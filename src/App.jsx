@@ -1,13 +1,14 @@
 import { useState } from 'react'
-import InitScreen from './pages/Init-screen'
 
-
+import Logo from './components/Logo'
 
 function App() {
   
 
   return (
-    <InitScreen />
+    <>
+      <Logo size_height={500} size_width={500} />
+    </>
   )
 }
 

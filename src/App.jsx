@@ -1,15 +1,7 @@
-import { useState } from 'react'
-
-import Logo from './components/Logo'
+import Loading from './components/Loading';
 
 function App() {
-  
-
-  return (
-    <>
-      <Logo size_height={500} size_width={500} />
-    </>
-  )
+  return <Loading />;
 }
 
-export default App
+export default App;

@@ -1,15 +1,11 @@
-import { useState } from 'react'
-
-import Logo from './components/Logo'
+import ProfileSelection from './pages/ProfileSelection';
 
 function App() {
-  
-
   return (
-    <>
-      <Logo size_height={500} size_width={500} />
-    </>
-  )
+    <div>
+      <ProfileSelection />
+    </div>
+  );
 }
 
-export default App
+export default App;

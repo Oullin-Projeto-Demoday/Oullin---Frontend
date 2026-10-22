@@ -1,15 +1,13 @@
-import { useState } from 'react'
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import FoodPreferences from './pages/FoodPreferences';
 
-import Logo from './components/Logo'
-
-function App() {
-  
-
+export default function App() {
   return (
-    <>
-      <Logo size_height={500} size_width={500} />
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="*" element={<FoodPreferences />} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
-
-export default App

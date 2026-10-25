@@ -1,9 +1,8 @@
-
-export default function Button({ onClick, children, className, px, py = 2}) {
+export default function Button({ onClick, children, className = "" }) {
   return (
     <button
       onClick={onClick}
-      className={`px-${px} py-${py} bg-[#FB8500] text-white rounded-[15px] hover:bg-[#0D4889] ${className}`}
+      className={`px-10 py-4 bg-[#FB8500] text-white rounded-[15px] hover:bg-[#0D4889] ${className}`}
     >
       {children}
     </button>

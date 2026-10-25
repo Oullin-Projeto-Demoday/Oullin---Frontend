@@ -6,6 +6,8 @@ import heart from "../assets/heart.png";
 import googleIcon from "../assets/Google.png";
 import facebookIcon from "../assets/Facebook.png";
 import appleIcon from "../assets/Apple.png";
+
+
 export default function WelcomeScreen() {
     const backgroundfont = { color: '#000000' };
 

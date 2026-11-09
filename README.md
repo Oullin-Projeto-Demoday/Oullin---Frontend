@@ -1,19 +1,44 @@
-# React + Vite
+# Oullin
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Oullin has two front-end clients in this repository:
 
-Currently, two official plugins are available:
+- The web app is React with Vite and lives at the repository root.
+- The mobile app is React Native with Expo and lives in `mobile/`.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Web app
 
-## React Compiler
+```bash
+npm ci
+npm run dev
+```
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+Web routes are declared in `src/App.jsx`; screen components belong in `src/pages/`
+and reusable UI belongs in `src/components/`.
 
-Note: This will impact Vite dev & build performances.
-You can also try [the experimental native React Compiler support in plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md#rust-react-compiler) by using `compiler: true` in the plugin options instead of using the Babel plugin.
+Useful commands:
 
-## Expanding the Oxlint configuration
+```bash
+npm run build
+npm run lint
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## Mobile app
+
+```bash
+cd mobile
+npm ci
+npm start
+```
+
+The mobile app entry point is `mobile/App.js`. Screens are split between
+`mobile/OnboardingScreen.js`, `mobile/HomeScreens.js`, `mobile/SearchScreen.js`,
+and `mobile/AddressScreen.js`. `mobile/App.js` manages the screen stack: tabs
+switch between the main sections, secondary screens can be opened from them,
+and Android's back button returns to the previous screen.
+
+## Team workflow
+
+Both clients are shared through this Git repository. Create a branch, commit the
+files you changed, and push it so teammates can fetch the work. Coordinate edits
+to the same screen through branches or pull requests to avoid overwriting one
+another's changes.

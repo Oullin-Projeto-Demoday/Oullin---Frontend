@@ -23,6 +23,7 @@ const COLORS = {
   border: '#D5D5D5',
   white: '#FFFFFF',
   background: '#F3F3F5',
+  orange: '#F07800',
 };
 
 const ADDRESSES_KEY = '@oullin/delivery-addresses';
@@ -89,61 +90,81 @@ function normalizeText(value) {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toLocaleLowerCase('pt-BR')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
+}
+
+function normalizeAddressQuery(value) {
+  return normalizeText(value)
+    .replace(/\bav\b/g, 'avenida')
+    .replace(/\br\b/g, 'rua')
+    .trim();
+}
+
+function buildAddressSearchQueries(value) {
+  const exact = normalizeAddressQuery(value);
+  const withoutTrailingNumber = exact.replace(/\s+\d+[a-z]?$/i, '').trim();
+  return [...new Set([exact, withoutTrailingNumber].filter(Boolean))];
 }
 
 function getAddressTitle(address) {
   return [address.street, address.number].filter(Boolean).join(', ');
 }
 
-async function searchWebAddresses(query) {
+async function searchPhotonAddresses(query) {
   const params = new URLSearchParams({
-    addressdetails: '1',
-    countrycodes: 'br',
-    format: 'jsonv2',
-    limit: '5',
-    q: `${query}, Brasil`,
+    lang: 'default',
+    limit: '10',
+    countrycode: 'BR',
+    lat: '-23.5505',
+    lon: '-46.6333',
+    zoom: '9',
+    q: query,
   });
-  const response = await fetch(
-    `https://nominatim.openstreetmap.org/search?${params.toString()}`,
-    { headers: { 'Accept-Language': 'pt-BR' } },
-  );
+  const response = await fetch(`https://photon.komoot.io/api/?${params.toString()}`);
   if (!response.ok) {
     throw new Error(`A busca de endereços falhou (${response.status}).`);
   }
 
-  const results = await response.json();
-  return results.map((result, index) => {
-    const place = result.address || {};
+  const { features = [] } = await response.json();
+  const suggestions = features.map((feature, index) => {
+    const place = feature.properties || {};
+    const [longitude, latitude] = feature.geometry?.coordinates || [];
     return {
-      id: `suggestion-${result.osm_type}-${result.osm_id || index}`,
-      street:
-        place.road ||
-        place.pedestrian ||
-        place.footway ||
-        place.path ||
-        place.residential ||
-        result.name ||
-        result.display_name.split(',')[0],
-      number: place.house_number || '',
-      neighborhood:
-        place.neighbourhood ||
-        place.suburb ||
-        place.city_district ||
-        place.quarter ||
-        '',
-      city: place.city || place.town || place.village || place.municipality || '',
+      id: `suggestion-${place.osm_type || 'place'}-${place.osm_id || index}`,
+      street: place.street || place.name || query,
+      number: place.housenumber || '',
+      neighborhood: place.district || place.locality || '',
+      city: place.city || place.county || '',
       state: place.state || '',
       reference: '',
       coordinates: {
-        latitude: Number(result.lat),
-        longitude: Number(result.lon),
+        latitude: Number(latitude),
+        longitude: Number(longitude),
       },
     };
   }).filter((result) =>
     Number.isFinite(result.coordinates.latitude) &&
-    Number.isFinite(result.coordinates.longitude),
+    Number.isFinite(result.coordinates.longitude) &&
+    (!result.state || normalizeText(result.state).includes('sao paulo') || normalizeText(result.state) === 'sp'),
   );
+  return suggestions.filter((suggestion, index) => suggestions.findIndex((item) =>
+    Math.abs(item.coordinates.latitude - suggestion.coordinates.latitude) < 0.0001 &&
+    Math.abs(item.coordinates.longitude - suggestion.coordinates.longitude) < 0.0001,
+  ) === index);
+}
+
+async function reversePhotonAddress(coordinates) {
+  const params = new URLSearchParams({
+    lat: String(coordinates.latitude),
+    lon: String(coordinates.longitude),
+    lang: 'default',
+  });
+  const response = await fetch(`https://photon.komoot.io/reverse?${params.toString()}`);
+  if (!response.ok) throw new Error(`Reverse geocoding failed (${response.status}).`);
+  const { features = [] } = await response.json();
+  return features[0]?.properties || null;
 }
 
 function AddressFormField({ label, value, onChangeText, ...props }) {
@@ -317,13 +338,6 @@ function AddressConfirmation({
           <Text style={styles.mapMoveHint}>Mova o mapa para ajustar o local</Text>
         </View>
       </View>
-      <View style={styles.confirmationDetails}>
-        <Text style={styles.confirmationHint}>Confirme o endereço selecionado</Text>
-        <Text style={styles.confirmationAddress}>{getAddressTitle(address)}</Text>
-        {details.map((detail) => (
-          <Text key={detail} style={styles.confirmationSubtitle}>{detail}</Text>
-        ))}
-      </View>
       <View style={styles.confirmationFooter}>
         <Pressable
           accessibilityRole="button"
@@ -336,6 +350,35 @@ function AddressConfirmation({
           </Text>
         </Pressable>
       </View>
+    </View>
+  );
+}
+
+function AddressDetailsScreen({ address, onBack, onSave }) {
+  const [form, setForm] = useState(() => ({ ...EMPTY_FORM, ...address }));
+  const [noComplement, setNoComplement] = useState(false);
+  return (
+    <View style={styles.confirmationScreen}>
+      <View style={styles.header}>
+        <Pressable onPress={onBack} style={styles.backButton}><Text style={styles.backArrow}>‹</Text></Pressable>
+        <Text style={styles.headerTitle}>ENDEREÇO DE ENTREGA</Text><View style={styles.headerSpacer} />
+      </View>
+      <View style={styles.detailsMap}>
+        <MapView initialRegion={{ ...DEFAULT_MAP_REGION, ...address.coordinates }} loadingEnabled style={StyleSheet.absoluteFill} />
+        <View pointerEvents="none" style={styles.detailsMarker}><Text style={styles.detailsMarkerText}>●</Text></View>
+      </View>
+      <ScrollView contentContainerStyle={styles.detailsContent} keyboardShouldPersistTaps="handled">
+        <Text style={styles.confirmationAddress}>{form.street}</Text>
+        <Text style={styles.confirmationSubtitle}>{[form.neighborhood, form.city, form.state].filter(Boolean).join(', ')}</Text>
+        <TextInput keyboardType="number-pad" onChangeText={(number) => setForm((value) => ({ ...value, number }))} placeholder="Número" style={styles.detailsInput} value={form.number || ''} />
+        <TextInput onChangeText={(complement) => setForm((value) => ({ ...value, complement }))} editable={!noComplement} placeholder="Complemento" style={styles.detailsInput} value={noComplement ? '' : form.complement || ''} />
+        <Pressable onPress={() => setNoComplement((value) => !value)} style={styles.detailsCheckRow}><Text>{noComplement ? '☑' : '☐'}  Sem complemento</Text></Pressable>
+        <Text style={styles.detailsFavorite}>Favoritar endereço</Text>
+        <View style={styles.favoriteRow}>{['Casa', 'Trabalho', 'Outro'].map((placeType) => (
+          <Pressable key={placeType} onPress={() => setForm((value) => ({ ...value, placeType }))} style={[styles.favoriteChip, form.placeType === placeType && styles.favoriteChipActive]}><Text>{placeType}</Text></Pressable>
+        ))}</View>
+        <Pressable onPress={() => onSave({ ...form, complement: noComplement ? '' : form.complement })} style={styles.detailsSave}><Text style={styles.confirmAddressText}>Salvar endereço</Text></Pressable>
+      </ScrollView>
     </View>
   );
 }
@@ -427,11 +470,29 @@ function AddressSearchMap({
             ? 'Buscando endereços...'
             : suggestions.length
               ? 'Resultados próximos'
-              : query.trim().length < 4
-                ? 'Digite ao menos 4 caracteres para buscar'
+              : query.trim().replace(/\s/g, '').length < 3
+                ? 'Digite ao menos 3 caracteres para buscar'
                 : 'Endereços encontrados'}
         </Text>
         {error ? <Text style={styles.searchMapMessage}>{error}</Text> : null}
+        {!loading && !suggestions.length && query.trim().length >= 3 ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => onSelect({
+              id: `map-point-${Date.now()}`,
+              street: query,
+              number: '',
+              neighborhood: '',
+              city: '',
+              state: '',
+              reference: '',
+              coordinates: { latitude: region.latitude, longitude: region.longitude },
+            })}
+            style={styles.manualMapButton}
+          >
+            <Text style={styles.manualMapButtonText}>Marcar este ponto no mapa</Text>
+          </Pressable>
+        ) : null}
         <ScrollView
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -523,7 +584,11 @@ function AddressCard({ address, selected, onSelect, onOpenMenu, onRemove }) {
   );
 }
 
-export default function AddressScreen({ onBack }) {
+export default function AddressScreen({
+  completeLabel = 'Concluir cadastro',
+  onBack,
+  onComplete,
+}) {
   const searchInput = useRef(null);
   const [addresses, setAddresses] = useState(INITIAL_ADDRESSES);
   const [selectedId, setSelectedId] = useState(INITIAL_ADDRESSES[0].id);
@@ -537,15 +602,15 @@ export default function AddressScreen({ onBack }) {
   const [locationLoading, setLocationLoading] = useState(false);
   const [storageReady, setStorageReady] = useState(false);
   const [pendingAddress, setPendingAddress] = useState(null);
-  const [mapLoading, setMapLoading] = useState(false);
+  const [detailsAddress, setDetailsAddress] = useState(null);
   const [confirmingAddress, setConfirmingAddress] = useState(false);
   const geocodeCache = useRef(new Map());
-  const lastWebGeocodeAt = useRef(0);
 
   useEffect(() => {
     if (!searchMapOpen) return undefined;
-    const query = search.trim();
-    if (query.length < 4) {
+    const query = normalizeAddressQuery(search);
+    const searchQueries = buildAddressSearchQueries(search);
+    if (query.replace(/\s/g, '').length < 3) {
       setSearchSuggestions([]);
       setSearchError('');
       setSearchLoading(false);
@@ -557,38 +622,16 @@ export default function AddressScreen({ onBack }) {
       setSearchLoading(true);
       setSearchError('');
       try {
-        let suggestions;
-        if (Platform.OS === 'web') {
-          const cacheKey = normalizeText(query);
+        let suggestions = [];
+        for (const candidate of searchQueries) {
+          const cacheKey = `photon-sp-v2:${candidate}`;
           suggestions = geocodeCache.current.get(cacheKey);
           if (!suggestions) {
-            const wait = Math.max(1000 - (Date.now() - lastWebGeocodeAt.current), 0);
-            if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
             if (!active) return;
-            lastWebGeocodeAt.current = Date.now();
-            suggestions = await searchWebAddresses(query);
-            geocodeCache.current.set(cacheKey, suggestions);
+            suggestions = await searchPhotonAddresses(candidate);
+            if (suggestions.length) geocodeCache.current.set(cacheKey, suggestions);
           }
-        } else {
-          const results = await Location.geocodeAsync(`${query}, Brasil`);
-          suggestions = await Promise.all(
-            results.slice(0, 5).map(async (result, index) => {
-              const [place] = await Location.reverseGeocodeAsync(result);
-              return {
-                id: `suggestion-${index}-${result.latitude}-${result.longitude}`,
-                street: place?.street || place?.name || query,
-                number: place?.streetNumber || '',
-                neighborhood: place?.district || place?.subregion || '',
-                city: place?.city || place?.subregion || '',
-                state: place?.region || '',
-                reference: '',
-                coordinates: {
-                  latitude: result.latitude,
-                  longitude: result.longitude,
-                },
-              };
-            }),
-          );
+          if (suggestions.length) break;
         }
         if (!active) return;
         setSearchSuggestions(suggestions);
@@ -697,6 +740,7 @@ export default function AddressScreen({ onBack }) {
       ).includes(query),
     );
   }, [addresses, search]);
+  const selectedAddress = addresses.find((address) => address.id === selectedId);
 
   function openEditor(address = null) {
     setEditingAddress(address);
@@ -738,71 +782,28 @@ export default function AddressScreen({ onBack }) {
     }
   }
 
-  async function openAddressOnMap(address) {
-    setMapLoading(true);
-    try {
-      let coordinates = address.coordinates;
-      if (
-        !coordinates ||
-        !Number.isFinite(coordinates.latitude) ||
-        !Number.isFinite(coordinates.longitude)
-      ) {
-        const query = [
-          address.street,
-          address.number,
-          address.neighborhood,
-          address.city,
-          address.state,
-          'Brasil',
-        ]
-          .filter(Boolean)
-          .join(', ');
-        const [result] = await Location.geocodeAsync(query);
-        if (!result) {
-          Alert.alert(
-            'Endereço não encontrado no mapa',
-            'Confira o endereço ou escolha “Usar minha localização”.',
-          );
-          return;
-        }
-        coordinates = {
-          latitude: result.latitude,
-          longitude: result.longitude,
-        };
-      }
-      setPendingAddress({ ...address, coordinates });
-    } catch (error) {
-      Alert.alert(
-        'Não foi possível localizar o endereço',
-        error?.message || 'Verifique sua conexão e tente novamente.',
-      );
-    } finally {
-      setMapLoading(false);
-    }
-  }
-
   async function confirmAddressOnMap() {
     setConfirmingAddress(true);
     try {
-      const [place] = await Location.reverseGeocodeAsync(pendingAddress.coordinates);
+      const place = await reversePhotonAddress(pendingAddress.coordinates);
       const confirmedAddress = place
         ? {
             ...pendingAddress,
             street: place.street || place.name || pendingAddress.street,
-            number: place.streetNumber || pendingAddress.number,
+            number: place.housenumber || pendingAddress.number,
             neighborhood:
-              place.district || place.subregion || pendingAddress.neighborhood,
-            city: place.city || place.subregion || pendingAddress.city,
-            state: place.region || pendingAddress.state,
+              place.district || place.locality || pendingAddress.neighborhood,
+            city: place.city || place.county || pendingAddress.city,
+            state: place.state || pendingAddress.state,
           }
         : pendingAddress;
-      openEditor(confirmedAddress);
+      setDetailsAddress(confirmedAddress);
     } catch (error) {
       Alert.alert(
         'Não foi possível atualizar o endereço pelo mapa',
         error?.message || 'Confira os dados do endereço antes de continuar.',
       );
-      openEditor(pendingAddress);
+      setDetailsAddress(pendingAddress);
     } finally {
       setConfirmingAddress(false);
     }
@@ -889,13 +890,25 @@ export default function AddressScreen({ onBack }) {
   if (pendingAddress) {
     return (
       <>
-        <AddressConfirmation
-          address={pendingAddress}
-          confirming={confirmingAddress}
-          onAddressChange={setPendingAddress}
-          onBack={() => setPendingAddress(null)}
-          onConfirm={confirmAddressOnMap}
-        />
+        {detailsAddress ? (
+          <AddressDetailsScreen
+            address={detailsAddress}
+            onBack={() => setDetailsAddress(null)}
+            onSave={(form) => {
+              setEditingAddress(null);
+              saveAddress(form);
+              setDetailsAddress(null);
+            }}
+          />
+        ) : (
+          <AddressConfirmation
+            address={pendingAddress}
+            confirming={confirmingAddress}
+            onAddressChange={setPendingAddress}
+            onBack={() => setPendingAddress(null)}
+            onConfirm={confirmAddressOnMap}
+          />
+        )}
         <Modal
           animationType="slide"
           onRequestClose={() => setEditorVisible(false)}
@@ -990,12 +1003,6 @@ export default function AddressScreen({ onBack }) {
           <Text style={styles.addButtonText}>+ Adicionar</Text>
         </Pressable>
       </View>
-      {mapLoading && (
-        <Text accessibilityRole="alert" style={styles.mapLoadingText}>
-          Localizando endereço no mapa...
-        </Text>
-      )}
-
       <ScrollView
         contentContainerStyle={styles.addressList}
         keyboardShouldPersistTaps="handled"
@@ -1007,7 +1014,7 @@ export default function AddressScreen({ onBack }) {
               address={address}
               key={address.id}
               onOpenMenu={() => openAddressMenu(address)}
-              onSelect={() => openAddressOnMap(address)}
+              onSelect={() => setSelectedId(address.id)}
               onRemove={() => removeAddress(address)}
               selected={selectedId === address.id}
             />
@@ -1024,6 +1031,21 @@ export default function AddressScreen({ onBack }) {
           </View>
         )}
       </ScrollView>
+
+      <View style={styles.completeFooter}>
+        <Pressable
+          accessibilityRole="button"
+          disabled={!storageReady || !selectedAddress}
+          onPress={() => selectedAddress && onComplete(selectedAddress)}
+          style={({ pressed }) => [
+            styles.completeAddressButton,
+            (!storageReady || !selectedAddress) && styles.completeAddressButtonDisabled,
+            pressed && styles.completeAddressButtonPressed,
+          ]}
+        >
+          <Text style={styles.completeAddressButtonText}>{completeLabel}</Text>
+        </Pressable>
+      </View>
 
       <Modal
         animationType="slide"
@@ -1056,6 +1078,17 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     flex: 1,
   },
+  detailsMap: { height: 150, overflow: 'hidden', position: 'relative' },
+  detailsMarker: { alignItems: 'center', backgroundColor: '#F07800', borderRadius: 18, height: 36, justifyContent: 'center', left: '50%', marginLeft: -18, marginTop: -36, position: 'absolute', top: '55%', width: 36 },
+  detailsMarkerText: { color: COLORS.white, fontSize: 12 },
+  detailsContent: { padding: 18, paddingBottom: 24 },
+  detailsInput: { borderColor: COLORS.amber, borderRadius: 6, borderWidth: 1, color: COLORS.text, height: 40, marginTop: 13, paddingHorizontal: 10 },
+  detailsCheckRow: { paddingVertical: 8 },
+  detailsFavorite: { color: COLORS.text, fontSize: 13, fontWeight: '600', marginTop: 18 },
+  favoriteRow: { flexDirection: 'row', marginTop: 8 },
+  favoriteChip: { borderColor: COLORS.amber, borderRadius: 5, borderWidth: 1, marginRight: 7, paddingHorizontal: 10, paddingVertical: 5 },
+  favoriteChipActive: { backgroundColor: '#FFF5D9' },
+  detailsSave: { alignItems: 'center', backgroundColor: COLORS.amber, borderRadius: 8, height: 46, justifyContent: 'center', marginTop: 28 },
   searchMapHeader: {
     alignItems: 'center',
     flexDirection: 'row',
@@ -1111,6 +1144,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     paddingVertical: 10,
   },
+  manualMapButton: { alignItems: 'center', backgroundColor: COLORS.amber, borderRadius: 8, marginBottom: 8, paddingHorizontal: 12, paddingVertical: 11 },
+  manualMapButtonText: { color: COLORS.white, fontSize: 12, fontWeight: '700' },
   suggestionList: {
     flexGrow: 0,
   },
@@ -1285,13 +1320,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 39,
   },
-  mapLoadingText: {
-    backgroundColor: COLORS.background,
-    color: COLORS.muted,
-    fontSize: 11,
-    paddingBottom: 6,
-    textAlign: 'center',
-  },
   searchIconText: {
     color: '#F07800',
     fontSize: 23,
@@ -1351,6 +1379,31 @@ const styles = StyleSheet.create({
     paddingBottom: 14,
     paddingHorizontal: 12,
     paddingTop: 10,
+  },
+  completeFooter: {
+    backgroundColor: COLORS.white,
+    borderTopColor: COLORS.border,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  completeAddressButton: {
+    alignItems: 'center',
+    backgroundColor: COLORS.amber,
+    borderRadius: 9,
+    justifyContent: 'center',
+    minHeight: 48,
+  },
+  completeAddressButtonDisabled: {
+    opacity: 0.5,
+  },
+  completeAddressButtonPressed: {
+    opacity: 0.8,
+  },
+  completeAddressButtonText: {
+    color: COLORS.white,
+    fontSize: 14,
+    fontWeight: '700',
   },
   addressCard: {
     alignItems: 'center',

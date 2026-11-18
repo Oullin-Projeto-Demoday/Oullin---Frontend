@@ -16,9 +16,9 @@ export default function WelcomeScreen() {
                 <Image src={Almoco} alt="imagem principal" className="w-75 h-auto mb-4 -mt-10" />
                 <div className="absolute left-4 top-42.5 h-6.5 w-45 gap-2 rounded-[20px] bg-[#EBEBD3]">
                     <Image src={heart} alt="Coração" className="absolute left-1.5 top-1 h-4 w-4" />
-                    <p style={backgroundfont} className="absolute left-8 top-0.5 text-[10px] font-bold">Menos tempo na sua rotina</p>
+                    <p style={backgroundfont} className="absolute left-8 top-0.5 text-[10px] font-bold">Mais segurança no prato</p>
                 </div>
-                <h2 style={backgroundfont}>Comer bem, viver sem peso</h2>
+                <h2 style={backgroundfont}>Mais segurança no prato menos peso na rotina</h2>
                 <p style={backgroundfont} className="text-[10px] leading-[15px]">
                     Conectamos quem faz com quem precisa,<br /> unindo microempreendedores a pessoas<br /> com restrições alimentares.
                 </p>

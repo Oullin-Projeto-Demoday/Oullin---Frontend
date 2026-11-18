@@ -9,15 +9,22 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  filterMealsForProfile,
+  FoodDetailsScreen,
+  getDietaryProfileRules,
+  RESTAURANT_DIRECTORY,
+  RestaurantDetailScreen,
+} from './SearchScreen';
 
 const COLORS = {
   orange: '#FF8900',
   navy: '#183F67',
   dark: '#191919',
-  taupe: '#A89591',
   white: '#FFFFFF',
   muted: '#777777',
 };
@@ -26,14 +33,116 @@ const scale = Math.min(Dimensions.get('window').width / 390, 1.15);
 const size = (value) => Math.round(value * scale);
 
 const FOODS = [
-  { image: require('./assets/burger-photo.jpg'), price: 'R$ 32,90', name: 'Hambúrguer artesanal', detail: 'Pão brioche e queijo', rating: '4,8' },
-  { image: require('./assets/pizza-photo.jpg'), price: 'R$ 45,00', name: 'Pizza da casa', detail: 'Queijo e tomate', rating: '4,9' },
-  { image: require('./assets/pasta-photo.jpg'), price: 'R$ 29,90', name: 'Massa artesanal', detail: 'Receita especial da casa', rating: '4,8' },
-  { image: require('./assets/sushi-photo.jpg'), price: 'R$ 39,90', name: 'Sushi variado', detail: 'Seleção especial', rating: '4,9' },
+  { image: require('./assets/food-fries-card.png'), price: 'R$ 40,00', name: 'Batata Frita', detail: 'Porção 300g', seller: 'Mcdonalds', rating: '4,8 (452)', category: 'Porções' },
+  { image: require('./assets/food-pastel-card.png'), price: 'R$ 15,00', name: 'Pastel', detail: 'Queijo, Pizza e Carne', seller: 'Feira', rating: '4,8 (452)', category: 'Salgados' },
+  { image: require('./assets/food-veggie-burger-card.png'), price: 'R$ 52,00', name: 'Hambúrguer veg...', detail: 'Pão e hambúrguer vegetal', seller: 'Vegan house', rating: '4,8 (452)', category: 'Hambúrgueres', detailName: 'Hambúrguer vegano' },
+  { image: require('./assets/food-pizza-card.png'), price: 'R$ 45,00', name: 'Pizza grande', detail: 'Marguerita, mus...', seller: 'Habibs', rating: '4,8 (452)', category: 'Pizzas' },
+  { image: require('./assets/drink-cola-card.png'), price: 'R$ 9,00', name: 'Coca cola', detail: '600ml', seller: 'Mercadinho da esquina', rating: '4,8 (452)', category: 'Bebidas' },
+  { image: require('./assets/drink-cola-zero-card.png'), price: 'R$ 6,00', name: 'Coca-Cola Zero', detail: 'Lata 350ml', seller: 'Primus Adega', rating: '4,8 (452)', category: 'Bebidas' },
+  { image: require('./assets/marmita-detail-frango.png'), price: 'R$ 15,99', name: 'Marmita de frango', detail: 'Frango, arroz e feijão', seller: 'Marmitas da Ana', rating: '4,8 (156)', category: 'Marmitas' },
+  { image: require('./assets/marmita-card-salada.png'), price: 'R$ 15,99', name: 'Marmita de legumes', detail: 'Legumes, arroz e grão-de-bico', seller: 'Marmitas da Ana', rating: '4,8 (156)', category: 'Marmitas' },
+  { image: require('./assets/marmita-card-caseira.png'), price: 'R$ 18,99', name: 'Marmita caseira', detail: 'Refeição completa do dia', seller: 'Marmitas da Ana', rating: '4,8 (156)', category: 'Marmitas' },
+  { image: require('./assets/sushi-photo.jpg'), price: 'R$ 42,00', name: 'Combinado de sushi', detail: 'Seleção variada da casa', seller: 'Sushi Oullin', rating: '4,9 (180)', category: 'Sushi' },
+  { image: require('./assets/salad-photo.jpg'), price: 'R$ 18,99', name: 'Salada da horta', detail: 'Folhas, vegetais e grãos', seller: 'Salada Viva', rating: '4,7 (112)', category: 'Saladas' },
+  { image: require('./assets/dessert-photo.jpg'), price: 'R$ 12,99', name: 'Taça de frutas', detail: 'Frutas com creme', seller: 'Doce Cantinho', rating: '4,9 (208)', category: 'Sobremesas' },
 ];
 
+const HOME_FOOD_FEATURES = [
+  { type: 'utensils', label: 'Utensílios usados' },
+  { type: 'ingredientCard', label: 'Ingredientes' },
+  { type: 'nutrition', label: 'Ficha nutricional' },
+  { type: 'certificate', label: 'Dados do vendedor' },
+];
+
+const HOME_FOOD_DETAILS = {
+  'Batata Frita': {
+    description: 'Batatas fritas servidas quentes, em porção de 300g.',
+    ingredients: 'Batata, óleo e sal. Consulte a loja sobre temperos e preparo.',
+    utensils: 'Fritadeira, escumadeira e recipiente para servir.',
+    filters: ['Porções', 'Vegetariano'],
+    dietaryCompatibility: { vegetarian: true },
+  },
+  Pastel: {
+    description: 'Pastel frito com recheio de queijo, pizza ou carne.',
+    ingredients: 'O recheio varia entre queijo, pizza e carne. Confirme a opção com a loja.',
+    utensils: 'Fritadeira, pegador e utensílios de montagem.',
+    filters: ['Salgados', 'Recheio variável'],
+    dietaryCompatibility: {},
+  },
+  'Hambúrguer veg...': {
+    description: 'Pão e hambúrguer vegetal preparados pela Vegan House.',
+    ingredients: 'Pão, hambúrguer vegetal e acompanhamentos. Consulte a loja para confirmar molhos e ingredientes.',
+    utensils: 'Chapa, espátula e utensílios de montagem.',
+    filters: ['Hambúrgueres', 'Vegano'],
+    dietaryCompatibility: { vegan: true, vegetarian: true },
+  },
+  'Pizza grande': {
+    description: 'Pizza grande de muçarela com molho de tomate e manjericão.',
+    ingredients: 'Massa, molho de tomate, muçarela e manjericão. Confirme os ingredientes da massa com a loja.',
+    utensils: 'Forno, pá de pizza e cortador.',
+    filters: ['Pizzas', 'Vegetariano'],
+    dietaryCompatibility: { vegetarian: true },
+  },
+  'Coca cola': {
+    description: 'Refrigerante de cola em embalagem de 600ml.',
+    ingredients: 'Consulte o rótulo da embalagem para a lista completa de ingredientes e alergênicos.',
+    utensils: 'Embalagem original; copo quando solicitado.',
+    filters: ['Bebidas'],
+    dietaryCompatibility: {},
+  },
+  'Coca-Cola Zero': {
+    description: 'Refrigerante de cola sem açúcar em lata de 350ml.',
+    ingredients: 'Consulte o rótulo da embalagem para a lista completa de ingredientes e alergênicos.',
+    utensils: 'Embalagem original; copo quando solicitado.',
+    filters: ['Bebidas', 'Sem açúcar'],
+    dietaryCompatibility: {},
+  },
+  'Marmita de frango': {
+    description: 'Frango grelhado com arroz e feijão, preparado pela Marmitas da Ana.',
+    ingredients: 'Frango, arroz e feijão. Consulte a loja sobre temperos e alergênicos.',
+    utensils: 'Grelha, panela e utensílios de montagem.',
+    filters: ['Marmitas', 'Refeição completa'],
+    dietaryCompatibility: {},
+  },
+  'Marmita de legumes': {
+    description: 'Legumes, arroz e grão-de-bico em uma refeição sem ingredientes de origem animal informados.',
+    ingredients: 'Legumes, arroz e grão-de-bico. Confirme preparo e risco de contaminação cruzada com a loja.',
+    utensils: 'Panelas, escumadeira e utensílios de montagem.',
+    filters: ['Marmitas', 'Vegano', 'Vegetariano'],
+    dietaryCompatibility: { vegan: true, vegetarian: true },
+  },
+  'Marmita caseira': {
+    description: 'Refeição caseira completa preparada no dia pela Marmitas da Ana.',
+    ingredients: 'A composição varia conforme o prato do dia. Consulte a loja antes de pedir.',
+    utensils: 'Panelas, pegadores e utensílios de montagem.',
+    filters: ['Marmitas', 'Prato do dia'],
+    dietaryCompatibility: {},
+  },
+  'Combinado de sushi': {
+    description: 'Seleção de peças variadas preparadas na hora pelo Sushi Oullin.',
+    ingredients: 'Ingredientes variam conforme as peças. Consulte a loja para alergênicos e opções sem peixe.',
+    utensils: 'Faca, tábua e utensílios de montagem.',
+    filters: ['Sushi', 'Combinados'],
+    dietaryCompatibility: {},
+  },
+  'Salada da horta': {
+    description: 'Salada fresca de folhas, vegetais e grãos da Salada Viva.',
+    ingredients: 'Folhas, vegetais e grãos. Confirme molhos e acompanhamentos com a loja.',
+    utensils: 'Faca, tábua e utensílios de preparo.',
+    filters: ['Saladas', 'Vegetariano'],
+    dietaryCompatibility: { vegetarian: true },
+  },
+  'Taça de frutas': {
+    description: 'Frutas servidas com creme pelo Doce Cantinho.',
+    ingredients: 'Frutas e creme. Consulte a loja sobre ingredientes e alergênicos.',
+    utensils: 'Faca, tábua e recipiente para servir.',
+    filters: ['Sobremesas', 'Frutas'],
+    dietaryCompatibility: { vegetarian: true },
+  },
+};
+
 const PROMOTIONS = [
-  { image: require('./assets/promo-burger.png'), color: '#81231B' },
+  { image: require('./assets/promo-burger-reference.png'), color: '#81231B' },
   { image: require('./assets/promo-pizza.png'), color: '#791B3B' },
   { image: require('./assets/promo-salad.png'), color: '#204D2B' },
   { image: require('./assets/promo-sushi.png'), color: '#0F3E59' },
@@ -41,58 +150,66 @@ const PROMOTIONS = [
   { image: require('./assets/promo-pasta.png'), color: '#913D0B' },
 ];
 
-export function PostRegistrationSplash({ onFinish }) {
-  const koalaY = useRef(new Animated.Value(0)).current;
-  const dots = useRef([0, 1, 2].map(() => new Animated.Value(0.35))).current;
+export function RegistrationCompleteScreen({ onFinish }) {
+  const dotOne = useRef(new Animated.Value(0.35)).current;
+  const dotTwo = useRef(new Animated.Value(0.35)).current;
+  const dotThree = useRef(new Animated.Value(0.35)).current;
+  const mascotOffset = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const useNativeDriver = Platform.OS !== 'web';
-    const bob = Animated.loop(Animated.sequence([
-      Animated.timing(koalaY, { toValue: -size(5), duration: 850, useNativeDriver }),
-      Animated.timing(koalaY, { toValue: 0, duration: 850, useNativeDriver }),
+    const dotLoop = (value, delay) => Animated.sequence([
+      Animated.delay(delay),
+      Animated.loop(Animated.sequence([
+        Animated.timing(value, { toValue: 1, duration: 360, useNativeDriver }),
+        Animated.timing(value, { toValue: 0.35, duration: 520, useNativeDriver }),
+        Animated.delay(220),
+      ])),
+    ]);
+    const dotsAnimation = Animated.parallel([
+      dotLoop(dotOne, 0),
+      dotLoop(dotTwo, 170),
+      dotLoop(dotThree, 340),
+    ]);
+    const mascotAnimation = Animated.loop(Animated.sequence([
+      Animated.timing(mascotOffset, { toValue: -4, duration: 650, useNativeDriver }),
+      Animated.timing(mascotOffset, { toValue: 0, duration: 650, useNativeDriver }),
     ]));
-    const pulse = Animated.loop(Animated.stagger(180, dots.map((dot) => Animated.sequence([
-      Animated.timing(dot, { toValue: 1, duration: 260, useNativeDriver }),
-      Animated.timing(dot, { toValue: 0.35, duration: 360, useNativeDriver }),
-    ]))));
-    bob.start();
-    pulse.start();
-    const timer = setTimeout(onFinish, 2600);
+    dotsAnimation.start();
+    mascotAnimation.start();
+    const finishTimer = setTimeout(onFinish, 3800);
 
     return () => {
-      bob.stop();
-      pulse.stop();
-      clearTimeout(timer);
+      clearTimeout(finishTimer);
+      dotsAnimation.stop();
+      mascotAnimation.stop();
     };
-  }, [dots, koalaY, onFinish]);
+  }, [dotOne, dotTwo, dotThree, mascotOffset, onFinish]);
 
   return (
     <SafeAreaView style={styles.splash}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
-      <View style={styles.splashContent}>
-        <Animated.View style={[styles.koalaStage, { transform: [{ translateY: koalaY }] }]}>
-          <Image
-            accessibilityLabel="Mascote Oullin"
-            resizeMode="contain"
-            source={require('./assets/mascote-loading.png')}
-            style={styles.koalaImage}
-          />
-        </Animated.View>
-        <Text style={styles.splashTitle}>Só um instante...</Text>
-        <Text style={styles.splashSubtitle}>Preparando tudo com carinho para você.</Text>
-        <View style={styles.loadingDots}>
-          {dots.map((dot, index) => (
-            <Animated.View
-              key={index}
-              style={[styles.loadingDot, { opacity: dot, transform: [{ scale: dot }] }]}
-            />
+      <View style={styles.completeContent}>
+        <View pointerEvents="none" style={styles.loadingGlow} />
+        <Animated.Image
+          accessibilityLabel="Mascote Oullin carregando"
+          resizeMode="contain"
+          source={require('./assets/mascote-loading.png')}
+          style={[styles.completeMascot, { transform: [{ translateY: mascotOffset }] }]}
+        />
+        <Text style={styles.completeTitle}>{'S\u00f3 um instante...'}</Text>
+        <Text style={styles.completeSubtitle}>
+          {'Preparando tudo com carinho para voc\u00ea.'}
+        </Text>
+        <View accessibilityLabel="Carregando" accessibilityRole="progressbar" style={styles.loadingDots}>
+          {[dotOne, dotTwo, dotThree].map((opacity, index) => (
+            <Animated.View key={index} style={[styles.loadingDot, { opacity }]} />
           ))}
         </View>
       </View>
     </SafeAreaView>
   );
 }
-
 function BellIcon() {
   return (
     <View style={styles.bellShape}>
@@ -101,9 +218,14 @@ function BellIcon() {
   );
 }
 
-function FoodCard({ food }) {
+function FoodCard({ food, onPress }) {
   return (
-    <Pressable accessibilityRole="button" style={styles.foodCard}>
+    <Pressable
+      accessibilityLabel={`Ver informações de ${food.detailName || food.name}`}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={styles.foodCard}
+    >
       <View style={styles.foodImageWrap}>
         <Image
           accessibilityLabel={food.name}
@@ -111,26 +233,59 @@ function FoodCard({ food }) {
           style={styles.foodPhoto}
           resizeMode="cover"
         />
-        <View style={styles.foodPriceBadge}>
-          <Text style={styles.foodPrice}>{food.price}</Text>
-        </View>
       </View>
       <View style={styles.foodCardInfo}>
+        <Text style={styles.foodPrice}>{food.price}</Text>
         <Text numberOfLines={1} style={styles.foodName}>{food.name}</Text>
         <Text numberOfLines={1} style={styles.foodDetail}>{food.detail}</Text>
+        <Text numberOfLines={1} style={styles.foodSeller}>{food.seller}</Text>
         <View style={styles.foodRatingRow}>
-          <Text style={styles.ratingStar}>★</Text>
           <Text style={styles.foodRating}>{food.rating}</Text>
-          <Text style={styles.foodRatingCount}>• popular</Text>
+          <View accessibilityLabel="Localização do vendedor" style={styles.locationMarker}>
+            <View style={styles.locationMarkerDot} />
+          </View>
         </View>
       </View>
     </Pressable>
   );
 }
 
-export function HomeScreen({ firstName, onAddAddress, onNotifications, onSelectTab }) {
+function RestaurantHomeCard({ restaurant, onPress }) {
+  return (
+    <Pressable
+      accessibilityLabel={`Ver restaurante ${restaurant.name}`}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={styles.restaurantHomeCard}
+    >
+      <Image
+        accessibilityLabel={restaurant.name}
+        resizeMode="cover"
+        source={restaurant.image}
+        style={styles.restaurantHomeImage}
+      />
+      <Text numberOfLines={1} style={styles.restaurantHomeName}>{restaurant.name}</Text>
+      <Text numberOfLines={1} style={styles.restaurantHomeDetails}>
+        ★ {restaurant.rating} · {restaurant.deliveryTime}
+      </Text>
+    </Pressable>
+  );
+}
+
+export function HomeScreen({
+  deliveryAddress,
+  firstName,
+  onNotifications,
+  onSelectTab,
+  profileSetupComplete,
+  profileSelections = {},
+}) {
   const [promotionIndex, setPromotionIndex] = useState(0);
+  const [selectedFood, setSelectedFood] = useState(null);
+  const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
+  const { width: screenWidth } = useWindowDimensions();
   const promotionOpacity = useRef(new Animated.Value(1)).current;
+  const profileRules = getDietaryProfileRules(profileSelections);
 
   useEffect(() => {
     let active = true;
@@ -157,12 +312,35 @@ export function HomeScreen({ firstName, onAddAddress, onNotifications, onSelectT
     };
   }, [promotionOpacity]);
 
+  const selectedRestaurant = RESTAURANT_DIRECTORY.find(
+    (restaurant) => restaurant.id === selectedRestaurantId,
+  );
+
+  if (selectedRestaurant) {
+    return (
+      <RestaurantDetailScreen
+        onBack={() => setSelectedRestaurantId(null)}
+        restaurant={selectedRestaurant}
+        screenWidth={screenWidth}
+      />
+    );
+  }
+
+  if (selectedFood) {
+    return (
+      <FoodDetailsScreen
+        item={selectedFood}
+        onBack={() => setSelectedFood(null)}
+        onSelectItem={setSelectedFood}
+        profileSelections={profileSelections}
+        screenWidth={screenWidth}
+      />
+    );
+  }
+
   return (
     <SafeAreaView edges={[]} style={styles.homeScreen}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.taupe} />
-      <View style={styles.homeTitleBar}>
-        <Text style={styles.homeTitle}>Home</Text>
-      </View>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
       <ScrollView
         contentContainerStyle={styles.homeScroll}
         showsVerticalScrollIndicator={false}
@@ -179,12 +357,18 @@ export function HomeScreen({ firstName, onAddAddress, onNotifications, onSelectT
           <View style={styles.greetingText}>
             <Text style={styles.hello}>Olá {firstName || 'Ouli'}!</Text>
             <Pressable
-              accessibilityLabel="Adicionar endereço de entrega"
+              accessibilityLabel={
+                deliveryAddress
+                  ? 'Gerenciar perfil e endereço pelas notificações'
+                  : 'Adicionar endereço pelas notificações'
+              }
               accessibilityRole="button"
-              onPress={onAddAddress}
+              onPress={onNotifications}
               style={styles.addressButton}
             >
-              <Text style={styles.address}>Adicione seu endereço</Text>
+              <Text numberOfLines={1} style={styles.address}>
+                {deliveryAddress || 'Adicione seu endereço'}
+              </Text>
             </Pressable>
           </View>
           <Pressable
@@ -197,17 +381,19 @@ export function HomeScreen({ firstName, onAddAddress, onNotifications, onSelectT
           </Pressable>
         </View>
 
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => onSelectTab('Perfil')}
-          style={styles.tipBanner}
-        >
-          <View style={styles.tipBubble} />
-          <Text style={styles.tipTitle}>Falta pouco para o match perfeito!</Text>
-          <Text style={styles.tipText}>
-            Defina o que você adora para receber nossas melhores opções.
-          </Text>
-        </Pressable>
+        {!profileSetupComplete && (
+          <Pressable
+            accessibilityRole="button"
+            onPress={onNotifications}
+            style={styles.tipBanner}
+          >
+            <View style={styles.tipBubble} />
+            <Text style={styles.tipTitle}>Falta pouco para o match perfeito!</Text>
+            <Text style={styles.tipText}>
+              Defina o que você adora para receber nossas melhores opções.
+            </Text>
+          </Pressable>
+        )}
 
         <View style={styles.sectionHeading}>
           <Text style={styles.sectionTitle}>Promoções do dia</Text>
@@ -215,10 +401,33 @@ export function HomeScreen({ firstName, onAddAddress, onNotifications, onSelectT
         <View style={[styles.promoCard, { backgroundColor: PROMOTIONS[promotionIndex].color }]}>
           <Animated.Image
             source={PROMOTIONS[promotionIndex].image}
-            style={[StyleSheet.absoluteFill, { opacity: promotionOpacity }]}
+            style={[StyleSheet.absoluteFill, styles.promoImage, { opacity: promotionOpacity }]}
             resizeMode="cover"
           />
         </View>
+
+        <View style={styles.foodHeading}>
+          <View>
+            <Text style={styles.foodSectionTitle}>Restaurantes</Text>
+            <Text style={styles.foodSectionSubtitle}>
+              Conheça os restaurantes e seus cardápios
+            </Text>
+          </View>
+        </View>
+        <ScrollView
+          contentContainerStyle={styles.restaurantHomeList}
+          horizontal
+          nestedScrollEnabled
+          showsHorizontalScrollIndicator={false}
+        >
+          {RESTAURANT_DIRECTORY.map((restaurant) => (
+            <RestaurantHomeCard
+              key={restaurant.id}
+              onPress={() => setSelectedRestaurantId(restaurant.id)}
+              restaurant={restaurant}
+            />
+          ))}
+        </ScrollView>
 
         <View style={styles.foodHeading}>
           <View>
@@ -229,9 +438,36 @@ export function HomeScreen({ firstName, onAddAddress, onNotifications, onSelectT
         <ScrollView
           contentContainerStyle={styles.foodList}
           horizontal
+          nestedScrollEnabled
           showsHorizontalScrollIndicator={false}
         >
-          {FOODS.map((food) => <FoodCard key={food.name} food={food} />)}
+          {FOODS.map((food) => (
+            <FoodCard
+              key={food.name}
+              food={food}
+              onPress={() => {
+                const foodDetails = HOME_FOOD_DETAILS[food.name] || {};
+                const recommendations = filterMealsForProfile(
+                  FOODS
+                    .filter((candidate) => candidate.name !== food.name)
+                    .map((candidate) => ({
+                      ...candidate,
+                      ...HOME_FOOD_DETAILS[candidate.name],
+                    })),
+                  profileRules,
+                );
+                setSelectedFood({
+                  ...food,
+                  ...foodDetails,
+                  description: foodDetails.description || food.detail,
+                  features: HOME_FOOD_FEATURES,
+                  name: food.detailName || food.name,
+                  recommendations,
+                  restaurantName: food.seller,
+                });
+              }}
+            />
+          ))}
         </ScrollView>
       </ScrollView>
     </SafeAreaView>
@@ -339,57 +575,55 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
-  splashContent: {
+  completeContent: {
     alignItems: 'center',
-    transform: [{ translateY: size(24) }],
-    width: '100%',
-  },
-  koalaStage: {
-    alignItems: 'center',
-    height: size(88),
+    flex: 1,
     justifyContent: 'center',
-    marginBottom: size(7),
-    width: size(88),
+    paddingHorizontal: size(24),
+    paddingTop: size(70),
+    position: 'relative',
   },
-  koalaImage: {
-    height: size(58),
-    width: size(58),
+  loadingGlow: {
+    backgroundColor: '#FFFDF4',
+    borderRadius: size(110),
+    height: size(220),
+    position: 'absolute',
+    top: '29%',
+    width: size(220),
   },
-  splashTitle: {
+  completeMascot: {
+    height: size(112),
+    marginBottom: size(57),
+    width: size(112),
+  },
+  completeTitle: {
     color: COLORS.navy,
-    fontSize: size(18),
+    fontSize: size(20),
     fontWeight: '700',
+    textAlign: 'center',
   },
-  splashSubtitle: {
-    color: '#969696',
+  completeSubtitle: {
+    color: COLORS.muted,
     fontSize: size(13),
-    marginTop: size(10),
+    lineHeight: size(19),
+    marginTop: size(20),
+    textAlign: 'center',
   },
   loadingDots: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: size(6),
-    marginTop: size(34),
+    gap: size(12),
+    marginTop: size(70),
   },
   loadingDot: {
-    backgroundColor: COLORS.orange,
-    borderRadius: 99,
-    height: size(6),
-    width: size(6),
+    backgroundColor: '#FFD7B1',
+    borderRadius: size(5),
+    height: size(8),
+    width: size(8),
   },
   homeScreen: {
     backgroundColor: COLORS.white,
     flex: 1,
-  },
-  homeTitleBar: {
-    backgroundColor: COLORS.taupe,
-    height: size(40),
-    justifyContent: 'center',
-    paddingLeft: size(14),
-  },
-  homeTitle: {
-    color: COLORS.white,
-    fontSize: size(16),
   },
   homeScroll: {
     paddingBottom: size(16),
@@ -500,10 +734,14 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   promoCard: {
+    aspectRatio: 400 / 253,
     borderRadius: size(14),
-    height: size(205),
     marginHorizontal: size(20),
     overflow: 'hidden',
+  },
+  promoImage: {
+    height: '100%',
+    width: '100%',
   },
   foodHeading: {
     marginBottom: size(10),
@@ -522,79 +760,102 @@ const styles = StyleSheet.create({
   },
   foodList: {
     paddingLeft: size(20),
-    paddingRight: size(10),
+    paddingRight: size(16),
     paddingBottom: size(8),
   },
-  foodCard: {
-    backgroundColor: COLORS.white,
-    borderColor: '#EFEAE5',
-    borderRadius: size(14),
-    borderWidth: 1,
-    elevation: 2,
+  restaurantHomeList: {
+    paddingBottom: size(8),
+    paddingLeft: size(20),
+    paddingRight: size(16),
+  },
+  restaurantHomeCard: {
     marginRight: size(12),
-    overflow: 'hidden',
-    shadowColor: '#34281F',
-    shadowOffset: { height: 2, width: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    width: size(176),
+    width: size(148),
+  },
+  restaurantHomeImage: {
+    backgroundColor: '#F7F7F7',
+    borderRadius: size(10),
+    height: size(88),
+    width: '100%',
+  },
+  restaurantHomeName: {
+    color: COLORS.dark,
+    fontSize: size(12),
+    fontWeight: '700',
+    marginTop: size(6),
+  },
+  restaurantHomeDetails: {
+    color: COLORS.muted,
+    fontSize: size(9),
+    marginTop: size(3),
+  },
+  foodCard: {
+    marginRight: size(16),
+    width: size(128),
   },
   foodImageWrap: {
-    height: size(116),
-    position: 'relative',
+    backgroundColor: '#F7F7F7',
+    borderRadius: size(12),
+    height: size(128),
+    overflow: 'hidden',
+    width: '100%',
   },
   foodPhoto: {
-    backgroundColor: '#F1EDE7',
     height: '100%',
     width: '100%',
   },
-  foodPriceBadge: {
-    backgroundColor: COLORS.white,
-    borderRadius: size(8),
-    bottom: size(8),
-    left: size(8),
-    paddingHorizontal: size(8),
-    paddingVertical: size(4),
-  },
   foodPrice: {
-    color: COLORS.navy,
-    fontSize: size(11),
-    fontWeight: '700',
+    color: COLORS.dark,
+    fontSize: size(12),
+    marginBottom: size(4),
   },
   foodCardInfo: {
-    paddingHorizontal: size(10),
-    paddingBottom: size(10),
-    paddingTop: size(9),
+    paddingBottom: size(8),
+    paddingHorizontal: size(4),
+    paddingTop: size(7),
   },
   foodName: {
     color: '#242424',
-    fontSize: size(13),
-    fontWeight: '700',
+    fontSize: size(12),
+    fontWeight: '600',
+    lineHeight: size(16),
   },
   foodDetail: {
     color: '#555555',
     fontSize: size(11),
-    marginTop: size(4),
+    lineHeight: size(15),
+    marginTop: size(2),
+  },
+  foodSeller: {
+    color: '#444444',
+    fontSize: size(9),
+    lineHeight: size(12),
+    marginTop: size(2),
   },
   foodRatingRow: {
     alignItems: 'center',
     flexDirection: 'row',
+    justifyContent: 'center',
     marginTop: size(7),
-  },
-  ratingStar: {
-    color: '#F4A900',
-    fontSize: size(12),
-    marginRight: size(4),
   },
   foodRating: {
     color: '#333333',
     fontSize: size(11),
-    fontWeight: '700',
   },
-  foodRatingCount: {
-    color: COLORS.muted,
-    fontSize: size(10),
+  locationMarker: {
+    alignItems: 'center',
+    backgroundColor: '#111111',
+    borderRadius: 99,
+    height: size(12),
+    justifyContent: 'center',
     marginLeft: size(5),
+    width: size(12),
+  },
+  locationMarkerDot: {
+    backgroundColor: COLORS.white,
+    borderRadius: 99,
+    height: size(3),
+    width: size(3),
   },
   notificationsScreen: {
     backgroundColor: COLORS.white,

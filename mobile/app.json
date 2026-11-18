@@ -18,12 +18,14 @@
       ]
     ],
     "ios": {
+      "bundleIdentifier": "br.com.oullin.app",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Usamos sua localização para cadastrar o endereço de entrega."
       },
       "supportsTablet": true
     },
     "android": {
+      "package": "br.com.oullin.app",
       "adaptiveIcon": {
         "backgroundColor": "#fffdf9"
       },

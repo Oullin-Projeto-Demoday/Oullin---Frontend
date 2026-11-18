@@ -13,7 +13,11 @@ import {
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import AddressScreen from './AddressScreen';
-import { HomeScreen, NotificationsScreen, PostRegistrationSplash } from './HomeScreens';
+import {
+  HomeScreen,
+  NotificationsScreen,
+  RegistrationCompleteScreen,
+} from './HomeScreens';
 import OnboardingScreen from './OnboardingScreen';
 import SearchScreen from './SearchScreen';
 
@@ -28,11 +32,12 @@ const COLORS = {
 
 const ROUTES = {
   onboarding: 'onboarding',
-  welcome: 'welcome',
+  registrationComplete: 'registrationComplete',
   home: 'home',
   search: 'search',
   orders: 'orders',
   preferences: 'preferences',
+  profile: 'profile',
   address: 'address',
   notifications: 'notifications',
 };
@@ -41,7 +46,7 @@ const TAB_ROUTES = {
   Início: ROUTES.home,
   Buscar: ROUTES.search,
   Pedidos: ROUTES.orders,
-  Perfil: ROUTES.preferences,
+  Perfil: ROUTES.profile,
 };
 
 const QUESTIONS = [
@@ -322,15 +327,18 @@ function BottomNavigation({ activeTab, onSelectTab, bottomInset }) {
 
 function PlaceholderScreen({ tab }) {
   const isOrders = tab === ROUTES.orders;
+  const isProfile = tab === ROUTES.profile;
 
   return (
     <View style={styles.placeholder}>
       <Text style={styles.placeholderTitle}>
-        {isOrders ? 'Seus pedidos' : 'Bem-vindo ao Oullin'}
+        {isOrders ? 'Seus pedidos' : isProfile ? 'Seu perfil' : 'Bem-vindo ao Oullin'}
       </Text>
       <Text style={styles.placeholderDescription}>
         {isOrders
           ? 'Seus pedidos aparecerão aqui quando você fizer uma compra.'
+          : isProfile
+            ? 'Para completar seu perfil alimentar e endereço, acesse as notificações.'
           : 'Esta tela ainda está sendo preparada.'}
       </Text>
     </View>
@@ -342,6 +350,8 @@ function AppContent() {
   const [routeStack, setRouteStack] = useState([ROUTES.onboarding]);
   const [selections, setSelections] = useState({});
   const [firstName, setFirstName] = useState('');
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [profileSetupComplete, setProfileSetupComplete] = useState(false);
   const currentRoute = routeStack[routeStack.length - 1];
 
   function resetNavigation(route) {
@@ -385,13 +395,17 @@ function AppContent() {
       <OnboardingScreen
         onComplete={(registration) => {
           setFirstName(registration.firstName);
-          resetNavigation(ROUTES.welcome);
+          resetNavigation(ROUTES.registrationComplete);
         }}
       />
     );
   }
-  if (currentRoute === ROUTES.welcome) {
-    return <PostRegistrationSplash onFinish={() => resetNavigation(ROUTES.home)} />;
+  if (currentRoute === ROUTES.registrationComplete) {
+    return (
+      <RegistrationCompleteScreen
+        onFinish={() => resetNavigation(ROUTES.home)}
+      />
+    );
   }
 
   const isOverlayRoute = currentRoute === ROUTES.address || currentRoute === ROUTES.notifications;
@@ -407,15 +421,31 @@ function AppContent() {
             onConfigure={() => navigate(ROUTES.preferences)}
           />
         ) : currentRoute === ROUTES.address ? (
-          <AddressScreen onBack={goBack} />
+          <SafeAreaView edges={['bottom']} style={styles.addressSafeArea}>
+            <AddressScreen
+              completeLabel="Confirmar endereço"
+              onBack={goBack}
+              onComplete={(address) => {
+                setSelectedAddress(address);
+                setProfileSetupComplete(true);
+                resetNavigation(ROUTES.home);
+              }}
+            />
+          </SafeAreaView>
         ) : currentRoute === ROUTES.search ? (
-          <SearchScreen />
+          <SearchScreen profileSelections={selections} />
         ) : currentRoute === ROUTES.home ? (
           <HomeScreen
+            deliveryAddress={
+              selectedAddress
+                ? [selectedAddress.street, selectedAddress.number].filter(Boolean).join(', ')
+                : ''
+            }
             firstName={firstName}
-            onAddAddress={() => navigate(ROUTES.address)}
             onNotifications={() => navigate(ROUTES.notifications)}
             onSelectTab={(tab) => resetNavigation(TAB_ROUTES[tab])}
+            profileSetupComplete={profileSetupComplete}
+            profileSelections={selections}
           />
         ) : currentRoute === ROUTES.preferences ? (
           <PreferencesScreen
@@ -453,6 +483,9 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
   },
   mainContent: {
+    flex: 1,
+  },
+  addressSafeArea: {
     flex: 1,
   },
   screen: {

@@ -3,6 +3,7 @@ import {
   Animated,
   Easing,
   Image,
+  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -25,6 +26,9 @@ const COLORS = {
 };
 
 const LOGO = require('./assets/oullin-logo.png');
+const MASCOT = require('./assets/mascote-email.png');
+const NAME_MASCOT = require('./assets/mascote-name.png');
+const WELCOME_BACKGROUND = require('./assets/welcome-background.png');
 
 function Splash({ onContinue }) {
   const opacity = useRef(new Animated.Value(0)).current;
@@ -82,7 +86,7 @@ function Splash({ onContinue }) {
         resizeMode="contain"
       />
       <Animated.Text style={[styles.splashTagline, { opacity: taglineOpacity }]}>
-        Sua alimentação, do seu jeito
+        Mais segurança no prato{'\n'}menos peso na rotina
       </Animated.Text>
     </View>
   );
@@ -101,38 +105,41 @@ function RegistrationOptions({ onContinue }) {
   const [notice, setNotice] = useState('');
 
   return (
-    <SafeAreaView style={styles.registrationScreen}>
-      <StatusBar barStyle="dark-content" />
-      <View style={styles.registrationPhoto}>
-        <View style={styles.photoSun} />
-        <View style={styles.photoHand} />
-        <Image source={LOGO} style={styles.registrationLogo} resizeMode="contain" />
+    <ImageBackground
+      accessibilityLabel="Pessoas trocando uma entrega da Oullin"
+      imageStyle={styles.welcomeBackgroundImage}
+      resizeMode="cover"
+      source={WELCOME_BACKGROUND}
+      style={styles.registrationScreen}
+    >
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <View style={styles.registrationContent}>
         <View pointerEvents="none" style={styles.photoShade} />
+        <SafeAreaView edges={['bottom']} style={styles.registrationPanel}>
+          <Text style={styles.registrationTitle}>Crie sua conta</Text>
+          <Text style={styles.registrationHint}>Escolha como deseja se cadastrar no Oullin</Text>
+          {!!notice && <Text accessibilityRole="alert" style={styles.notice}>{notice}</Text>}
+          <View style={styles.dividerRow}>
+            <View style={styles.divider} />
+            <Text style={styles.orText}>ou</Text>
+            <View style={styles.divider} />
+          </View>
+          <SocialButton
+            icon="f"
+            iconColor="#1877F2"
+            label="Continuar com Facebook"
+            onPress={() => setNotice('Facebook ainda não está configurado. Continue com email.')}
+          />
+          <SocialButton
+            icon="G"
+            iconColor="#4285F4"
+            label="Continuar com Google"
+            onPress={() => setNotice('Google ainda não está configurado. Continue com email.')}
+          />
+          <SocialButton label="Continuar com email" onPress={onContinue} />
+        </SafeAreaView>
       </View>
-      <View style={styles.registrationPanel}>
-        <Text style={styles.registrationTitle}>Crie sua conta</Text>
-        <Text style={styles.registrationHint}>Escolha como deseja se cadastrar no Oullin</Text>
-        {!!notice && <Text accessibilityRole="alert" style={styles.notice}>{notice}</Text>}
-        <View style={styles.dividerRow}>
-          <View style={styles.divider} />
-          <Text style={styles.orText}>ou</Text>
-          <View style={styles.divider} />
-        </View>
-        <SocialButton
-          icon="f"
-          iconColor="#1877F2"
-          label="Continuar com Facebook"
-          onPress={() => setNotice('Facebook ainda não está configurado. Continue com email.')}
-        />
-        <SocialButton
-          icon="G"
-          iconColor="#4285F4"
-          label="Continuar com Google"
-          onPress={() => setNotice('Google ainda não está configurado. Continue com email.')}
-        />
-        <SocialButton label="Continuar com email" onPress={onContinue} />
-      </View>
-    </SafeAreaView>
+    </ImageBackground>
   );
 }
 
@@ -176,7 +183,7 @@ function EmailScreen({ email, onChangeEmail, onBack, onContinue }) {
           {!!error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
         </View>
         <View style={styles.formActions}>
-          <Image source={LOGO} style={styles.cornerLogo} resizeMode="contain" />
+          <Image source={MASCOT} style={styles.cornerMascot} resizeMode="contain" />
           <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}>
             <Text style={styles.backArrow}>←</Text>
           </Pressable>
@@ -208,7 +215,7 @@ function NameScreen({ email, onBack, onComplete }) {
       style={styles.formScreen}
     >
       <SafeAreaView style={styles.nameContent}>
-        <Image source={LOGO} style={styles.topLogo} resizeMode="contain" />
+        <Image source={NAME_MASCOT} style={styles.topMascot} resizeMode="contain" />
         <Text style={styles.formTitle}>Qual é seu nome?</Text>
         <Text style={styles.formHint}>Informe seu nome para concluir o cadastro</Text>
         <TextInput
@@ -302,54 +309,29 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '500',
     letterSpacing: 0.3,
+    lineHeight: 21,
     marginTop: 2,
+    textAlign: 'center',
   },
   registrationScreen: {
-    backgroundColor: COLORS.white,
     flex: 1,
   },
-  registrationPhoto: {
-    alignItems: 'center',
-    backgroundColor: '#C99A67',
-    flex: 1.05,
+  welcomeBackgroundImage: {
+    transform: [{ translateY: -270 }],
+  },
+  registrationContent: {
+    flex: 1,
     justifyContent: 'flex-end',
-    overflow: 'hidden',
-  },
-  photoSun: {
-    backgroundColor: '#F4C978',
-    borderRadius: 65,
-    height: 130,
-    position: 'absolute',
-    right: -25,
-    top: -20,
-    width: 130,
-  },
-  photoHand: {
-    backgroundColor: '#D9A876',
-    borderRadius: 85,
-    bottom: 45,
-    height: 170,
-    left: -125,
-    position: 'absolute',
-    transform: [{ rotate: '-18deg' }],
-    width: 330,
-  },
-  registrationLogo: {
-    height: 170,
-    marginBottom: 36,
-    width: 260,
-    zIndex: 1,
   },
   photoShade: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(55,31,12,0.08)',
+    backgroundColor: 'rgba(35,24,16,0.12)',
   },
   registrationPanel: {
     backgroundColor: COLORS.white,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     marginTop: -18,
-    paddingBottom: 20,
     paddingHorizontal: 28,
     paddingTop: 22,
   },
@@ -424,13 +406,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 30,
   },
-  topLogo: {
+  topMascot: {
     alignSelf: 'flex-end',
-    height: 95,
-    marginBottom: 20,
-    marginRight: -10,
-    marginTop: -10,
-    width: 95,
+    height: 75,
+    marginRight: -32,
+    marginTop: -25,
+    width: 96,
   },
   formTitle: {
     color: COLORS.blue,
@@ -471,12 +452,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 6,
   },
-  cornerLogo: {
-    bottom: 66,
-    height: 75,
-    left: -10,
+  cornerMascot: {
+    bottom: 130,
+    height: 90,
+    left: -44,
     position: 'absolute',
-    width: 75,
+    width: 117,
   },
   backButton: {
     alignItems: 'center',

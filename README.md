@@ -36,6 +36,23 @@ and `mobile/AddressScreen.js`. `mobile/App.js` manages the screen stack: tabs
 switch between the main sections, secondary screens can be opened from them,
 and Android's back button returns to the previous screen.
 
+To create an installable Android test APK, sign in to Expo and start an EAS
+preview build:
+
+```bash
+cd mobile
+npx eas-cli login
+npx eas-cli init
+npx eas-cli build --profile preview --platform android
+```
+
+EAS prints a download link when the build finishes. Internal iPhone builds also
+require an Apple Developer account and registered test devices:
+
+```bash
+npx eas-cli build --profile preview --platform ios
+```
+
 ## Team workflow
 
 Both clients are shared through this Git repository. Create a branch, commit the

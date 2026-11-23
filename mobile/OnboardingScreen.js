@@ -86,7 +86,7 @@ function Splash({ onContinue }) {
         resizeMode="contain"
       />
       <Animated.Text style={[styles.splashTagline, { opacity: taglineOpacity }]}>
-        Mais segurança no prato{'\n'}menos peso na rotina
+        Mais segurança no prato.
       </Animated.Text>
     </View>
   );
@@ -306,10 +306,10 @@ const styles = StyleSheet.create({
   },
   splashTagline: {
     color: COLORS.blue,
-    fontSize: 15,
-    fontWeight: '500',
-    letterSpacing: 0.3,
-    lineHeight: 21,
+    fontSize: 13,
+    fontWeight: '400',
+    letterSpacing: 0,
+    lineHeight: 18,
     marginTop: 2,
     textAlign: 'center',
   },

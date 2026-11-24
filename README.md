@@ -1,28 +1,14 @@
 # Oullin
 
-Oullin has two front-end clients in this repository:
+Oullin is a React Native application built with Expo. The app and its complete
+source, assets, dependencies, and Expo configuration are kept in `mobile/`.
 
-- The web app is React with Vite and lives at the repository root.
-- The mobile app is React Native with Expo and lives in `mobile/`.
+## Requirements
 
-## Web app
+- Node.js compatible with the Expo SDK configured in `mobile/package.json`
+- npm
 
-```bash
-npm ci
-npm run dev
-```
-
-Web routes are declared in `src/App.jsx`; screen components belong in `src/pages/`
-and reusable UI belongs in `src/components/`.
-
-Useful commands:
-
-```bash
-npm run build
-npm run lint
-```
-
-## Mobile app
+## Install and run
 
 ```bash
 cd mobile
@@ -30,32 +16,44 @@ npm ci
 npm start
 ```
 
-The mobile app entry point is `mobile/App.js`. Screens are split between
-`mobile/OnboardingScreen.js`, `mobile/HomeScreens.js`, `mobile/SearchScreen.js`,
-and `mobile/AddressScreen.js`. `mobile/App.js` manages the screen stack: tabs
-switch between the main sections, secondary screens can be opened from them,
-and Android's back button returns to the previous screen.
-
-To create an installable Android test APK, sign in to Expo and start an EAS
-preview build:
+From Expo's development menu, open the app on Android or iOS. To run the web
+version in a browser:
 
 ```bash
-cd mobile
-npx eas-cli login
-npx eas-cli init
-npx eas-cli build --profile preview --platform android
+npx expo start --web
 ```
 
-EAS prints a download link when the build finishes. Internal iPhone builds also
-require an Apple Developer account and registered test devices:
+To create a static web export:
 
 ```bash
-npx eas-cli build --profile preview --platform ios
+npm run export:web
 ```
 
-## Team workflow
+## Publicar no GitHub Pages
 
-Both clients are shared through this Git repository. Create a branch, commit the
-files you changed, and push it so teammates can fetch the work. Coordinate edits
-to the same screen through branches or pull requests to avoid overwriting one
-another's changes.
+O projeto pode ser publicado no navegador pelo GitHub Pages. A publicação foi
+configurada em `.github/workflows/pages.yml` e ocorre automaticamente a cada
+push na branch `main`.
+
+Após a primeira publicação, ative **GitHub Pages** em:
+`Settings > Pages > Source > GitHub Actions`.
+
+O endereço público será:
+
+```text
+https://oullin-projeto-demoday.github.io/Oullin---Frontend/
+```
+
+## Project structure
+
+- `mobile/App.js` is the application entry point and manages navigation.
+- `mobile/HomeScreens.js`, `mobile/SearchScreen.js`, `mobile/CartScreen.js`,
+  `mobile/ProfileScreen.js`, `mobile/AddressScreen.js`, and
+  `mobile/OnboardingScreen.js` contain the app screens.
+- `mobile/AddressMap.web.js` and `mobile/AddressMap.native.js` provide
+  platform-specific address map behavior.
+- `mobile/assets/` contains the images used by the application.
+- `mobile/app.json` and `mobile/eas.json` contain Expo and EAS configuration.
+
+The repository root contains this README and Git metadata; the Expo project is
+maintained from `mobile/`.

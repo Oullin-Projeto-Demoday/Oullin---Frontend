@@ -1,7 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  Animated,
-  Easing,
   Image,
   ImageBackground,
   KeyboardAvoidingView,
@@ -14,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import PhoneVerificationScreen from './PhoneVerificationScreen';
 
 const COLORS = {
   blue: '#174D76',
@@ -25,84 +24,66 @@ const COLORS = {
   error: '#B3261E',
 };
 
-const LOGO = require('./assets/oullin-logo.png');
+const LOGO = require('./assets/oullin-logo-cropped.png');
 const MASCOT = require('./assets/mascote-email.png');
 const NAME_MASCOT = require('./assets/mascote-name.png');
 const WELCOME_BACKGROUND = require('./assets/welcome-background.png');
+const FACEBOOK_ICON = require('./assets/facebook-icon.png');
+const GOOGLE_ICON = require('./assets/google-icon.png');
 
 function Splash({ onContinue }) {
-  const opacity = useRef(new Animated.Value(0)).current;
-  const scale = useRef(new Animated.Value(0.72)).current;
-  const translateY = useRef(new Animated.Value(24)).current;
-  const taglineOpacity = useRef(new Animated.Value(0)).current;
-
   useEffect(() => {
-    const useNativeDriver = Platform.OS !== 'web';
-    const entrance = Animated.parallel([
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 850,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver,
-      }),
-      Animated.spring(scale, {
-        toValue: 1,
-        friction: 5,
-        tension: 65,
-        useNativeDriver,
-      }),
-      Animated.timing(translateY, {
-        toValue: 0,
-        duration: 750,
-        easing: Easing.out(Easing.cubic),
-        useNativeDriver,
-      }),
-    ]);
-
-    entrance.start();
-    const taglineTimer = setTimeout(() => {
-      Animated.timing(taglineOpacity, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver,
-      }).start();
-    }, 500);
     const screenTimer = setTimeout(onContinue, 3400);
-
-    return () => {
-      clearTimeout(taglineTimer);
-      clearTimeout(screenTimer);
-      entrance.stop();
-      taglineOpacity.stopAnimation();
-    };
-  }, [opacity, scale, translateY, taglineOpacity, onContinue]);
+    return () => clearTimeout(screenTimer);
+  }, [onContinue]);
 
   return (
     <View style={styles.splash}>
-      <Animated.Image
-        accessibilityLabel="Logo Oullin"
-        source={LOGO}
-        style={[styles.splashLogo, { opacity, transform: [{ translateY }, { scale }] }]}
-        resizeMode="contain"
-      />
-      <Animated.Text style={[styles.splashTagline, { opacity: taglineOpacity }]}>
-        Mais segurança no prato.
-      </Animated.Text>
+      <StatusBar hidden />
+      <View style={styles.splashLogoContainer}>
+        <Image
+          accessibilityLabel="Logo Oullin"
+          source={LOGO}
+          style={styles.splashLogo}
+          resizeMode="contain"
+        />
+      </View>
+      <Text
+        maxFontSizeMultiplier={1}
+        style={styles.splashTagline}
+      >
+        {'Mais seguran\u00e7a no prato.'}
+      </Text>
     </View>
   );
 }
 
-function SocialButton({ label, icon, iconColor, onPress }) {
+function SocialButton({ label, iconSource, onPress }) {
   return (
     <Pressable accessibilityRole="button" onPress={onPress} style={styles.socialButton}>
-      {!!icon && <Text style={[styles.socialIcon, { color: iconColor }]}>{icon}</Text>}
+      {!!iconSource && <Image source={iconSource} style={styles.socialIcon} resizeMode="contain" />}
       <Text style={styles.socialText}>{label}</Text>
     </Pressable>
   );
 }
 
-function RegistrationOptions({ onContinue }) {
+function formatBrazilianPhone(phone) {
+  const digits = phone.replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, '');
+  return `+55${digits}`;
+}
+
+function RegistrationOptions({ onContinue, onPhoneContinue, phone, onChangePhone }) {
   const [notice, setNotice] = useState('');
+
+  function continueWithPhone() {
+    const digits = phone.replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, '');
+    if (digits.length !== 10 && digits.length !== 11) {
+      setNotice('Digite um telefone com DDD para continuar.');
+      return;
+    }
+    setNotice('');
+    onPhoneContinue(formatBrazilianPhone(phone));
+  }
 
   return (
     <ImageBackground
@@ -114,10 +95,35 @@ function RegistrationOptions({ onContinue }) {
     >
       <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
       <View style={styles.registrationContent}>
-        <View pointerEvents="none" style={styles.photoShade} />
         <SafeAreaView edges={['bottom']} style={styles.registrationPanel}>
-          <Text style={styles.registrationTitle}>Crie sua conta</Text>
-          <Text style={styles.registrationHint}>Escolha como deseja se cadastrar no Oullin</Text>
+          <View style={styles.phoneRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Country: Brazil, code +55"
+              onPress={() => setNotice('Country selected: Brazil (+55).')}
+              style={styles.countryButton}
+            >
+              <Text style={styles.countryFlag}>{'\uD83C\uDDE7\uD83C\uDDF7'}</Text>
+              <Text style={styles.countryChevron}>v</Text>
+            </Pressable>
+            <TextInput
+              accessibilityLabel="Telefone"
+              autoComplete="tel"
+              keyboardType="phone-pad"
+              onChangeText={onChangePhone}
+              placeholder="+55 (11) 90028-9222"
+              placeholderTextColor="#333333"
+              style={styles.phoneInput}
+              value={phone}
+            />
+          </View>
+          <Pressable
+            accessibilityRole="button"
+            onPress={continueWithPhone}
+            style={styles.phoneContinueButton}
+          >
+            <Text style={styles.phoneContinueText}>Continuar</Text>
+          </Pressable>
           {!!notice && <Text accessibilityRole="alert" style={styles.notice}>{notice}</Text>}
           <View style={styles.dividerRow}>
             <View style={styles.divider} />
@@ -125,18 +131,16 @@ function RegistrationOptions({ onContinue }) {
             <View style={styles.divider} />
           </View>
           <SocialButton
-            icon="f"
-            iconColor="#1877F2"
-            label="Continuar com Facebook"
-            onPress={() => setNotice('Facebook ainda não está configurado. Continue com email.')}
+            iconSource={FACEBOOK_ICON}
+            label="Continue com Facebook"
+            onPress={() => setNotice('Facebook sign-in is not configured yet. Continue with email.')}
           />
           <SocialButton
-            icon="G"
-            iconColor="#4285F4"
-            label="Continuar com Google"
-            onPress={() => setNotice('Google ainda não está configurado. Continue com email.')}
+            iconSource={GOOGLE_ICON}
+            label="Continue com Google"
+            onPress={() => setNotice('Google sign-in is not configured yet. Continue with email.')}
           />
-          <SocialButton label="Continuar com email" onPress={onContinue} />
+          <SocialButton label="Continue com email" onPress={onContinue} />
         </SafeAreaView>
       </View>
     </ImageBackground>
@@ -196,7 +200,7 @@ function EmailScreen({ email, onChangeEmail, onBack, onContinue }) {
   );
 }
 
-function NameScreen({ email, onBack, onComplete }) {
+function NameScreen({ email, phone, onBack, onComplete }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [error, setError] = useState('');
@@ -206,7 +210,12 @@ function NameScreen({ email, onBack, onComplete }) {
       setError('Informe seu nome e sobrenome para continuar.');
       return;
     }
-    onComplete({ email: email.trim(), firstName: firstName.trim(), lastName: lastName.trim() });
+    onComplete({
+      ...(email.trim() ? { email: email.trim() } : {}),
+      ...(phone ? { phone } : {}),
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+    });
   }
 
   return (
@@ -245,7 +254,7 @@ function NameScreen({ email, onBack, onComplete }) {
           style={styles.input}
           value={lastName}
         />
-        <Text style={styles.emailSummary}>Email: {email}</Text>
+        <Text style={styles.emailSummary}>{phone ? `Telefone: ${phone}` : `Email: ${email}`}</Text>
         {!!error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
         <View style={styles.formActions}>
           <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}>
@@ -267,12 +276,35 @@ function NameScreen({ email, onBack, onComplete }) {
 export default function OnboardingScreen({ onComplete }) {
   const [screen, setScreen] = useState('splash');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
 
   if (screen === 'splash') {
     return <Splash onContinue={() => setScreen('registration')} />;
   }
   if (screen === 'registration') {
-    return <RegistrationOptions onContinue={() => setScreen('email')} />;
+    return (
+      <RegistrationOptions
+        onContinue={() => {
+          setPhone('');
+          setScreen('email');
+        }}
+        phone={phone}
+        onChangePhone={setPhone}
+        onPhoneContinue={(value) => {
+          setPhone(value);
+          setScreen('phoneVerification');
+        }}
+      />
+    );
+  }
+  if (screen === 'phoneVerification') {
+    return (
+      <PhoneVerificationScreen
+        phone={phone}
+        onBack={() => setScreen('registration')}
+        onVerify={async () => setScreen('name')}
+      />
+    );
   }
   if (screen === 'email') {
     return (
@@ -287,7 +319,8 @@ export default function OnboardingScreen({ onComplete }) {
   return (
     <NameScreen
       email={email}
-      onBack={() => setScreen('email')}
+      phone={phone}
+      onBack={() => setScreen(phone ? 'phoneVerification' : 'email')}
       onComplete={onComplete}
     />
   );
@@ -299,97 +332,141 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     flex: 1,
     justifyContent: 'center',
+    paddingHorizontal: 24,
+    width: '100%',
+  },
+  splashLogoContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
   },
   splashLogo: {
-    height: 225,
-    width: 340,
+    height: 85,
+    width: 250,
   },
   splashTagline: {
-    color: COLORS.blue,
-    fontSize: 13,
+    color: COLORS.text,
+    fontSize: 15,
     fontWeight: '400',
-    letterSpacing: 0,
-    lineHeight: 18,
-    marginTop: 2,
+    includeFontPadding: false,
+    lineHeight: 22,
+    marginTop: 6,
+    paddingHorizontal: 16,
     textAlign: 'center',
+    width: '100%',
   },
   registrationScreen: {
     flex: 1,
   },
   welcomeBackgroundImage: {
-    transform: [{ translateY: -270 }],
+    height: '62%',
+    width: '100%',
   },
   registrationContent: {
     flex: 1,
     justifyContent: 'flex-end',
   },
-  photoShade: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(35,24,16,0.12)',
-  },
   registrationPanel: {
+    alignSelf: 'center',
     backgroundColor: COLORS.white,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    marginTop: -18,
-    paddingHorizontal: 28,
-    paddingTop: 22,
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    maxWidth: 480,
+    paddingBottom: 6,
+    paddingHorizontal: 27,
+    paddingTop: 14,
+    width: '96%',
   },
-  registrationTitle: {
-    color: COLORS.blue,
-    fontSize: 22,
-    fontWeight: '700',
-    marginBottom: 7,
-    textAlign: 'center',
+  phoneRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    height: 36,
+    marginBottom: 10,
   },
-  registrationHint: {
-    color: '#666666',
-    fontSize: 14,
-    marginBottom: 12,
-    textAlign: 'center',
+  countryButton: {
+    alignItems: 'center',
+    backgroundColor: '#FFF9E9',
+    borderRadius: 7,
+    flexDirection: 'row',
+    height: 36,
+    justifyContent: 'center',
+    marginRight: 8,
+    width: 55,
+  },
+  countryFlag: {
+    fontSize: 18,
+  },
+  countryChevron: {
+    color: '#555555',
+    fontSize: 12,
+    marginLeft: 4,
+  },
+  phoneInput: {
+    backgroundColor: '#FFF9E9',
+    borderRadius: 7,
+    color: COLORS.text,
+    flex: 1,
+    fontSize: 13,
+    height: 36,
+    paddingHorizontal: 12,
+  },
+  phoneContinueButton: {
+    alignItems: 'center',
+    backgroundColor: '#FFB703',
+    borderRadius: 8,
+    height: 34,
+    justifyContent: 'center',
+  },
+  disabledButton: {
+    opacity: 0.65,
+  },
+  phoneContinueText: {
+    color: COLORS.white,
+    fontSize: 13,
+    fontWeight: '500',
   },
   notice: {
     color: '#A33A2F',
-    fontSize: 12,
-    lineHeight: 17,
-    marginTop: 4,
+    fontSize: 11,
+    lineHeight: 15,
+    marginTop: 5,
     textAlign: 'center',
   },
   dividerRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    marginVertical: 13,
+    marginVertical: 10,
   },
   divider: {
-    backgroundColor: COLORS.border,
+    backgroundColor: '#9AA6B2',
     flex: 1,
     height: 1,
   },
   orText: {
-    color: COLORS.muted,
-    fontSize: 13,
+    color: COLORS.blue,
+    fontSize: 11,
     marginHorizontal: 12,
   },
   socialButton: {
     alignItems: 'center',
-    borderColor: COLORS.border,
-    borderRadius: 9,
-    borderWidth: 1,
+    borderColor: '#FFB703',
+    borderRadius: 8,
+    borderWidth: 1.5,
     flexDirection: 'row',
-    height: 52,
+    height: 34,
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   socialIcon: {
-    fontSize: 21,
-    fontWeight: '800',
-    left: 18,
+    height: 16,
+    left: 35,
     position: 'absolute',
+    width: 16,
   },
   socialText: {
-    color: '#555555',
-    fontSize: 15,
-    fontWeight: '500',
+    color: COLORS.blue,
+    fontSize: 12,
+    fontWeight: '600',
   },
   formScreen: {
     backgroundColor: COLORS.white,

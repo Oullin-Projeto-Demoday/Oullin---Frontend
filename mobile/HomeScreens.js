@@ -17,8 +17,6 @@ import {
   filterMealsForProfile,
   FoodDetailsScreen,
   getDietaryProfileRules,
-  RESTAURANT_DIRECTORY,
-  RestaurantDetailScreen,
 } from './SearchScreen';
 
 const COLORS = {
@@ -31,6 +29,7 @@ const COLORS = {
 
 const scale = Math.min(Dimensions.get('window').width / 390, 1.15);
 const size = (value) => Math.round(value * scale);
+const HOME_SIDE_GUTTER = 20;
 
 const FOODS = [
   { image: require('./assets/food-fries-card.png'), price: 'R$ 40,00', name: 'Batata Frita', detail: 'Porção 300g', seller: 'Mcdonalds', rating: '4,8 (452)', category: 'Porções' },
@@ -45,6 +44,15 @@ const FOODS = [
   { image: require('./assets/sushi-photo.jpg'), price: 'R$ 42,00', name: 'Combinado de sushi', detail: 'Seleção variada da casa', seller: 'Sushi Oullin', rating: '4,9 (180)', category: 'Sushi' },
   { image: require('./assets/salad-photo.jpg'), price: 'R$ 18,99', name: 'Salada da horta', detail: 'Folhas, vegetais e grãos', seller: 'Salada Viva', rating: '4,7 (112)', category: 'Saladas' },
   { image: require('./assets/dessert-photo.jpg'), price: 'R$ 12,99', name: 'Taça de frutas', detail: 'Frutas com creme', seller: 'Doce Cantinho', rating: '4,9 (208)', category: 'Sobremesas' },
+];
+
+const PROMOTIONS = [
+  { image: require('./assets/promo-burger-normalized.png'), color: '#81231B', width: 400, height: 250 },
+  { image: require('./assets/promo-pizza-figma.png'), color: '#791B3B', width: 400, height: 247 },
+  { image: require('./assets/promo-salad-figma.png'), color: '#204D2B', width: 400, height: 247 },
+  { image: require('./assets/promo-sushi-figma.png'), color: '#0F3E59', width: 401, height: 247 },
+  { image: require('./assets/promo-dessert-normalized.png'), color: '#572C53', width: 400, height: 250 },
+  { image: require('./assets/promo-pasta-figma.png'), color: '#913D0B', width: 408, height: 247 },
 ];
 
 const HOME_FOOD_FEATURES = [
@@ -141,13 +149,30 @@ const HOME_FOOD_DETAILS = {
   },
 };
 
-const PROMOTIONS = [
-  { image: require('./assets/promo-burger-reference.png'), color: '#81231B' },
-  { image: require('./assets/promo-pizza.png'), color: '#791B3B' },
-  { image: require('./assets/promo-salad.png'), color: '#204D2B' },
-  { image: require('./assets/promo-sushi.png'), color: '#0F3E59' },
-  { image: require('./assets/promo-dessert.png'), color: '#572C53' },
-  { image: require('./assets/promo-pasta.png'), color: '#913D0B' },
+const RECOMMENDED_RESTAURANTS = [
+  { id: 'subway', name: 'Subway', image: require('./assets/subway-logo.png') },
+  { id: 'carolli-fit', name: 'Carólli Fit', image: require('./assets/carolli-fit-logo.png') },
+  { id: 'ostia', name: 'Óstia', image: require('./assets/ostia-logo.png') },
+  { id: 'emporio-frutaria', name: 'Empório Frutaria', image: require('./assets/emporio-frutaria-logo.png') },
+  { id: 'paprica', name: 'Páprica', image: require('./assets/paprica-logo.png') },
+  { id: 'grao-fino', name: 'Grão Fino', image: require('./assets/grao-fino-logo.png') },
+  { id: 'slim-food', name: 'Slim Food', image: require('./assets/slim-food-logo.png') },
+  { id: 'pandan', name: 'Pandan', image: require('./assets/pandan-logo.png') },
+  { id: 'raizes', name: 'Raízes', image: require('./assets/natural-tree-logo.png') },
+];
+
+const NEARBY_RESTAURANTS = [
+  { distance: '05 km', name: 'Vegan Food', category: 'Comidas vegan', rating: '4,8 (452)', image: require('./assets/nearby-vegan-food.png') },
+  { distance: '08 km', name: 'Vege House', category: 'Vegetariano', rating: '4,7 (100)', image: require('./assets/nearby-vege-house.png') },
+  { distance: '500 metros', name: 'The Pizza Place', category: 'Pizzas variadas', rating: '4,9 (553)', image: require('./assets/nearby-pizza-place.png') },
+  { distance: '02 km', name: 'The Lounge', category: 'Apoio ao seu dia', rating: '5,0 (20)', image: require('./assets/nearby-lounge.png') },
+];
+
+const RECOMMENDATION_FILTERS = [
+  { label: 'Frete grátis', width: 70 },
+  { label: 'Retirada na Loja', width: 88 },
+  { label: 'Entrega Rápida', width: 116 },
+  { label: 'Em Promoção', width: 116 },
 ];
 
 export function RegistrationCompleteScreen({ onFinish }) {
@@ -190,12 +215,18 @@ export function RegistrationCompleteScreen({ onFinish }) {
     <SafeAreaView style={styles.splash}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
       <View style={styles.completeContent}>
-        <View pointerEvents="none" style={styles.loadingGlow} />
         <Animated.Image
           accessibilityLabel="Mascote Oullin carregando"
           resizeMode="contain"
           source={require('./assets/mascote-loading.png')}
           style={[styles.completeMascot, { transform: [{ translateY: mascotOffset }] }]}
+        />
+        <Image
+          accessibilityElementsHidden
+          pointerEvents="none"
+          resizeMode="stretch"
+          source={require('./assets/splash-shadow.png')}
+          style={styles.completeShadow}
         />
         <Text style={styles.completeTitle}>{'S\u00f3 um instante...'}</Text>
         <Text style={styles.completeSubtitle}>
@@ -212,7 +243,10 @@ export function RegistrationCompleteScreen({ onFinish }) {
 }
 function BellIcon() {
   return (
-    <View style={styles.bellShape}>
+    <View style={styles.bellIcon}>
+      <View style={styles.bellTopDot} />
+      <View style={styles.bellShape} />
+      <View style={styles.bellBase} />
       <View style={styles.bellClapper} />
     </View>
   );
@@ -241,34 +275,53 @@ function FoodCard({ food, onPress }) {
         <Text numberOfLines={1} style={styles.foodSeller}>{food.seller}</Text>
         <View style={styles.foodRatingRow}>
           <Text style={styles.foodRating}>{food.rating}</Text>
-          <View accessibilityLabel="Localização do vendedor" style={styles.locationMarker}>
-            <View style={styles.locationMarkerDot} />
-          </View>
+          <Image
+            accessibilityLabel="Estrela de avaliação"
+            source={require('./assets/rating-star.png')}
+            style={styles.ratingStar}
+          />
         </View>
       </View>
     </Pressable>
   );
 }
 
-function RestaurantHomeCard({ restaurant, onPress }) {
+function RecommendedRestaurantCard({ restaurant, showDivider = true }) {
   return (
-    <Pressable
-      accessibilityLabel={`Ver restaurante ${restaurant.name}`}
-      accessibilityRole="button"
-      onPress={onPress}
-      style={styles.restaurantHomeCard}
-    >
-      <Image
-        accessibilityLabel={restaurant.name}
-        resizeMode="cover"
-        source={restaurant.image}
-        style={styles.restaurantHomeImage}
-      />
-      <Text numberOfLines={1} style={styles.restaurantHomeName}>{restaurant.name}</Text>
-      <Text numberOfLines={1} style={styles.restaurantHomeDetails}>
-        ★ {restaurant.rating} · {restaurant.deliveryTime}
-      </Text>
-    </Pressable>
+    <View style={styles.recommendedRestaurantCard}>
+      <Image source={restaurant.image} resizeMode="contain" style={styles.recommendedLogo} />
+      <View style={styles.recommendedRestaurantInfo}>
+        <Text numberOfLines={1} style={styles.recommendedRestaurantName}>{restaurant.name}</Text>
+        <View style={styles.recommendedRatingRow}>
+          <Image
+            accessibilityLabel="Estrela de avaliação"
+            source={require('./assets/rating-star.png')}
+            style={styles.ratingStar}
+          />
+          <Text style={styles.recommendedRating}>4,8 (452)</Text>
+        </View>
+        {showDivider && <View style={styles.recommendedDivider} />}
+      </View>
+    </View>
+  );
+}
+
+function NearbyRestaurantCard({ restaurant }) {
+  return (
+    <View style={styles.nearbyRestaurantCard}>
+      <Image source={restaurant.image} resizeMode="cover" style={styles.nearbyRestaurantImage} />
+      <Text style={styles.nearbyRestaurantDistance}>{restaurant.distance}</Text>
+      <Text numberOfLines={1} style={styles.nearbyRestaurantName}>{restaurant.name}</Text>
+      <Text numberOfLines={1} style={styles.nearbyRestaurantCategory}>{restaurant.category}</Text>
+      <View style={styles.nearbyRatingRow}>
+        <Text style={styles.nearbyRating}>{restaurant.rating}</Text>
+        <Image
+          accessibilityLabel="Estrela de avaliação"
+          source={require('./assets/rating-star.png')}
+          style={styles.ratingStar}
+        />
+      </View>
+    </View>
   );
 }
 
@@ -282,9 +335,14 @@ export function HomeScreen({
 }) {
   const [promotionIndex, setPromotionIndex] = useState(0);
   const [selectedFood, setSelectedFood] = useState(null);
-  const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
   const { width: screenWidth } = useWindowDimensions();
   const promotionOpacity = useRef(new Animated.Value(1)).current;
+  const currentPromotion = PROMOTIONS[promotionIndex];
+  const availablePromotionWidth = Math.max(0, screenWidth - size(40));
+  const promotionWidth = Platform.OS === 'web'
+    ? Math.min(availablePromotionWidth, 400)
+    : availablePromotionWidth;
+  const promotionHeight = promotionWidth * 250 / 400;
   const profileRules = getDietaryProfileRules(profileSelections);
 
   useEffect(() => {
@@ -292,14 +350,14 @@ export function HomeScreen({
     const interval = setInterval(() => {
       Animated.timing(promotionOpacity, {
         toValue: 0,
-        duration: 240,
+        duration: 220,
         useNativeDriver: Platform.OS !== 'web',
       }).start(({ finished }) => {
         if (!finished || !active) return;
         setPromotionIndex((current) => (current + 1) % PROMOTIONS.length);
         Animated.timing(promotionOpacity, {
           toValue: 1,
-          duration: 240,
+          duration: 220,
           useNativeDriver: Platform.OS !== 'web',
         }).start();
       });
@@ -311,20 +369,6 @@ export function HomeScreen({
       promotionOpacity.stopAnimation();
     };
   }, [promotionOpacity]);
-
-  const selectedRestaurant = RESTAURANT_DIRECTORY.find(
-    (restaurant) => restaurant.id === selectedRestaurantId,
-  );
-
-  if (selectedRestaurant) {
-    return (
-      <RestaurantDetailScreen
-        onBack={() => setSelectedRestaurantId(null)}
-        restaurant={selectedRestaurant}
-        screenWidth={screenWidth}
-      />
-    );
-  }
 
   if (selectedFood) {
     return (
@@ -340,22 +384,14 @@ export function HomeScreen({
 
   return (
     <SafeAreaView edges={[]} style={styles.homeScreen}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
       <ScrollView
         contentContainerStyle={styles.homeScroll}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.greetingRow}>
-          <View style={styles.avatar}>
-            <Image
-              accessibilityLabel="Foto de perfil"
-              resizeMode="contain"
-              source={require('./assets/koala-enhanced.png')}
-              style={styles.avatarImage}
-            />
-          </View>
+          <View accessibilityLabel="Foto de perfil" style={styles.avatar} />
           <View style={styles.greetingText}>
-            <Text style={styles.hello}>Olá {firstName || 'Ouli'}!</Text>
+            <Text style={styles.hello}>Olá {firstName || 'Oulis'}!</Text>
             <Pressable
               accessibilityLabel={
                 deliveryAddress
@@ -367,7 +403,7 @@ export function HomeScreen({
               style={styles.addressButton}
             >
               <Text numberOfLines={1} style={styles.address}>
-                {deliveryAddress || 'Adicione seu endereço'}
+                {deliveryAddress || 'Adicionar local de entrega'}
               </Text>
             </Pressable>
           </View>
@@ -389,51 +425,28 @@ export function HomeScreen({
           >
             <View style={styles.tipBubble} />
             <Text style={styles.tipTitle}>Falta pouco para o match perfeito!</Text>
-            <Text style={styles.tipText}>
-              Defina o que você adora para receber nossas melhores opções.
+            <Text numberOfLines={1} style={styles.tipText}>
+              Defina o que precisa evitar para mostrarmos apenas pratos seguros.
             </Text>
           </Pressable>
         )}
-
-        <View style={styles.sectionHeading}>
-          <Text style={styles.sectionTitle}>Promoções do dia</Text>
-        </View>
-        <View style={[styles.promoCard, { backgroundColor: PROMOTIONS[promotionIndex].color }]}>
+        <View style={[styles.promoCard, {
+          width: promotionWidth,
+          height: promotionHeight,
+          backgroundColor: currentPromotion.color,
+        }]}>
           <Animated.Image
-            source={PROMOTIONS[promotionIndex].image}
-            style={[StyleSheet.absoluteFill, styles.promoImage, { opacity: promotionOpacity }]}
-            resizeMode="cover"
+            source={currentPromotion.image}
+            style={[styles.promoImage, { opacity: promotionOpacity }]}
+            resizeMode="contain"
           />
         </View>
-
-        <View style={styles.foodHeading}>
-          <View>
-            <Text style={styles.foodSectionTitle}>Restaurantes</Text>
-            <Text style={styles.foodSectionSubtitle}>
-              Conheça os restaurantes e seus cardápios
-            </Text>
-          </View>
-        </View>
-        <ScrollView
-          contentContainerStyle={styles.restaurantHomeList}
-          horizontal
-          nestedScrollEnabled
-          showsHorizontalScrollIndicator={false}
-        >
-          {RESTAURANT_DIRECTORY.map((restaurant) => (
-            <RestaurantHomeCard
-              key={restaurant.id}
-              onPress={() => setSelectedRestaurantId(restaurant.id)}
-              restaurant={restaurant}
-            />
-          ))}
-        </ScrollView>
-
         <View style={styles.foodHeading}>
           <View>
             <Text style={styles.foodSectionTitle}>Em alta</Text>
-            <Text style={styles.foodSectionSubtitle}>Confira os mais amados</Text>
+            <Text style={styles.foodSectionSubtitle}>Confira os mais acessados</Text>
           </View>
+          <Text style={styles.allOptions}>Todas opções</Text>
         </View>
         <ScrollView
           contentContainerStyle={styles.foodList}
@@ -469,20 +482,80 @@ export function HomeScreen({
             />
           ))}
         </ScrollView>
+
+        <View style={styles.recommendedSection}>
+          <Text style={styles.recommendedHeading}>Recomendados com base no seu perfil</Text>
+          <ScrollView
+            contentContainerStyle={styles.recommendationFilters}
+            horizontal
+            nestedScrollEnabled
+            showsHorizontalScrollIndicator={false}
+          >
+            {RECOMMENDATION_FILTERS.map((filter) => (
+              <View
+                key={filter.label}
+                style={[styles.recommendationFilter, { width: size(filter.width) }]}
+              >
+                <Text style={styles.recommendationFilterText}>{filter.label}</Text>
+              </View>
+            ))}
+          </ScrollView>
+          <ScrollView horizontal nestedScrollEnabled showsHorizontalScrollIndicator={false}>
+            <View style={styles.recommendationGrid}>
+              {[0, 1, 2].map((row) => (
+                <View key={row} style={styles.recommendationRow}>
+                  {RECOMMENDED_RESTAURANTS.slice(row * 3, row * 3 + 3).map((restaurant) => (
+                    <RecommendedRestaurantCard
+                      key={restaurant.id}
+                      restaurant={restaurant}
+                      showDivider={row < 2}
+                    />
+                  ))}
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+        </View>
+
+        <View style={styles.nearbySection}>
+          <Text style={styles.nearbyHeading}>Oullin indica</Text>
+          <Text style={styles.nearbySubtitle}>Os melhores perto de você</Text>
+          <ScrollView
+            contentContainerStyle={styles.nearbyRestaurantList}
+            horizontal
+            nestedScrollEnabled
+            showsHorizontalScrollIndicator={false}
+          >
+            {NEARBY_RESTAURANTS.map((restaurant) => (
+              <NearbyRestaurantCard key={restaurant.name} restaurant={restaurant} />
+            ))}
+          </ScrollView>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const NOTIFICATION_FILTERS = ['Todas', 'Pagamentos', 'Cancelados', 'Entregas', 'Outros'];
+const NOTIFICATION_FILTERS = ['Todas', 'Pagamentos', 'Comidas', 'Entregas', 'Em Promoção'];
+const HOME_NOTIFICATIONS = [
+  {
+    action: 'profile',
+    title: 'Vamos completar seu perfil',
+    description: 'Adicione suas restrições e seus pratos prediletos para o Titu procurar as melhores opções para você. Certifique-se de logo após cadastrar seu endereço de entrega!',
+  },
+  {
+    action: 'address',
+    title: 'Vamos adicionar seu endereço de entrega',
+    description: 'Adicione seu endereço de entrega para localizar onde será feita sua entrega.',
+  },
+];
 
-export function NotificationsScreen({ onBack, onConfigure }) {
+export function NotificationsScreen({ onBack, onConfigureProfile, onConfigureAddress }) {
   const [selectedFilter, setSelectedFilter] = useState('Todas');
   const [selectedSection, setSelectedSection] = useState('Notificações');
 
   return (
     <SafeAreaView edges={[]} style={styles.notificationsScreen}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
       <View style={styles.notificationTop}>
         <Pressable
           accessibilityLabel="Voltar para início"
@@ -505,34 +578,45 @@ export function NotificationsScreen({ onBack, onConfigure }) {
           </React.Fragment>
         ))}
       </View>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <ScrollView
-          contentContainerStyle={styles.filterRail}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-        >
-          {NOTIFICATION_FILTERS.map((filter) => {
-            const active = selectedFilter === filter;
-            return (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ selected: active }}
-                key={filter}
-                onPress={() => setSelectedFilter(filter)}
-                style={[styles.filterChip, active && styles.filterSelected]}
-              >
-                <Text style={[styles.filterText, active && styles.filterTextSelected]}>
-                  {filter}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+      <ScrollView
+        horizontal
+        style={styles.notificationFilterScroll}
+        contentContainerStyle={styles.filterRail}
+        showsHorizontalScrollIndicator={false}
+      >
+        {NOTIFICATION_FILTERS.map((filter) => {
+          const active = selectedFilter === filter;
+          return (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              key={filter}
+              onPress={() => setSelectedFilter(filter)}
+              style={[styles.filterChip, active && styles.filterSelected]}
+            >
+              <Text style={[styles.filterText, active && styles.filterTextSelected]}>
+                {filter}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
 
-        {selectedSection === 'Notificações' ? (
-          <View style={styles.notificationContent}>
-            <Text style={styles.todayLabel}>Hoje</Text>
-            <View style={styles.notificationRow}>
+      {selectedSection === 'Notificações' ? (
+        <ScrollView
+          style={styles.notificationFeed}
+          contentContainerStyle={styles.notificationContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.todayLabel}>Hoje</Text>
+          {HOME_NOTIFICATIONS.map((notification) => (
+            <Pressable
+              accessibilityLabel={`${notification.title}. Abrir cadastro`}
+              accessibilityRole="button"
+              key={notification.title}
+              onPress={notification.action === 'profile' ? onConfigureProfile : onConfigureAddress}
+              style={styles.notificationCard}
+            >
               <View style={styles.notificationIcon}>
                 <Image
                   source={require('./assets/koala-enhanced.png')}
@@ -545,25 +629,18 @@ export function NotificationsScreen({ onBack, onConfigure }) {
                   <Text style={styles.notificationTitle}>Alerta Titu</Text>
                   <Text style={styles.notificationDate}>1 OUT, 2026</Text>
                 </View>
-                <Text style={styles.notificationBody}>Vamos completar seu perfil</Text>
+                <Text style={styles.notificationBody}>{notification.title}</Text>
                 <Text style={styles.notificationDescription}>
-                  Adicione suas restrições e seus pratos preferidos para o Titu procurar as melhores
-                  opções para você. Certifique-se de ter seu endereço de entrega cadastrado para
-                  receber seu pedido!
+                  {notification.description}
                 </Text>
-                <Pressable accessibilityRole="button" onPress={onConfigure}>
-                  <Text style={styles.configureLink}>CONFIGURAR AQUI</Text>
-                </Pressable>
               </View>
-            </View>
-            <View style={styles.notificationDivider} />
-          </View>
-        ) : (
-          <View style={styles.emptyMessages}>
-            <Text style={styles.emptyMessagesText}>Você ainda não tem mensagens.</Text>
-          </View>
-        )}
-      </ScrollView>
+              <View style={styles.notificationUnreadDot} />
+            </Pressable>
+          ))}
+        </ScrollView>
+      ) : (
+        <View style={styles.notificationFeed} />
+      )}
     </SafeAreaView>
   );
 }
@@ -583,29 +660,26 @@ const styles = StyleSheet.create({
     paddingTop: size(70),
     position: 'relative',
   },
-  loadingGlow: {
-    backgroundColor: '#FFFDF4',
-    borderRadius: size(110),
-    height: size(220),
-    position: 'absolute',
-    top: '29%',
-    width: size(220),
-  },
   completeMascot: {
     height: size(112),
-    marginBottom: size(57),
     width: size(112),
   },
+  completeShadow: {
+    height: size(10),
+    marginTop: size(8),
+    width: size(100),
+  },
   completeTitle: {
-    color: COLORS.navy,
+    color: '#111111',
     fontSize: size(20),
     fontWeight: '700',
+    marginTop: size(4),
     textAlign: 'center',
   },
   completeSubtitle: {
     color: COLORS.muted,
-    fontSize: size(13),
-    lineHeight: size(19),
+    fontSize: size(16),
+    lineHeight: size(23),
     marginTop: size(20),
     textAlign: 'center',
   },
@@ -616,7 +690,7 @@ const styles = StyleSheet.create({
     marginTop: size(70),
   },
   loadingDot: {
-    backgroundColor: '#FFD7B1',
+    backgroundColor: '#FF8500',
     borderRadius: size(5),
     height: size(8),
     width: size(8),
@@ -631,24 +705,15 @@ const styles = StyleSheet.create({
   greetingRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    paddingBottom: size(18),
+    paddingBottom: size(36),
     paddingHorizontal: size(20),
     paddingTop: size(14),
   },
   avatar: {
-    alignItems: 'center',
-    backgroundColor: '#FFF1DF',
-    borderColor: '#F3D7B5',
-    borderRadius: size(23),
-    borderWidth: 1,
-    height: size(46),
-    justifyContent: 'center',
-    overflow: 'hidden',
-    width: size(46),
-  },
-  avatarImage: {
-    height: size(39),
-    width: size(39),
+    backgroundColor: '#D9D9D9',
+    borderRadius: size(20),
+    height: size(40),
+    width: size(40),
   },
   greetingText: {
     flex: 1,
@@ -656,12 +721,12 @@ const styles = StyleSheet.create({
   },
   hello: {
     color: '#222222',
-    fontSize: size(16),
-    fontWeight: '700',
+    fontSize: size(10),
+    fontWeight: '400',
   },
   address: {
     color: COLORS.muted,
-    fontSize: size(12),
+    fontSize: size(7),
     marginTop: size(2),
   },
   addressButton: {
@@ -669,134 +734,142 @@ const styles = StyleSheet.create({
   },
   bellButton: {
     alignItems: 'center',
-    height: size(38),
+    backgroundColor: COLORS.orange,
+    borderRadius: size(20),
+    height: size(40),
     justifyContent: 'center',
-    width: size(38),
+    width: size(40),
   },
   bellShape: {
-    alignItems: 'center',
-    borderColor: '#171717',
-    borderTopLeftRadius: size(12),
-    borderTopRightRadius: size(12),
-    borderWidth: 1.8,
-    height: size(20),
+    borderColor: COLORS.white,
+    borderTopLeftRadius: size(7),
+    borderTopRightRadius: size(7),
+    borderTopWidth: size(2),
+    borderLeftWidth: size(2),
+    borderRightWidth: size(2),
+    height: size(15),
+    left: size(5),
+    position: 'absolute',
+    top: size(4),
+    width: size(14),
+  },
+  bellIcon: {
+    height: size(24),
+    position: 'relative',
+    width: size(24),
+  },
+  bellTopDot: {
+    backgroundColor: COLORS.white,
+    borderRadius: size(2),
+    height: size(3),
+    left: size(10),
+    position: 'absolute',
+    top: size(1),
+    width: size(3),
+  },
+  bellBase: {
+    backgroundColor: COLORS.white,
+    height: size(2),
+    left: size(3),
+    position: 'absolute',
+    top: size(19),
     width: size(18),
   },
   bellClapper: {
-    backgroundColor: '#171717',
-    borderRadius: 2,
-    bottom: -size(5),
-    height: size(4),
+    backgroundColor: COLORS.white,
+    borderRadius: size(1.5),
+    bottom: size(1),
+    height: size(3),
     position: 'absolute',
-    width: size(7),
+    width: size(4),
+    alignSelf: 'center',
   },
   tipBanner: {
     backgroundColor: COLORS.orange,
     borderRadius: size(14),
     justifyContent: 'center',
-    marginHorizontal: size(20),
-    minHeight: size(76),
+    marginHorizontal: size(22),
+    minHeight: size(52),
     overflow: 'visible',
-    paddingHorizontal: size(15),
-    paddingVertical: size(12),
+    paddingHorizontal: size(18),
+    paddingVertical: size(6),
   },
   tipBubble: {
     borderBottomColor: COLORS.orange,
-    borderBottomWidth: size(12),
+    borderBottomWidth: size(16),
     borderLeftColor: 'transparent',
-    borderLeftWidth: size(8),
+    borderLeftWidth: size(10),
     borderRightColor: 'transparent',
-    borderRightWidth: size(8),
+    borderRightWidth: size(10),
     position: 'absolute',
     right: size(12),
-    top: -size(8),
+    top: -size(14),
   },
   tipTitle: {
     color: COLORS.white,
-    fontSize: size(14),
-    fontWeight: '800',
-    marginBottom: size(4),
+    fontSize: size(11),
+    fontWeight: '600',
+    marginBottom: size(2),
   },
   tipText: {
     color: '#FFF4E6',
-    fontSize: size(12),
-    lineHeight: size(16),
+    fontSize: size(7),
+    lineHeight: size(9),
     paddingRight: size(8),
   },
-  sectionHeading: {
-    marginBottom: size(10),
-    marginHorizontal: size(22),
-    marginTop: size(24),
-  },
-  sectionTitle: {
-    color: COLORS.dark,
-    fontSize: size(17),
-    fontWeight: '800',
-  },
   promoCard: {
-    aspectRatio: 400 / 253,
-    borderRadius: size(14),
-    marginHorizontal: size(20),
+    alignSelf: 'center',
+    backgroundColor: '#81231B',
+    borderRadius: size(10),
+    marginTop: size(28),
     overflow: 'hidden',
   },
   promoImage: {
     height: '100%',
+    borderRadius: size(10),
     width: '100%',
   },
   foodHeading: {
-    marginBottom: size(10),
-    marginHorizontal: size(22),
-    marginTop: size(18),
+    alignItems: 'flex-end',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: size(16),
+    marginHorizontal: size(HOME_SIDE_GUTTER),
+    marginTop: size(24),
   },
   foodSectionTitle: {
     color: '#222222',
-    fontSize: size(17),
-    fontWeight: '800',
+    fontSize: size(10),
+    fontWeight: '400',
   },
   foodSectionSubtitle: {
-    color: '#666666',
-    fontSize: size(13),
+    color: '#777777',
+    fontSize: size(7),
+    fontWeight: '400',
     marginTop: size(2),
   },
+  allOptions: {
+    backgroundColor: '#FFD21A',
+    borderRadius: size(8),
+    color: '#222222',
+    fontSize: size(6),
+    overflow: 'hidden',
+    paddingHorizontal: size(7),
+    paddingVertical: size(2),
+  },
   foodList: {
-    paddingLeft: size(20),
-    paddingRight: size(16),
+    paddingLeft: size(HOME_SIDE_GUTTER),
+    paddingRight: size(HOME_SIDE_GUTTER),
     paddingBottom: size(8),
-  },
-  restaurantHomeList: {
-    paddingBottom: size(8),
-    paddingLeft: size(20),
-    paddingRight: size(16),
-  },
-  restaurantHomeCard: {
-    marginRight: size(12),
-    width: size(148),
-  },
-  restaurantHomeImage: {
-    backgroundColor: '#F7F7F7',
-    borderRadius: size(10),
-    height: size(88),
-    width: '100%',
-  },
-  restaurantHomeName: {
-    color: COLORS.dark,
-    fontSize: size(12),
-    fontWeight: '700',
-    marginTop: size(6),
-  },
-  restaurantHomeDetails: {
-    color: COLORS.muted,
-    fontSize: size(9),
-    marginTop: size(3),
   },
   foodCard: {
-    marginRight: size(16),
-    width: size(128),
+    marginRight: size(12),
+    width: size(94),
   },
   foodImageWrap: {
     backgroundColor: '#F7F7F7',
-    borderRadius: size(12),
-    height: size(128),
+    borderRadius: size(9),
+    height: size(94),
     overflow: 'hidden',
     width: '100%',
   },
@@ -806,7 +879,7 @@ const styles = StyleSheet.create({
   },
   foodPrice: {
     color: COLORS.dark,
-    fontSize: size(12),
+    fontSize: size(10),
     marginBottom: size(4),
   },
   foodCardInfo: {
@@ -816,148 +889,282 @@ const styles = StyleSheet.create({
   },
   foodName: {
     color: '#242424',
-    fontSize: size(12),
-    fontWeight: '600',
-    lineHeight: size(16),
+    fontSize: size(10),
+    fontWeight: '400',
+    lineHeight: size(13),
   },
   foodDetail: {
     color: '#555555',
-    fontSize: size(11),
-    lineHeight: size(15),
+    fontSize: size(9),
+    lineHeight: size(12),
     marginTop: size(2),
   },
   foodSeller: {
     color: '#444444',
-    fontSize: size(9),
-    lineHeight: size(12),
+    fontSize: size(6),
+    lineHeight: size(11),
     marginTop: size(2),
   },
   foodRatingRow: {
     alignItems: 'center',
     flexDirection: 'row',
+    gap: size(4),
     justifyContent: 'center',
     marginTop: size(7),
   },
   foodRating: {
     color: '#333333',
-    fontSize: size(11),
+    fontSize: size(9),
   },
-  locationMarker: {
+  ratingStar: {
+    height: size(10),
+    width: size(10),
+  },
+  recommendedSection: {
+    marginTop: size(16),
+  },
+  recommendedHeading: {
+    color: '#161616',
+    fontSize: size(13),
+    fontWeight: '700',
+    marginBottom: size(16),
+    marginHorizontal: size(HOME_SIDE_GUTTER),
+  },
+  recommendationFilters: {
     alignItems: 'center',
-    backgroundColor: '#111111',
-    borderRadius: 99,
-    height: size(12),
-    justifyContent: 'center',
-    marginLeft: size(5),
-    width: size(12),
+    flexDirection: 'row',
+    gap: size(9),
+    paddingHorizontal: size(HOME_SIDE_GUTTER),
+    paddingBottom: size(5),
   },
-  locationMarkerDot: {
-    backgroundColor: COLORS.white,
+  recommendationFilter: {
+    alignItems: 'center',
+    backgroundColor: '#124F8C',
     borderRadius: 99,
-    height: size(3),
-    width: size(3),
+    height: size(27),
+    justifyContent: 'center',
+  },
+  recommendationFilterText: {
+    color: COLORS.white,
+    fontSize: size(8),
+  },
+  recommendationGrid: {
+    paddingHorizontal: size(HOME_SIDE_GUTTER),
+    paddingTop: size(5),
+  },
+  recommendationRow: {
+    flexDirection: 'row',
+    gap: size(20),
+  },
+  recommendedRestaurantCard: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    height: size(84),
+    width: size(220),
+  },
+  recommendedLogo: {
+    height: size(66),
+    marginRight: size(10),
+    width: size(66),
+  },
+  recommendedRestaurantInfo: {
+    alignSelf: 'stretch',
+    flex: 1,
+    justifyContent: 'center',
+    paddingRight: size(5),
+  },
+  recommendedRestaurantName: {
+    color: '#1B1B1B',
+    fontSize: size(10),
+    fontWeight: '400',
+    marginBottom: size(4),
+  },
+  recommendedRatingRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: size(4),
+  },
+  recommendedRating: {
+    color: '#222222',
+    fontSize: size(10),
+  },
+  recommendedDivider: {
+    borderBottomColor: '#D1D1D1',
+    borderBottomWidth: 1,
+    marginTop: size(15),
+    width: '100%',
+  },
+  nearbySection: {
+    marginTop: size(12),
+  },
+  nearbyHeading: {
+    color: '#1A1A1A',
+    fontSize: size(12),
+    fontWeight: '500',
+    marginHorizontal: size(HOME_SIDE_GUTTER),
+  },
+  nearbySubtitle: {
+    color: '#1A1A1A',
+    fontSize: size(12),
+    marginBottom: size(14),
+    marginHorizontal: size(HOME_SIDE_GUTTER),
+  },
+  nearbyRestaurantList: {
+    paddingHorizontal: size(HOME_SIDE_GUTTER),
+    paddingBottom: size(16),
+  },
+  nearbyRestaurantCard: {
+    marginRight: size(10),
+    width: size(90),
+  },
+  nearbyRestaurantImage: {
+    borderRadius: size(14),
+    height: size(90),
+    width: '100%',
+  },
+  nearbyRestaurantDistance: {
+    color: '#202020',
+    fontSize: size(10),
+    marginTop: size(6),
+  },
+  nearbyRestaurantName: {
+    color: '#202020',
+    fontSize: size(10),
+    marginTop: size(3),
+  },
+  nearbyRestaurantCategory: {
+    color: '#202020',
+    fontSize: size(10),
+    marginTop: size(3),
+  },
+  nearbyRatingRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: size(5),
+    marginTop: size(5),
+  },
+  nearbyRating: {
+    color: '#202020',
+    fontSize: size(10),
   },
   notificationsScreen: {
-    backgroundColor: COLORS.white,
+    backgroundColor: '#F2F2F2',
     flex: 1,
   },
   notificationTop: {
-    height: size(52),
+    backgroundColor: COLORS.white,
+    height: size(85),
     justifyContent: 'center',
-    paddingHorizontal: size(12),
+    paddingHorizontal: size(14),
   },
   backButton: {
     alignItems: 'center',
-    backgroundColor: '#FFB900',
-    borderRadius: size(8),
-    height: size(36),
+    height: size(28),
     justifyContent: 'center',
-    width: size(36),
+    width: size(28),
   },
   backArrow: {
-    color: COLORS.white,
-    fontSize: size(24),
-    fontWeight: '700',
-    lineHeight: size(28),
-    marginTop: -size(2),
+    color: '#FFB400',
+    fontSize: size(22),
+    fontWeight: '400',
+    lineHeight: size(26),
   },
   notificationTabs: {
     alignItems: 'center',
+    backgroundColor: COLORS.white,
     flexDirection: 'row',
-    marginBottom: size(14),
-    marginLeft: size(18),
-    marginTop: size(8),
+    height: size(42),
+    paddingHorizontal: size(16),
   },
   notificationTabActive: {
-    color: COLORS.navy,
-    fontSize: size(15),
-    fontWeight: '800',
+    color: '#111111',
+    fontSize: size(16),
+    fontWeight: '700',
   },
   tabDivider: {
-    color: '#C79D36',
-    fontSize: size(15),
-    marginHorizontal: size(10),
+    color: '#FFB400',
+    fontSize: size(16),
+    marginHorizontal: size(7),
   },
   notificationTab: {
-    color: COLORS.navy,
-    fontSize: size(15),
+    color: '#111111',
+    fontSize: size(16),
     fontWeight: '700',
+  },
+  notificationFilterScroll: {
+    backgroundColor: COLORS.white,
+    flexGrow: 0,
+    flexShrink: 0,
+    height: size(60),
   },
   filterRail: {
     alignItems: 'center',
+    backgroundColor: COLORS.white,
     paddingHorizontal: size(12),
   },
   filterChip: {
     alignItems: 'center',
-    borderColor: '#DEDEDE',
-    borderRadius: size(10),
+    borderColor: '#D4D4D4',
+    borderRadius: size(7),
     borderWidth: 1,
-    height: size(36),
+    height: size(30),
     justifyContent: 'center',
     marginRight: size(7),
-    paddingHorizontal: size(14),
+    paddingHorizontal: size(12),
   },
   filterSelected: {
-    backgroundColor: '#FFFDF5',
-    borderColor: '#E0BD5B',
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.orange,
   },
   filterText: {
-    color: COLORS.muted,
-    fontSize: size(12),
+    color: '#124F8C',
+    fontSize: size(9),
   },
   filterTextSelected: {
-    color: '#B9911B',
+    color: '#124F8C',
+  },
+  notificationFeed: {
+    backgroundColor: '#F2F2F2',
+    flex: 1,
   },
   notificationContent: {
-    paddingHorizontal: size(14),
+    paddingBottom: size(10),
+    paddingTop: size(16),
   },
   todayLabel: {
-    color: COLORS.navy,
+    color: '#111111',
     fontSize: size(14),
-    fontWeight: '800',
-    marginBottom: size(14),
-    marginTop: size(18),
+    fontWeight: '700',
+    marginBottom: size(18),
+    marginHorizontal: size(18),
   },
-  notificationRow: {
-    alignItems: 'flex-start',
+  notificationCard: {
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    borderRadius: size(7),
     flexDirection: 'row',
+    marginBottom: size(5),
+    marginHorizontal: size(8),
+    paddingHorizontal: size(7),
+    paddingVertical: size(6),
   },
   notificationIcon: {
     alignItems: 'center',
     borderColor: COLORS.navy,
     borderRadius: 999,
-    borderWidth: 1.5,
-    height: size(44),
+    borderWidth: size(1.5),
+    height: size(36),
     justifyContent: 'center',
-    marginRight: size(12),
-    width: size(44),
+    marginRight: size(6),
+    width: size(36),
   },
   notificationKoala: {
-    height: size(34),
-    width: size(34),
+    height: size(28),
+    width: size(28),
   },
   notificationMessage: {
     flex: 1,
+    paddingRight: size(5),
   },
   notificationTitleRow: {
     alignItems: 'center',
@@ -965,46 +1172,30 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   notificationTitle: {
-    color: COLORS.navy,
-    fontSize: size(13),
-    fontWeight: '800',
+    color: '#124F8C',
+    fontSize: size(12),
+    fontWeight: '700',
   },
   notificationDate: {
-    color: COLORS.navy,
-    fontSize: size(10),
+    color: '#111111',
+    fontSize: size(9),
   },
   notificationBody: {
-    color: COLORS.navy,
-    fontSize: size(14),
-    fontWeight: '700',
-    marginTop: size(5),
+    color: '#111111',
+    fontSize: size(12),
+    fontWeight: '400',
+    marginTop: size(1),
   },
   notificationDescription: {
-    color: COLORS.orange,
-    fontSize: size(12),
-    lineHeight: size(18),
-    marginTop: size(6),
+    color: '#333333',
+    fontSize: size(8),
+    lineHeight: size(12),
+    marginTop: size(2),
   },
-  configureLink: {
-    color: '#D2A000',
-    fontSize: size(12),
-    fontWeight: '800',
-    marginTop: size(7),
-    textAlign: 'right',
-    textDecorationLine: 'underline',
-  },
-  notificationDivider: {
-    borderBottomColor: '#F0F0F0',
-    borderBottomWidth: 1,
-    marginLeft: size(56),
-    marginTop: size(16),
-  },
-  emptyMessages: {
-    alignItems: 'center',
-    padding: size(30),
-  },
-  emptyMessagesText: {
-    color: COLORS.muted,
-    fontSize: size(14),
+  notificationUnreadDot: {
+    backgroundColor: '#FF8900',
+    borderRadius: size(3),
+    height: size(7),
+    width: size(7),
   },
 });

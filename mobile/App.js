@@ -12,7 +12,10 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { NavigationBar } from 'expo-navigation-bar';
 import AddressScreen from './AddressScreen';
+import CartScreen, { INITIAL_CART_ITEMS } from './CartScreen';
+import ProfileScreen from './ProfileScreen';
 import {
   HomeScreen,
   NotificationsScreen,
@@ -154,24 +157,31 @@ function SelectionField({ question, selected, onToggle }) {
             <Pressable
               accessibilityLabel="Fechar opções"
               accessibilityRole="button"
+              accessibilityState={{ expanded: true }}
               onPress={toggleExpanded}
               style={styles.chevronButton}
             >
-              <Text style={styles.chevron}>⌃</Text>
+              <View style={[styles.chevron, styles.chevronUp]}>
+                <View style={[styles.chevronArm, styles.chevronArmLeft]} />
+                <View style={[styles.chevronArm, styles.chevronArmRight]} />
+              </View>
             </Pressable>
           </View>
         ) : (
           <Pressable
             accessibilityLabel={selected.length ? `${selected.length} selecionadas` : 'Pesquisar opções'}
             accessibilityRole="button"
-            accessibilityState={{ expanded: false }}
+            accessibilityState={{ expanded }}
             onPress={toggleExpanded}
             style={styles.collapsedField}
           >
             <Text style={[styles.collapsedText, selected.length > 0 && styles.selectedSummary]}>
               {selected.length ? `${selected.length} selecionada${selected.length > 1 ? 's' : ''}` : 'Pesquisar'}
             </Text>
-            <Text style={styles.chevron}>⌄</Text>
+            <View style={styles.chevron}>
+              <View style={[styles.chevronArm, styles.chevronArmLeft]} />
+              <View style={[styles.chevronArm, styles.chevronArmRight]} />
+            </View>
           </Pressable>
         )}
         {expanded && (
@@ -300,7 +310,12 @@ function PreferencesScreen({ onBack, onContinue, selections, setSelections }) {
 
 function BottomNavigation({ activeTab, onSelectTab, bottomInset }) {
   return (
-    <View style={[styles.bottomNav, { paddingBottom: Math.max(bottomInset, 8) }]}>
+    <View
+      style={[
+        styles.bottomNav,
+        { paddingBottom: Math.max(bottomInset + 6, 14) },
+      ]}
+    >
       {[
         { label: 'Início' },
         { label: 'Buscar' },
@@ -350,9 +365,15 @@ function AppContent() {
   const [routeStack, setRouteStack] = useState([ROUTES.onboarding]);
   const [selections, setSelections] = useState({});
   const [firstName, setFirstName] = useState('');
+  const [userProfile, setUserProfile] = useState({});
   const [selectedAddress, setSelectedAddress] = useState(null);
+  const [cartItems, setCartItems] = useState(INITIAL_CART_ITEMS);
   const [profileSetupComplete, setProfileSetupComplete] = useState(false);
+  const [searchStatusBarBackground, setSearchStatusBarBackground] = useState('#FF8500');
   const currentRoute = routeStack[routeStack.length - 1];
+  const statusBarBackground = currentRoute === ROUTES.search
+    ? searchStatusBarBackground
+    : COLORS.white;
 
   function resetNavigation(route) {
     setRouteStack([route]);
@@ -394,6 +415,7 @@ function AppContent() {
     return (
       <OnboardingScreen
         onComplete={(registration) => {
+          setUserProfile(registration);
           setFirstName(registration.firstName);
           resetNavigation(ROUTES.registrationComplete);
         }}
@@ -408,20 +430,30 @@ function AppContent() {
     );
   }
 
-  const isOverlayRoute = currentRoute === ROUTES.address || currentRoute === ROUTES.notifications;
-  const activeTab = Object.keys(TAB_ROUTES).find((tab) => TAB_ROUTES[tab] === currentRoute);
+  const activeTab = currentRoute === ROUTES.notifications || currentRoute === ROUTES.address
+    ? 'Pedidos'
+    : Object.keys(TAB_ROUTES).find((tab) => TAB_ROUTES[tab] === currentRoute);
 
   return (
-    <SafeAreaView edges={['top']} style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
+    <SafeAreaView
+      edges={currentRoute === ROUTES.search ? [] : ['top']}
+      style={[styles.safeArea, { backgroundColor: statusBarBackground }]}
+    >
+      <StatusBar
+        barStyle={statusBarBackground === '#FF8500' ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+        hidden={false}
+        translucent
+      />
       <View style={styles.mainContent}>
         {currentRoute === ROUTES.notifications ? (
           <NotificationsScreen
             onBack={goBack}
-            onConfigure={() => navigate(ROUTES.preferences)}
+            onConfigureAddress={() => navigate(ROUTES.address)}
+            onConfigureProfile={() => navigate(ROUTES.preferences)}
           />
         ) : currentRoute === ROUTES.address ? (
-          <SafeAreaView edges={['bottom']} style={styles.addressSafeArea}>
+          <View style={styles.addressSafeArea}>
             <AddressScreen
               completeLabel="Confirmar endereço"
               onBack={goBack}
@@ -431,9 +463,12 @@ function AppContent() {
                 resetNavigation(ROUTES.home);
               }}
             />
-          </SafeAreaView>
+          </View>
         ) : currentRoute === ROUTES.search ? (
-          <SearchScreen profileSelections={selections} />
+          <SearchScreen
+            onStatusBarBackgroundChange={setSearchStatusBarBackground}
+            profileSelections={selections}
+          />
         ) : currentRoute === ROUTES.home ? (
           <HomeScreen
             deliveryAddress={
@@ -454,17 +489,24 @@ function AppContent() {
             selections={selections}
             setSelections={setSelections}
           />
+        ) : currentRoute === ROUTES.orders ? (
+          <CartScreen
+            items={cartItems}
+            onAddItems={() => resetNavigation(ROUTES.home)}
+            onBack={() => resetNavigation(ROUTES.home)}
+            onItemsChange={setCartItems}
+          />
+        ) : currentRoute === ROUTES.profile ? (
+          <ProfileScreen address={selectedAddress} selections={selections} user={userProfile} />
         ) : (
           <PlaceholderScreen tab={currentRoute} />
         )}
       </View>
-      {!isOverlayRoute && (
-        <BottomNavigation
-          activeTab={activeTab}
-          bottomInset={insets.bottom}
-          onSelectTab={(tab) => resetNavigation(TAB_ROUTES[tab])}
-        />
-      )}
+      <BottomNavigation
+        activeTab={activeTab}
+        bottomInset={insets.bottom}
+        onSelectTab={(tab) => resetNavigation(TAB_ROUTES[tab])}
+      />
     </SafeAreaView>
   );
 }
@@ -472,12 +514,33 @@ function AppContent() {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AppContent />
+      {Platform.OS === 'android' && <NavigationBar hidden style="dark" />}
+      <View style={styles.appViewport}>
+        <View style={Platform.OS === 'web' ? styles.webAppFrame : styles.nativeAppFrame}>
+          <AppContent />
+        </View>
+      </View>
     </SafeAreaProvider>
   );
 }
 
 const styles = StyleSheet.create({
+  appViewport: {
+    flex: 1,
+    width: '100%',
+  },
+  webAppFrame: {
+    backgroundColor: COLORS.white,
+    flex: 1,
+    maxWidth: 430,
+    width: '100%',
+    alignSelf: 'center',
+    overflow: 'hidden',
+  },
+  nativeAppFrame: {
+    flex: 1,
+    width: '100%',
+  },
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.white,
@@ -564,8 +627,28 @@ const styles = StyleSheet.create({
     width: 40,
   },
   chevron: {
-    color: COLORS.muted,
-    fontSize: 19,
+    height: 8,
+    position: 'relative',
+    width: 10,
+  },
+  chevronUp: {
+    transform: [{ rotate: '180deg' }],
+  },
+  chevronArm: {
+    backgroundColor: COLORS.muted,
+    borderRadius: 0.75,
+    height: 1.5,
+    position: 'absolute',
+    top: 2.5,
+    width: 6,
+  },
+  chevronArmLeft: {
+    left: 0,
+    transform: [{ rotate: '45deg' }],
+  },
+  chevronArmRight: {
+    right: 0,
+    transform: [{ rotate: '-45deg' }],
   },
   optionsList: {
     maxHeight: 220,
@@ -633,7 +716,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.blue,
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingTop: 7,
+    minHeight: 68,
+    paddingTop: 6,
   },
   tab: {
     alignItems: 'center',
@@ -726,8 +810,8 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     color: COLORS.white,
-    fontSize: 10,
-    marginTop: 1,
+    fontSize: 11,
+    marginTop: 3,
   },
   activeTabText: {
     color: COLORS.amber,

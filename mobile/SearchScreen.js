@@ -4,7 +4,6 @@ import {
   Keyboard,
   Pressable,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -23,18 +22,65 @@ const COLORS = {
 };
 
 const FOOD_CATEGORIES = [
-  // A foto dos chefs representa a seleção geral e evita repetir o card de hambúrguer.
-  { label: 'Todos', image: require('./assets/saudavel-life-chefs.png') },
-  { label: 'Hambúrguer', image: require('./assets/burger-photo.jpg') },
-  { label: 'Pizza', image: require('./assets/pizza-photo.jpg') },
-  { label: 'Marmitas', image: require('./assets/meal-banner-user.png') },
-  { label: 'Saladas', image: require('./assets/salad-photo.jpg') },
-  { label: 'Massas', image: require('./assets/pasta-photo.jpg') },
-  { label: 'Sushi', image: require('./assets/sushi-photo.jpg') },
-  { label: 'Doces', image: require('./assets/dessert-photo.jpg') },
-  { label: 'Bebidas', image: require('./assets/drink-photo.jpg') },
-  { label: 'Salgados', image: require('./assets/food-pastel.png') },
-  { label: 'Porções', image: require('./assets/food-fries.png') },
+  {
+    label: 'Hambúrguer',
+    background: require('./assets/search-circle-orange-1.png'),
+    image: require('./assets/search-food-burger.png'),
+  },
+  {
+    label: 'Sushi',
+    background: require('./assets/search-circle-yellow-1.png'),
+    image: require('./assets/search-food-sushi.png'),
+  },
+  {
+    label: 'Pizza',
+    background: require('./assets/search-circle-orange-2.png'),
+    image: require('./assets/search-food-pizza.png'),
+  },
+  {
+    label: 'Porções',
+    background: require('./assets/search-circle-yellow-2.png'),
+    image: require('./assets/search-food-fries.png'),
+  },
+];
+
+const HOME_PROFILE_PROMOTIONS = [
+  {
+    label: 'Hambúrguer',
+    category: 'Hambúrguer',
+    start: 16,
+  },
+  {
+    label: 'Pizza',
+    category: 'Pizza',
+    start: 206,
+  },
+  {
+    label: 'Saladas',
+    category: 'Saladas',
+    start: 397,
+  },
+  {
+    label: 'Sushi',
+    category: 'Sushi',
+    start: 588,
+  },
+  {
+    label: 'Doces',
+    category: 'Doces',
+    start: 778,
+  },
+  {
+    label: 'Massas',
+    category: 'Massas',
+    start: 969,
+  },
+];
+
+const HOME_PROFILE_PROMOTION_PAGES = [
+  { start: 16, promotions: HOME_PROFILE_PROMOTIONS.slice(0, 2) },
+  { start: 397, promotions: HOME_PROFILE_PROMOTIONS.slice(2, 4) },
+  { start: 778, promotions: HOME_PROFILE_PROMOTIONS.slice(4, 6) },
 ];
 
 // Catálogo demonstrativo; a lista poderá ser substituída pela resposta do backend.
@@ -177,14 +223,89 @@ const FOOD_CARDS = [
   },
 ];
 
+const SEARCH_RESULT_PRODUCTS = [
+  {
+    id: 'lanche-natural',
+    name: 'Subway',
+    restaurantName: 'Subway',
+    restaurantLabel: 'Restaurante',
+    image: require('./assets/subway-logo.png'),
+  },
+  {
+    id: 'marmita-200g',
+    name: 'Marmita 200g - Marmitas da jô',
+    restaurantName: 'Marmitas da jô',
+    restaurantLabel: 'restaurante',
+    image: require('./assets/search-result-store-marmitas-ju.png'),
+  },
+  {
+    id: 'batata-cozida',
+    name: 'Batata Cozida - Potato House',
+    restaurantName: 'Potato House',
+    restaurantLabel: 'restaurante',
+    image: require('./assets/search-result-store-potato-house.png'),
+  },
+  {
+    id: 'sanduiche-frango',
+    name: 'Sanduíche de Frango - KFC',
+    restaurantName: 'KFC',
+    restaurantLabel: 'restaurante',
+    image: require('./assets/search-result-store-kfc.png'),
+  },
+  {
+    id: 'suco-natural',
+    name: 'Suco Natural - Saudavel Life',
+    restaurantName: 'Saudavel Life',
+    restaurantLabel: 'restaurante',
+    image: require('./assets/search-result-store-saudavel-life.png'),
+  },
+  {
+    id: 'brigadeiro',
+    name: 'Brigadeiro - Doce Abraço',
+    restaurantName: 'Doce Abraço',
+    restaurantLabel: 'restaurante',
+    image: require('./assets/search-result-store-doce-abraco.png'),
+  },
+  {
+    id: 'bife-acebolado',
+    name: 'Bife Acebolado - Outback',
+    restaurantName: 'Outback',
+    restaurantLabel: 'restaurante',
+    image: require('./assets/search-result-store-outback.png'),
+  },
+  {
+    id: 'cafe-da-manha',
+    name: 'Cafés Da Manhã - Manhã Leve',
+    restaurantName: 'Manhã Leve',
+    restaurantLabel: 'restaurante',
+    image: require('./assets/search-result-store-manha-leve.png'),
+  },
+  {
+    id: 'bolo-de-milho',
+    name: 'Bolo De Milho - Quintal Do Milho',
+    restaurantName: 'Quintal Do Milho',
+    restaurantLabel: 'restaurante',
+    image: require('./assets/search-result-store-quintal-milho.png'),
+  },
+];
+
 const SEARCH_FILTERS = [
   'Todo Oullin',
   'Perfil alimentar',
-  'restaurantes',
+  'restaurantes verificados',
   'bebidas',
   'região',
   'menor preço',
 ];
+
+const SEARCH_FILTER_WIDTHS = {
+  'Todo Oullin': 68,
+  'Perfil alimentar': 88,
+  'restaurantes verificados': 86,
+  bebidas: 79,
+  região: 70,
+  'menor preço': 90,
+};
 
 const FOOD_CARD_PRICES = {
   burger: 28.9,
@@ -210,16 +331,27 @@ const RECENT_STORES = [
   {
     id: 'saudavel-life',
     name: 'Saudável Life',
+    label: 'Saudável\nLife',
     image: require('./assets/saudavel-life-logo.png'),
   },
-  { id: 'burger-house', name: 'Burger House', image: require('./assets/burger-photo.jpg') },
-  { id: 'pizza-da-vila', name: 'Pizza da Vila', image: require('./assets/pizza-photo.jpg') },
-  { id: 'sushi-oullin', name: 'Sushi Oullin', image: require('./assets/sushi-photo.jpg') },
-  { id: 'marmitas-da-ana', name: 'Marmitas da Ana', image: require('./assets/meal-banner-user.png') },
-  { id: 'salada-viva', name: 'Salada Viva', image: require('./assets/salad-photo.jpg') },
-  { id: 'doce-cantinho', name: 'Doce Cantinho', image: require('./assets/dessert-photo.jpg') },
-  { id: 'massa-da-casa', name: 'Massa da Casa', image: require('./assets/pasta-photo.jpg') },
-  { id: 'bebidas-geladas', name: 'Bebidas Geladas', image: require('./assets/drink-photo.jpg') },
+  {
+    id: 'subway',
+    name: 'Subway',
+    label: 'Subway',
+    image: require('./assets/recent-store-ubuwa.png'),
+  },
+  {
+    id: 'burger-house',
+    name: 'KFC',
+    label: 'KFC',
+    image: require('./assets/recent-store-kfc.png'),
+  },
+  {
+    id: 'marmitas-da-ana',
+    name: 'Marmitas da Ju',
+    label: 'Marmitas\nda Ju',
+    image: require('./assets/recent-store-marmitas-ju.png'),
+  },
 ];
 const INITIAL_RECENT_SEARCHES = ['Pizza', 'Pastel', 'torta', 'filé a parmegiana'];
 const SEARCH_HISTORY_STORAGE_KEY = '@oullin/search-history';
@@ -323,6 +455,92 @@ const UNCONFIRMED_FOOD_SAFETY = {
 
 export const RESTAURANT_DIRECTORY = [
   {
+    id: 'subway',
+    name: 'Subway',
+    verified: true,
+    image: require('./assets/subway-logo.png'),
+    heroImage: require('./assets/subway-logo.png'),
+    rating: '4,8 (452)',
+    deliveryTime: '25–40 min',
+    minimumOrder: 'R$ 20,00',
+    description: 'Lanches naturais e opções frescas.',
+    foodSafety: UNCONFIRMED_FOOD_SAFETY,
+    filters: ['Todo Oullin', 'Perfil alimentar', 'lanches', 'menor preço'],
+    features: [],
+    sections: [{
+      title: 'Lanches',
+      items: [
+        makeMenuItem('Lanche Natural', 'R$ 24,90', 'Lanche natural preparado pela loja.', require('./assets/subway-logo.png')),
+      ],
+    }],
+  },
+  {
+    id: 'marmitas-da-jo',
+    name: 'Marmitas da Jô',
+    verified: true,
+    image: require('./assets/search-result-store-marmitas-ju.png'),
+    heroImage: require('./assets/restaurant-search-marmitas-ju-1.png'),
+    searchCardImage: require('./assets/restaurant-result-marmitas-ju.png'),
+    rating: '4,8 (452)',
+    deliveryTime: '40-50 min',
+    deliveryFee: 'R$ 5,99',
+    minimumOrder: 'R$ 5,99',
+    description: 'Marmitas preparadas pela loja.',
+    foodSafety: UNCONFIRMED_FOOD_SAFETY,
+    filters: ['Todo Oullin', 'Perfil alimentar', 'marmitas', 'menor preço'],
+    features: [],
+    sections: [{
+      title: 'Marmitas',
+      items: [
+        {
+          id: 'marmitas-da-jo-simples-1',
+          ...makeMenuItem('Marmita Simples', 'R$ 15,99', '', require('./assets/restaurant-search-marmitas-ju-1.png')),
+        },
+        {
+          id: 'marmitas-da-jo-simples-2',
+          ...makeMenuItem('Marmita Simples', 'R$ 15,99', '', require('./assets/restaurant-search-marmitas-ju-2.png')),
+        },
+        {
+          id: 'marmitas-da-jo-simples-3',
+          ...makeMenuItem('Marmita Simples', 'R$ 15,99', '', require('./assets/restaurant-search-marmitas-ju-3.png')),
+        },
+      ],
+    }],
+  },
+  {
+    id: 'doce-abraco',
+    name: 'Doce Abraço',
+    verified: true,
+    image: require('./assets/search-result-store-doce-abraco.png'),
+    heroImage: require('./assets/restaurant-search-doce-abraco-1.png'),
+    searchCardImage: require('./assets/restaurant-result-doce-abraco.png'),
+    rating: '4,8 (452)',
+    deliveryTime: '40-50 min',
+    deliveryFee: 'R$ 5,99',
+    minimumOrder: 'R$ 5,99',
+    description: 'Doces preparados pela loja.',
+    foodSafety: UNCONFIRMED_FOOD_SAFETY,
+    filters: ['Todo Oullin', 'Perfil alimentar', 'doces', 'menor preço'],
+    features: [],
+    sections: [{
+      title: 'Doces',
+      items: [
+        {
+          id: 'doce-abraco-brigadeiros-fit',
+          ...makeMenuItem('Brigadeiros Fit', 'R$ 24,99', '', require('./assets/restaurant-search-doce-abraco-1.png')),
+        },
+        {
+          id: 'doce-abraco-fatia-bolo',
+          ...makeMenuItem('Fatia de bolo', 'R$ 15,99', '', require('./assets/restaurant-search-doce-abraco-2.png')),
+        },
+        {
+          id: 'doce-abraco-donuts',
+          ...makeMenuItem('Donuts', 'R$ 15,99', '', require('./assets/restaurant-search-doce-abraco-3.png')),
+        },
+      ],
+    }],
+  },
+  {
     id: 'saudavel-life',
     name: 'Saudável Life',
     verified: true,
@@ -332,6 +550,7 @@ export const RESTAURANT_DIRECTORY = [
     deliveryTime: '30–45 min',
     minimumOrder: 'R$ 25,00',
     description: 'Marmitas e refeições para a rotina.',
+    compatibilityText: '80% adequado com seu perfil\n(Sem glúten & Sem lactose)',
     foodSafety: {
       ...UNCONFIRMED_FOOD_SAFETY,
       equipment: 'Utensílios dedicados (cadastro demonstrativo; confirme com a loja)',
@@ -340,7 +559,6 @@ export const RESTAURANT_DIRECTORY = [
     features: [
       { type: 'utensils', label: 'Utensílios dedicados' },
       { type: 'ingredientCard', label: 'Dados de ingredientes' },
-      { type: 'utensils', label: 'Utensílios dedicados' },
     ],
     sections: [
       { title: 'Marmitas', items: RESTAURANT_MEALS },
@@ -563,6 +781,29 @@ function normalizeSearchTerm(value) {
     .trim();
 }
 
+function getDietaryTagColors(filter) {
+  const normalizedFilter = normalizeSearchTerm(filter);
+  if (normalizedFilter.includes('gluten')) {
+    return { backgroundColor: '#AEE59A', color: '#2F7537' };
+  }
+  if (normalizedFilter.includes('vegano')) {
+    return { backgroundColor: '#F4C7DF', color: '#B83278' };
+  }
+  if (normalizedFilter.includes('lactose') || normalizedFilter.includes('vegetariano')) {
+    return { backgroundColor: '#DDF1FF', color: '#2380A8' };
+  }
+  if (normalizedFilter.includes('sodio') || normalizedFilter.includes('baixo')) {
+    return { backgroundColor: '#FFB246', color: '#FFFFFF' };
+  }
+  if (normalizedFilter.includes('amendoim') || normalizedFilter.includes('castanha')) {
+    return { backgroundColor: '#BDE68A', color: '#3F7D2D' };
+  }
+  if (normalizedFilter.includes('contaminacao')) {
+    return { backgroundColor: '#EAEAEA', color: '#555555' };
+  }
+  return { backgroundColor: '#F4C7DF', color: '#B83278' };
+}
+
 export function getDietaryProfileRules(profileSelections = {}) {
   const restrictions = (profileSelections.restrictions || []).map(normalizeSearchTerm);
   const rules = [];
@@ -648,6 +889,7 @@ function FoodFeatureCard({ label, type, size }) {
 }
 
 export function FoodDetailsScreen({ item, onBack, onSelectItem, profileSelections = {}, screenWidth }) {
+  const [detailSearchQuery, setDetailSearchQuery] = useState('');
   const featureSize = Math.min(76, (screenWidth - 72) / 4);
   const cardWidth = Math.min(116, (screenWidth - 64) / 3);
   const recommendations = item.recommendations || RESTAURANT_MEALS;
@@ -662,24 +904,47 @@ export function FoodDetailsScreen({ item, onBack, onSelectItem, profileSelection
       normalizeSearchTerm(filter),
     ),
   );
+  const normalizedDetailQuery = normalizeSearchTerm(detailSearchQuery);
+  const visibleRecommendations = normalizedDetailQuery
+    ? recommendations.filter((recommendation) =>
+        normalizeSearchTerm([
+          recommendation.name,
+          recommendation.detailName,
+          recommendation.description,
+          ...(recommendation.filters || []),
+        ].filter(Boolean).join(' ')).includes(normalizedDetailQuery),
+      )
+    : recommendations;
 
   return (
     <View style={styles.foodDetailsScreen}>
-      <StatusBar barStyle="dark-content" backgroundColor={COLORS.white} />
       <ScrollView
         contentContainerStyle={styles.foodDetailsScroll}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.foodDetailsHeader}>
-          <Pressable
-            accessibilityLabel="Voltar"
-            accessibilityRole="button"
-            onPress={onBack}
-            style={styles.foodDetailsBackButton}
-          >
-            <Text style={styles.foodDetailsBackText}>‹</Text>
-          </Pressable>
-          <Text style={styles.foodDetailsTitle}>{item.detailName || item.name}</Text>
+          <View style={styles.foodDetailsSearchBox}>
+            <Text style={styles.searchIcon}>⌕</Text>
+            <TextInput
+              accessibilityLabel="Buscar produtos relacionados"
+              autoCapitalize="none"
+              onChangeText={setDetailSearchQuery}
+              placeholder="Peça na Oullin"
+              placeholderTextColor={COLORS.muted}
+              returnKeyType="search"
+              style={styles.foodDetailsSearchInput}
+              value={detailSearchQuery}
+            />
+            {!!detailSearchQuery && (
+              <Pressable
+                accessibilityLabel="Limpar busca de produtos"
+                accessibilityRole="button"
+                onPress={() => setDetailSearchQuery('')}
+              >
+                <Text style={styles.foodDetailsSearchClear}>×</Text>
+              </Pressable>
+            )}
+          </View>
         </View>
 
         <View style={styles.foodProductSummary}>
@@ -701,8 +966,21 @@ export function FoodDetailsScreen({ item, onBack, onSelectItem, profileSelection
         {!!productFilters.length && (
           <View style={styles.foodDetailsTags}>
             {productFilters.map((filter) => (
-              <View key={filter} style={styles.foodDetailTag}>
-                <Text style={styles.foodDetailTagText}>{filter}</Text>
+              <View
+                key={filter}
+                style={[
+                  styles.foodDetailTag,
+                  { backgroundColor: getDietaryTagColors(filter).backgroundColor },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.foodDetailTagText,
+                    { color: getDietaryTagColors(filter).color },
+                  ]}
+                >
+                  {filter}
+                </Text>
               </View>
             ))}
           </View>
@@ -743,7 +1021,7 @@ export function FoodDetailsScreen({ item, onBack, onSelectItem, profileSelection
           </View>
         )}
 
-        {!!recommendations.length && (
+        {!!visibleRecommendations.length && (
           <View style={styles.foodRecommendations}>
             <Text style={styles.foodRecommendationsTitle}>Seu perfil alimentar</Text>
             <ScrollView
@@ -751,8 +1029,8 @@ export function FoodDetailsScreen({ item, onBack, onSelectItem, profileSelection
               horizontal
               showsHorizontalScrollIndicator={false}
             >
-              {recommendations.map((recommendation) => (
-                <View key={recommendation.name} style={[styles.foodRecommendationCard, { width: cardWidth }]}>
+              {visibleRecommendations.map((recommendation) => (
+                <View key={recommendation.id || recommendation.name} style={[styles.foodRecommendationCard, { width: cardWidth }]}>
                   <Pressable
                     accessibilityLabel={`Ver ${recommendation.detailName || recommendation.name}`}
                     accessibilityRole="button"
@@ -799,15 +1077,9 @@ function RestaurantProductRow({ title, items, screenWidth, onSelectItem }) {
 
   return (
     <View style={styles.restaurantProductSection}>
-      <Text style={styles.restaurantSectionTitle}>{title}</Text>
-      <ScrollView
-        contentContainerStyle={styles.restaurantProducts}
-        horizontal
-        nestedScrollEnabled
-        showsHorizontalScrollIndicator={false}
-      >
+      <View style={styles.restaurantProductsGrid}>
         {items.map((item) => (
-          <View key={item.name} style={[styles.restaurantProduct, { width: cardWidth }]}>
+          <View key={item.id || item.name} style={[styles.restaurantProduct, { width: cardWidth }]}>
             <Pressable
               accessibilityLabel={`Ver ${item.detailName || item.name}`}
               accessibilityRole="button"
@@ -833,15 +1105,46 @@ function RestaurantProductRow({ title, items, screenWidth, onSelectItem }) {
             </Pressable>
           </View>
         ))}
-      </ScrollView>
+      </View>
     </View>
   );
 }
 
-export function RestaurantDetailScreen({ restaurant, screenWidth, onBack }) {
+export function RestaurantDetailScreen({ restaurant, screenWidth, onBack, onStatusBarBackgroundChange }) {
   const [selectedItem, setSelectedItem] = useState(null);
+  const [restaurantSearchQuery, setRestaurantSearchQuery] = useState('');
   const scrollRef = useRef(null);
   const recommendations = restaurant.sections.flatMap((section) => section.items);
+  const normalizedRestaurantQuery = normalizeSearchTerm(restaurantSearchQuery);
+  const filteredSections = normalizedRestaurantQuery
+    ? restaurant.sections.map((section) => ({
+        ...section,
+        items: section.items.filter((item) => {
+        const ingredients = Array.isArray(item.ingredients)
+          ? item.ingredients
+          : item.ingredients
+            ? [item.ingredients]
+            : [];
+        const searchValues = [
+            item.name,
+            item.detailName,
+            item.description,
+            item.category,
+            item.price,
+            ...(item.filters || []),
+          ...ingredients,
+            restaurant.name,
+            section.title,
+        ];
+        const haystack = normalizeSearchTerm(searchValues.filter(Boolean).join(' '));
+          return haystack.includes(normalizedRestaurantQuery);
+        }),
+      })).filter((section) => section.items.length > 0)
+    : restaurant.sections;
+
+  useEffect(() => {
+    onStatusBarBackgroundChange?.(selectedItem ? COLORS.white : COLORS.orange);
+  }, [onStatusBarBackgroundChange, selectedItem]);
 
   function selectProduct(item) {
     setSelectedItem({
@@ -870,7 +1173,6 @@ export function RestaurantDetailScreen({ restaurant, screenWidth, onBack }) {
 
   return (
     <View style={styles.restaurantScreen}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.orange} />
       <ScrollView
         ref={scrollRef}
         contentContainerStyle={styles.restaurantScroll}
@@ -885,17 +1187,28 @@ export function RestaurantDetailScreen({ restaurant, screenWidth, onBack }) {
           />
           <View style={styles.restaurantHeroShade} />
           <View style={styles.restaurantHeroHeader}>
-            <Pressable
-              accessibilityLabel="Voltar para resultados"
-              accessibilityRole="button"
-              onPress={onBack}
-              style={styles.restaurantBackButton}
-            >
-              <Text style={styles.restaurantBackText}>‹</Text>
-            </Pressable>
             <View style={styles.restaurantSearchBox}>
               <Text style={styles.searchIcon}>⌕</Text>
-              <Text style={styles.restaurantSearchText}>Peça na Oullin</Text>
+              <TextInput
+                accessibilityLabel={`Buscar no restaurante ${restaurant.name}`}
+                autoCapitalize="none"
+                onChangeText={setRestaurantSearchQuery}
+                placeholder="Peça na Oullin"
+                placeholderTextColor={COLORS.muted}
+                returnKeyType="search"
+                style={styles.restaurantSearchInput}
+                value={restaurantSearchQuery}
+              />
+              {!!restaurantSearchQuery && (
+                <Pressable
+                  accessibilityLabel="Limpar busca do restaurante"
+                  accessibilityRole="button"
+                  onPress={() => setRestaurantSearchQuery('')}
+                  style={styles.restaurantSearchClear}
+                >
+                  <Text style={styles.restaurantSearchClearText}>×</Text>
+                </Pressable>
+              )}
             </View>
           </View>
         </View>
@@ -911,36 +1224,42 @@ export function RestaurantDetailScreen({ restaurant, screenWidth, onBack }) {
               <View style={styles.restaurantNameRow}>
                 <Text style={styles.restaurantName}>{restaurant.name}</Text>
                 {restaurant.verified && (
-                  <Text style={styles.restaurantVerified}>✓</Text>
+                  <Image
+                    accessibilityLabel="Restaurante verificado"
+                    source={require('./assets/restaurant-verified.png')}
+                    style={styles.restaurantVerifiedIcon}
+                  />
                 )}
               </View>
-              <Text style={styles.restaurantRating}>★ {restaurant.rating}</Text>
-              <Text style={styles.restaurantMeta}>
-                ◷ {restaurant.deliveryTime}   ▱ Min. {restaurant.minimumOrder}
-              </Text>
-            </View>
-            <Text style={styles.restaurantArrow}>›</Text>
-          </View>
-          <Text style={styles.restaurantDescription}>{restaurant.description}</Text>
-
-          <View style={styles.restaurantFoodSafety}>
-            <Text style={styles.restaurantSectionTitle}>Glúten, lactose e preparo</Text>
-            {[
-              ['Sem glúten', restaurant.foodSafety.glutenFree],
-              ['Sem lactose', restaurant.foodSafety.lactoseFree],
-              ['Contaminação cruzada', restaurant.foodSafety.crossContamination],
-              ['Equipamentos e utensílios', restaurant.foodSafety.equipment],
-            ].map(([label, value]) => (
-              <View key={label} style={styles.restaurantFoodSafetyRow}>
-                <Text style={styles.restaurantFoodSafetyLabel}>{label}</Text>
-                <Text style={styles.restaurantFoodSafetyValue}>{value}</Text>
+              <View style={styles.restaurantRatingRow}>
+                <Image source={require('./assets/restaurant-star.png')} style={styles.restaurantMetaIcon} />
+                <Text style={styles.restaurantRating}> {restaurant.rating}</Text>
               </View>
-            ))}
-            <Text style={styles.restaurantFoodSafetyNote}>
-              Informações demonstrativas. Confirme ingredientes, equipamentos e risco de contaminação
-              cruzada diretamente com o restaurante antes de pedir.
-            </Text>
+              <View style={styles.restaurantMetaRow}>
+                <Image source={require('./assets/restaurant-clock.png')} style={styles.restaurantMetaIcon} />
+                <Text style={styles.restaurantMeta}>{restaurant.deliveryTime}</Text>
+                <Image source={require('./assets/restaurant-tag.png')} style={[styles.restaurantMetaIcon, styles.restaurantMetaIconSpaced]} />
+                <Text style={styles.restaurantMeta}>R$ 30,00</Text>
+                <Image source={require('./assets/restaurant-cart.png')} style={[styles.restaurantMetaIcon, styles.restaurantMetaIconSpaced]} />
+                <Text style={styles.restaurantMeta}>Min. {restaurant.minimumOrder}</Text>
+              </View>
+            </View>
+            <Image
+              accessibilityLabel="Abrir detalhes"
+              source={require('./assets/restaurant-arrow.png')}
+              style={styles.restaurantArrowIcon}
+            />
           </View>
+          {restaurant.compatibilityText ? (
+            <View style={styles.restaurantCompatibility}>
+              <View style={styles.restaurantCompatibilityIcon}>
+                <Text style={styles.restaurantCompatibilityCheck}>✓</Text>
+              </View>
+              <Text style={styles.restaurantCompatibilityText}>{restaurant.compatibilityText}</Text>
+            </View>
+          ) : (
+            <Text style={styles.restaurantDescription}>{restaurant.description}</Text>
+          )}
 
           <View style={styles.preparationSection}>
             <Text style={styles.restaurantSectionTitle}>
@@ -948,17 +1267,20 @@ export function RestaurantDetailScreen({ restaurant, screenWidth, onBack }) {
             </Text>
             <View style={styles.preparationFeatures}>
               {restaurant.features.map((feature, index) => (
-                <FoodFeatureCard
+                <View
                   key={`${feature.label}-${index}`}
-                  label={feature.label}
-                  size={76}
-                  type={feature.type}
-                />
+                  style={index === 0 ? styles.preparationFeatureSpacing : undefined}
+                >
+                  <FoodFeatureCard
+                    label={feature.label}
+                    size={76}
+                    type={feature.type}
+                  />
+                </View>
               ))}
             </View>
           </View>
         </View>
-
         <ScrollView
           contentContainerStyle={styles.restaurantFilters}
           horizontal
@@ -976,7 +1298,14 @@ export function RestaurantDetailScreen({ restaurant, screenWidth, onBack }) {
           ))}
         </ScrollView>
 
-        {restaurant.sections.map((section) => (
+        {normalizedRestaurantQuery && filteredSections.length === 0 && (
+          <View style={styles.restaurantSearchEmpty}>
+            <Text style={styles.restaurantSearchEmptyText}>
+              Nenhum item encontrado para "{restaurantSearchQuery}".
+            </Text>
+          </View>
+        )}
+        {filteredSections.map((section) => (
           <RestaurantProductRow
             key={section.title}
             items={section.items}
@@ -1075,41 +1404,282 @@ function MarmitaSearchResults({ items, onBack, onOpenRestaurant, onSelectFood })
   );
 }
 
-function RestaurantSearchResults({ restaurants, onSelectRestaurant }) {
-  return (
-    <ScrollView
-      contentContainerStyle={styles.mealResultsContent}
-      showsVerticalScrollIndicator={false}
-    >
-      <Text style={styles.mealResultsTitle}>Restaurantes encontrados</Text>
-      {restaurants.map((restaurant) => (
+function RestaurantSearchResultCard({ restaurant, onSelectFood, onSelectRestaurant, screenWidth }) {
+  const scale = screenWidth / 401;
+  const restaurantItems = restaurant.sections.flatMap((section) => section.items).slice(0, 3);
+
+  if (restaurant.searchCardImage) {
+    return (
+      <View
+        style={[
+          styles.restaurantSpriteResult,
+          {
+            height: 238 * scale,
+            marginBottom: 60 * scale,
+            width: screenWidth,
+          },
+        ]}
+      >
+        <Image
+          accessibilityLabel={`Restaurante ${restaurant.name}, nota ${restaurant.rating}, entrega ${restaurant.deliveryTime}, taxa ${restaurant.deliveryFee || restaurant.minimumOrder}. Produtos: ${restaurantItems.map((item) => `${item.name}, ${item.price}`).join('; ')}`}
+          resizeMode="stretch"
+          source={restaurant.searchCardImage}
+          style={StyleSheet.absoluteFillObject}
+        />
         <Pressable
           accessibilityLabel={`Ver restaurante ${restaurant.name}`}
           accessibilityRole="button"
-          key={restaurant.id}
           onPress={() => onSelectRestaurant(restaurant.id)}
-          style={styles.restaurantSearchResult}
-        >
-          <Image
-            accessibilityLabel={`Imagem de ${restaurant.name}`}
-            source={restaurant.image}
-            style={styles.mealStoreImage}
+          style={[
+            styles.restaurantSpriteHeaderButton,
+            { height: 58 * scale, width: screenWidth * 0.84 },
+          ]}
+        />
+        {restaurantItems.map((item, index) => (
+          <Pressable
+            accessibilityLabel={`Ver informações de ${item.name}`}
+            accessibilityRole="button"
+            key={item.id || item.name}
+            onPress={() => onSelectFood(restaurant, item)}
+            style={[
+              styles.restaurantSpriteProductButton,
+              {
+                height: 20 * scale,
+                left: (22 + index * 128) * scale,
+                top: 218 * scale,
+                width: 77 * scale,
+              },
+            ]}
           />
-          <View style={styles.mealStoreInfo}>
-            <Text style={styles.mealStoreName}>{restaurant.name}</Text>
-            <Text style={styles.mealStoreDetails}>
-              ★ {restaurant.rating}   {restaurant.deliveryTime}   Min. {restaurant.minimumOrder}
+        ))}
+      </View>
+    );
+  }
+
+  const cardWidth = Math.min(110, (screenWidth - 44) / 3);
+
+  return (
+    <View style={[styles.restaurantGenericResult, { marginBottom: 30 * scale }]}>
+      <View style={styles.restaurantGenericHeader}>
+        <Pressable
+          accessibilityLabel={`Ver restaurante ${restaurant.name}`}
+          accessibilityRole="button"
+          onPress={() => onSelectRestaurant(restaurant.id)}
+          style={styles.restaurantGenericStore}
+        >
+          <Image source={restaurant.image} style={styles.restaurantGenericLogo} />
+          <View style={styles.restaurantGenericStoreInfo}>
+            <Text numberOfLines={1} style={styles.restaurantGenericName}>
+              {restaurant.name}
+            </Text>
+            <Text numberOfLines={1} style={styles.restaurantGenericMetadata}>
+              {restaurant.rating}   {restaurant.deliveryTime}   {restaurant.deliveryFee || restaurant.minimumOrder}
             </Text>
           </View>
-          <Text style={styles.mealStoreArrow}>›</Text>
         </Pressable>
-      ))}
+        <Text style={styles.restaurantGenericFavorite}>♡</Text>
+      </View>
+      <ScrollView
+        contentContainerStyle={styles.restaurantGenericProducts}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+      >
+        {restaurantItems.map((item) => (
+          <View key={item.id || item.name} style={[styles.restaurantGenericProduct, { width: cardWidth }]}>
+            <Pressable
+              accessibilityLabel={`Ver ${item.detailName || item.name}`}
+              accessibilityRole="button"
+              onPress={() => onSelectFood(restaurant, item)}
+            >
+              <Image
+                accessibilityLabel={item.detailName || item.name}
+                resizeMode="cover"
+                source={item.image}
+                style={[styles.restaurantGenericProductImage, { height: cardWidth * 0.66 }]}
+              />
+              <Text style={styles.restaurantGenericProductPrice}>{item.price}</Text>
+              <Text numberOfLines={1} style={styles.restaurantGenericProductName}>
+                {item.name}
+              </Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => onSelectFood(restaurant, item)}
+              style={styles.mealInfoButton}
+            >
+              <Text style={styles.mealInfoButtonText}>Ver informações</Text>
+            </Pressable>
+          </View>
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
+
+function RestaurantSearchResults({ restaurants, onSelectRestaurant, onSelectFood, screenWidth }) {
+  const scale = screenWidth / 393;
+
+  return (
+    <ScrollView
+      contentContainerStyle={[
+        styles.restaurantSearchResultsContent,
+        {
+          paddingBottom: 24 * scale,
+          paddingTop: 18 * scale,
+        },
+      ]}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      <Text
+        style={[
+          styles.restaurantSearchHeading,
+          {
+            fontSize: 18 * scale,
+            lineHeight: 22 * scale,
+            marginBottom: 30 * scale,
+            paddingHorizontal: 24 * scale,
+          },
+        ]}
+      >
+        Opções encontradas
+      </Text>
+      {restaurants.length ? restaurants.map((restaurant) => (
+        <RestaurantSearchResultCard
+          key={restaurant.id}
+          onSelectFood={onSelectFood}
+          onSelectRestaurant={onSelectRestaurant}
+          restaurant={restaurant}
+          screenWidth={screenWidth}
+        />
+      )) : (
+        <Text style={[styles.productSearchEmpty, { fontSize: 13 * scale, paddingHorizontal: 24 * scale }]}>
+          Nenhum restaurante encontrado.
+        </Text>
+      )}
     </ScrollView>
   );
 }
 
-export default function SearchScreen({ profileSelections = {} }) {
+function ProductSearchResults({ items, screenWidth }) {
+  const scale = screenWidth / 393;
+
+  return (
+    <ScrollView
+      contentContainerStyle={[
+        styles.productSearchResultsContent,
+        {
+          paddingBottom: 24 * scale,
+          paddingHorizontal: 20 * scale,
+          paddingTop: 14 * scale,
+        },
+      ]}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
+      <Text
+        style={[
+          styles.productSearchHeading,
+          {
+            fontSize: 18 * scale,
+            lineHeight: 22 * scale,
+            marginBottom: 6 * scale,
+          },
+        ]}
+      >
+        Opções encontradas
+      </Text>
+      {items.length ? (
+        items.map((item) => (
+          <View
+            key={item.id}
+            style={[
+              styles.productSearchRow,
+              {
+                minHeight: 72 * scale,
+                paddingVertical: 8 * scale,
+              },
+            ]}
+          >
+            <View style={styles.productSearchText}>
+              <Text
+                numberOfLines={2}
+                style={[styles.productSearchName, { fontSize: 15 * scale, lineHeight: 18 * scale }]}
+              >
+                {item.name}
+              </Text>
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="clip"
+                style={[
+                  styles.productSearchRestaurant,
+                  {
+                    flexShrink: 1,
+                    fontSize: 10 * scale,
+                    lineHeight: 13 * scale,
+                    width: '100%',
+                  },
+                ]}
+              >
+                {item.restaurantLabel}
+              </Text>
+            </View>
+            <Image
+              accessibilityLabel={`Logo de ${item.restaurantName}`}
+              resizeMode="contain"
+              source={item.image}
+              style={[
+                styles.productSearchLogo,
+                {
+                  height: 30 * scale,
+                  marginLeft: 4 * scale,
+                  width: 32 * scale,
+                },
+              ]}
+            />
+          </View>
+        ))
+      ) : (
+        <Text style={[styles.productSearchEmpty, { fontSize: 13 * scale }]}>
+          Nenhum produto encontrado.
+        </Text>
+      )}
+    </ScrollView>
+  );
+}
+
+export default function SearchScreen({ profileSelections = {}, onStatusBarBackgroundChange }) {
   const { width: screenWidth } = useWindowDimensions();
+  const layoutWidth = Math.min(screenWidth, 430);
+  const isCompactScreen = layoutWidth <= 430;
+  const landingContentWidth = screenWidth * 568 / 608;
+  const profilePromotionWidth = Math.min(landingContentWidth, 568);
+  const profilePromotionCardWidth = Math.min(screenWidth * 255 / 608, 255);
+  const profilePromotionHeight = profilePromotionCardWidth * 263 / 181;
+  const profilePromotionImageWidth = profilePromotionHeight * 1173 / 263;
+  const profilePromotionPageImageWidth = profilePromotionImageWidth * 387 / 1173;
+  const bannerHeight = Math.min(screenWidth * 230 / 608, 230);
+  const bannerBadgeSize = Math.min(screenWidth * 28 / 608, 28);
+  const bannerTextFontSize = Math.min(screenWidth * 16 / 608, 16);
+  const categoryRowWidth = Math.min(screenWidth * 568 / 608, 568);
+  const categoryCircleSize = isCompactScreen
+    ? Math.min(screenWidth * 0.17, 68)
+    : Math.min(screenWidth * 92 / 608, 92);
+  const categoryGap = isCompactScreen
+    ? Math.max(12, (screenWidth - categoryCircleSize * 4 - 28) / 3)
+    : screenWidth * 56 / 608;
+  const categoryInset = isCompactScreen ? 14 : screenWidth * 14 / 608;
+  const profileSectionMarginTop = Math.min(screenWidth * 52 / 608, 52);
+  const profileSectionFontSize = Math.min(screenWidth * 30 / 608, 30);
+  const categoryMarginTop = Math.min(screenWidth * 112 / 608, 112);
+  const compactFilterWidths = {
+    'Todo Oullin': 68,
+    'Perfil alimentar': 88,
+    'restaurantes verificados': 118,
+    bebidas: 74,
+    região: 68,
+    'menor preço': 88,
+  };
   const [query, setQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedSearchFilter, setSelectedSearchFilter] = useState('Todo Oullin');
@@ -1119,6 +1689,9 @@ export default function SearchScreen({ profileSelections = {} }) {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
   const [showRestaurantFilter, setShowRestaurantFilter] = useState(false);
+  useEffect(() => {
+    onStatusBarBackgroundChange?.(selectedProduct ? COLORS.white : COLORS.orange);
+  }, [onStatusBarBackgroundChange, selectedProduct]);
   const profileRules = useMemo(() => getDietaryProfileRules(profileSelections), [profileSelections]);
   const compatibleMealItems = useMemo(
     () => filterMealsForProfile(MEAL_SEARCH_ITEMS, profileRules),
@@ -1130,6 +1703,12 @@ export default function SearchScreen({ profileSelections = {} }) {
   const showSearchFilters =
     searchOpen || query.trim().length > 0 || selectedSearchFilter !== 'Todo Oullin';
   const normalizedQuery = normalizeSearchTerm(query);
+  const visibleSearchResults = useMemo(
+    () => SEARCH_RESULT_PRODUCTS.filter((item) =>
+      normalizeSearchTerm(`${item.name} ${item.restaurantName}`).includes(normalizedQuery),
+    ),
+    [normalizedQuery],
+  );
   const matchingRestaurants = normalizedQuery
     ? RESTAURANT_DIRECTORY.filter((restaurant) =>
         normalizeSearchTerm(restaurant.name).includes(normalizedQuery),
@@ -1194,6 +1773,14 @@ export default function SearchScreen({ profileSelections = {} }) {
     Keyboard.dismiss();
   }
 
+  function openCategory(category) {
+    setSelectedCategory(category);
+    setQuery('');
+    setShowRestaurantFilter(false);
+    setSearchOpen(false);
+    Keyboard.dismiss();
+  }
+
   function selectSaudavelFood(item) {
     setSelectedProduct({
       ...item,
@@ -1201,6 +1788,17 @@ export default function SearchScreen({ profileSelections = {} }) {
       filters: item.filters || [],
       recommendations: compatibleMealItems.filter((meal) => meal.id !== item.id),
       restaurantName: saudavelLifeRestaurant.name,
+    });
+  }
+
+  function selectRestaurantFood(restaurant, item) {
+    const restaurantItems = restaurant.sections.flatMap((section) => section.items);
+    setSelectedProduct({
+      ...item,
+      features: restaurant.features || [],
+      filters: restaurant.filters || [],
+      recommendations: restaurantItems.filter((recommendation) => recommendation !== item),
+      restaurantName: restaurant.name,
     });
   }
 
@@ -1253,6 +1851,7 @@ export default function SearchScreen({ profileSelections = {} }) {
         onBack={() => {
           setSelectedRestaurantId(null);
         }}
+        onStatusBarBackgroundChange={onStatusBarBackgroundChange}
         restaurant={selectedRestaurant}
         screenWidth={screenWidth}
       />
@@ -1261,26 +1860,45 @@ export default function SearchScreen({ profileSelections = {} }) {
 
   return (
     <View style={styles.screen}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.orange} />
-      <View style={[styles.searchHeader, showSearchFilters && styles.searchHeaderExpanded]}>
-        <View style={styles.searchBox}>
+      <View
+        style={[
+          styles.searchHeader,
+          showSearchFilters && styles.searchHeaderExpanded,
+          {
+            paddingBottom: isCompactScreen ? 10 : screenWidth * 22 / 608,
+            paddingHorizontal: isCompactScreen ? 16 : screenWidth * (showSearchFilters ? 12 : 14) / 608,
+            paddingTop: isCompactScreen ? 48 : screenWidth * (showSearchFilters ? 85 : 97) / 608,
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.searchBox,
+            {
+              height: isCompactScreen ? 48 : screenWidth * (showSearchFilters ? 60 : 64) / 608,
+              paddingHorizontal: isCompactScreen ? 18 : screenWidth * 26 / 608,
+            },
+          ]}
+        >
           <Text style={styles.searchIcon}>⌕</Text>
           <TextInput
             accessibilityLabel="Buscar alimentos"
             autoCapitalize="none"
             onChangeText={(value) => {
               setQuery(value);
+              setSearchOpen(value.trim().length === 0);
+              if (value.trim()) setSelectedCategory('Todos');
               setShowRestaurantFilter(false);
             }}
             onFocus={() => {
-              setSearchOpen(true);
+              setSearchOpen(query.trim().length === 0);
               setShowRestaurantFilter(false);
             }}
             onSubmitEditing={() => submitSearch()}
-            placeholder="Peça na Oullin"
+            placeholder="Peça no oullin"
             placeholderTextColor={COLORS.muted}
             returnKeyType="search"
-            style={styles.searchInput}
+            style={[styles.searchInput, { fontSize: isCompactScreen ? 15 : Math.min(screenWidth * 16 / 608, 16) }]}
             value={query}
           />
           {!!query && (
@@ -1298,7 +1916,10 @@ export default function SearchScreen({ profileSelections = {} }) {
         </View>
         {showSearchFilters && (
           <ScrollView
-            contentContainerStyle={styles.searchFilters}
+            contentContainerStyle={[
+              styles.searchFilters,
+              isCompactScreen && styles.searchFiltersCompact,
+            ]}
             horizontal
             keyboardShouldPersistTaps="handled"
             showsHorizontalScrollIndicator={false}
@@ -1318,7 +1939,7 @@ export default function SearchScreen({ profileSelections = {} }) {
                     setShowRestaurantFilter(false);
                     Keyboard.dismiss();
 
-                    if (normalizedFilter === 'restaurantes' || normalizedFilter === 'regiao') {
+                    if (normalizedFilter.startsWith('restaurantes') || normalizedFilter === 'regiao') {
                       setSelectedCategory('Todos');
                       setShowRestaurantFilter(true);
                     } else if (normalizedFilter === 'perfil alimentar') {
@@ -1329,9 +1950,27 @@ export default function SearchScreen({ profileSelections = {} }) {
                       setSelectedCategory('Todos');
                     }
                   }}
-                  style={[styles.searchFilterChip, active && styles.searchFilterChipActive]}
+                  style={[
+                    styles.searchFilterChip,
+                    {
+                      height: isCompactScreen ? 30 : 22,
+                      marginRight: isCompactScreen ? 8 : screenWidth * 8 / 393,
+                      paddingHorizontal: isCompactScreen ? 12 : 0,
+                      width: isCompactScreen
+                        ? compactFilterWidths[filter]
+                        : screenWidth * SEARCH_FILTER_WIDTHS[filter] / 393,
+                    },
+                    active && styles.searchFilterChipActive,
+                  ]}
                 >
-                  <Text style={[styles.searchFilterText, active && styles.searchFilterTextActive]}>
+                  <Text
+                    numberOfLines={1}
+                    style={[
+                      styles.searchFilterText,
+                      isCompactScreen && styles.searchFilterTextCompact,
+                      active && styles.searchFilterTextActive,
+                    ]}
+                  >
                     {filter}
                   </Text>
                 </Pressable>
@@ -1344,13 +1983,16 @@ export default function SearchScreen({ profileSelections = {} }) {
       {showRestaurantFilter ? (
         <RestaurantSearchResults
           onSelectRestaurant={setSelectedRestaurantId}
-          restaurants={RESTAURANT_DIRECTORY}
+          onSelectFood={selectRestaurantFood}
+          restaurants={RESTAURANT_DIRECTORY.filter((restaurant) => restaurant.verified)}
+          screenWidth={screenWidth}
         />
       ) : searchOpen ? (
         <ScrollView
           contentContainerStyle={styles.searchLandingContent}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+          style={styles.homeLandingScroll}
         >
           <Text style={styles.searchSectionTitle}>Lojas recentes</Text>
           <ScrollView
@@ -1370,17 +2012,16 @@ export default function SearchScreen({ profileSelections = {} }) {
                 style={styles.recentStore}
               >
                 <Image source={store.image} style={styles.recentStoreCircle} />
-                <Text numberOfLines={1} style={styles.recentStoreLabel}>{store.name}</Text>
+              <Text
+                ellipsizeMode="tail"
+                numberOfLines={2}
+                style={styles.recentStoreLabel}
+              >
+                {store.label}
+              </Text>
               </Pressable>
             ))}
           </ScrollView>
-
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => setSelectedSearchFilter('Perfil alimentar')}
-          >
-            <Text style={styles.searchSectionTitle}>Seu perfil alimentar</Text>
-          </Pressable>
 
           <Text style={[styles.searchSectionTitle, styles.recentSearchHeading]}>
             Buscas recentes
@@ -1401,6 +2042,15 @@ export default function SearchScreen({ profileSelections = {} }) {
             <Text style={styles.noRecentSearches}>Nenhuma busca encontrada.</Text>
           )}
         </ScrollView>
+      ) : matchingRestaurants.length > 0 ? (
+        <RestaurantSearchResults
+          onSelectRestaurant={setSelectedRestaurantId}
+          onSelectFood={selectRestaurantFood}
+          restaurants={matchingRestaurants}
+          screenWidth={screenWidth}
+        />
+      ) : normalizedQuery && visibleSearchResults.length > 0 ? (
+        <ProductSearchResults items={visibleSearchResults} screenWidth={screenWidth} />
       ) : showSaudavelLife ? (
         <MarmitaSearchResults
           items={compatibleMealItems}
@@ -1411,26 +2061,36 @@ export default function SearchScreen({ profileSelections = {} }) {
           onOpenRestaurant={() => setSelectedRestaurantId('saudavel-life')}
           onSelectFood={selectSaudavelFood}
         />
-      ) : matchingRestaurants.length > 0 ? (
-        <RestaurantSearchResults
-          onSelectRestaurant={setSelectedRestaurantId}
-          restaurants={matchingRestaurants}
-        />
+      ) : normalizedQuery ? (
+        <ProductSearchResults items={visibleSearchResults} screenWidth={screenWidth} />
       ) : (
       <ScrollView
-        contentContainerStyle={styles.content}
+        key="search-landing"
+        contentContainerStyle={[
+          styles.homeLandingContent,
+          {
+            paddingHorizontal: screenWidth * 20 / 608,
+            paddingTop: screenWidth * 42 / 608,
+          },
+        ]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        style={[
+          styles.homeLandingScroll,
+          {
+            borderTopLeftRadius: screenWidth * 24 / 608,
+            borderTopRightRadius: screenWidth * 24 / 608,
+          },
+        ]}
       >
         <Pressable
           accessibilityRole="button"
-          onPress={() => {
-            setSelectedCategory('Marmitas');
-            setQuery('');
-            setSearchOpen(false);
-            Keyboard.dismiss();
-          }}
-          style={({ pressed }) => [styles.banner, pressed && styles.pressed]}
+          onPress={() => openCategory('Marmitas')}
+          style={({ pressed }) => [
+            styles.banner,
+            { height: bannerHeight },
+            pressed && styles.pressed,
+          ]}
         >
           <Image
             accessibilityLabel="Refeição fresca para sua rotina"
@@ -1439,94 +2099,193 @@ export default function SearchScreen({ profileSelections = {} }) {
             style={styles.bannerImage}
           />
           <View style={styles.bannerShade} />
-          <View style={styles.bannerCopy}>
-            <View style={styles.bannerBadge}>
-              <Image source={require('./assets/koala-icon.png')} style={styles.bannerKoala} />
-            </View>
-            <Text style={styles.bannerText}>Marmitas para sua rotina</Text>
+          <View
+            style={[
+              styles.bannerCopy,
+              {
+                left: screenWidth * 12 / 608,
+                top: screenWidth * 16 / 608,
+              },
+            ]}
+          >
+            <Image
+              accessibilityLabel="Mascote Oullin"
+              source={require('./assets/search-banner-mascot.png')}
+              style={[
+                styles.bannerBadge,
+                {
+                  height: bannerBadgeSize,
+                  marginRight: screenWidth * 16 / 608,
+                  width: bannerBadgeSize,
+                },
+              ]}
+            />
+            <Text style={[styles.bannerText, { fontSize: bannerTextFontSize }]}>
+              Marmitas para sua rotina
+            </Text>
           </View>
         </Pressable>
 
-        <Text style={styles.sectionTitle}>Explore o cardapio</Text>
-        <Text style={styles.categoryHeading}>Filtrar por categoria</Text>
-        <ScrollView
-          contentContainerStyle={styles.categoryList}
-          horizontal
-          showsHorizontalScrollIndicator={false}
+        <Text
+          style={[
+            styles.profileSectionTitle,
+            {
+              fontSize: profileSectionFontSize,
+              lineHeight: screenWidth * 36 / 608,
+              marginBottom: screenWidth * 36 / 608,
+              marginLeft: screenWidth * 12 / 608,
+              marginTop: profileSectionMarginTop,
+            },
+          ]}
         >
-          {FOOD_CATEGORIES.map((category) => {
-            const active = selectedCategory === category.label;
+          Seu perfil alimentar
+        </Text>
+        <View
+          style={[
+            styles.profilePromotionCarouselFrame,
+            { width: profilePromotionWidth, height: profilePromotionHeight },
+          ]}
+        >
+          <ScrollView
+            contentContainerStyle={styles.profilePromotionCarouselContent}
+            decelerationRate="fast"
+            disableIntervalMomentum
+            horizontal
+            nestedScrollEnabled
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            snapToAlignment="start"
+            style={[
+              styles.profilePromotionCarousel,
+              { width: profilePromotionWidth, height: profilePromotionHeight },
+            ]}
+          >
+            {HOME_PROFILE_PROMOTION_PAGES.map((page) => {
+              const imageOffset = page.start - 16;
+              return (
+                <View
+                  key={page.start}
+                  style={[
+                    styles.profilePromotionPage,
+                    { width: profilePromotionWidth, height: profilePromotionHeight },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.profilePromotionPageImage,
+                      { width: profilePromotionPageImageWidth, height: profilePromotionHeight },
+                    ]}
+                  >
+                    <Image
+                      accessibilityLabel="Promoções de hambúrguer, pizza, saladas, sushi, doces e massas"
+                      resizeMode="stretch"
+                      source={require('./assets/search-profile-promotions-carousel.png')}
+                      style={{
+                        height: profilePromotionHeight,
+                        left: -profilePromotionImageWidth * imageOffset / 1173,
+                        position: 'absolute',
+                        top: 0,
+                        width: profilePromotionImageWidth,
+                      }}
+                    />
+                    {page.promotions.map((promotion) => (
+                      <Pressable
+                        accessibilityLabel={`Ver opções de ${promotion.label}`}
+                        accessibilityRole="button"
+                        key={promotion.category}
+                        onPress={() => openCategory(promotion.category)}
+                        style={({ pressed }) => {
+                          const left = profilePromotionImageWidth *
+                            (promotion.start - imageOffset) / 1173;
+                          return [
+                            styles.profilePromotionHitArea,
+                            { left, width: profilePromotionImageWidth * 181 / 1173 },
+                            pressed && styles.pressed,
+                          ];
+                        }}
+                      />
+                    ))}
+                  </View>
+                </View>
+              );
+            })}
+          </ScrollView>
+        </View>
+
+        <ScrollView
+          contentContainerStyle={[
+            styles.categoryList,
+            {
+              paddingLeft: categoryInset,
+              paddingRight: categoryInset,
+            },
+          ]}
+          horizontal
+          nestedScrollEnabled
+          showsHorizontalScrollIndicator={false}
+          style={[
+            styles.categoryScroll,
+            {
+              width: categoryRowWidth,
+              height: categoryCircleSize,
+              marginTop: categoryMarginTop,
+            },
+          ]}
+        >
+          {FOOD_CATEGORIES.map((category, index) => {
+            const iconScale = 0.92;
+            const iconSize = categoryCircleSize * iconScale;
+            const iconInset = (categoryCircleSize - iconSize) / 2;
+
             return (
               <Pressable
+                accessibilityLabel={`Buscar ${category.label}`}
                 accessibilityRole="button"
-                accessibilityState={{ selected: active }}
+                accessibilityState={{ selected: selectedCategory === category.label }}
                 key={category.label}
-                onPress={() => {
-                  setSelectedCategory(category.label);
-                  setQuery('');
-                  setSearchOpen(false);
-                  setShowRestaurantFilter(false);
-                  Keyboard.dismiss();
-                }}
-                style={styles.categoryItem}
+                onPress={() => openCategory(category.label)}
+                style={[
+                  styles.categoryItem,
+                  {
+                    marginRight: index === FOOD_CATEGORIES.length - 1 ? 0 : categoryGap,
+                    width: categoryCircleSize,
+                  },
+                ]}
               >
-                <View style={[styles.categoryCircle, active && styles.categoryCircleActive]}>
+                <View
+                  style={[
+                    styles.categoryCircle,
+                    {
+                      borderRadius: categoryCircleSize / 2,
+                      height: categoryCircleSize,
+                      width: categoryCircleSize,
+                    },
+                    selectedCategory === category.label && styles.categoryCircleActive,
+                  ]}
+                >
                   <Image
-                    accessibilityLabel={category.label}
+                    resizeMode="stretch"
+                    source={category.background}
+                    style={[StyleSheet.absoluteFillObject, styles.categoryCircleBackground]}
+                  />
+                  <Image
+                    resizeMode={index < 4 ? 'contain' : 'cover'}
                     source={category.image}
-                    style={styles.categoryImage}
+                    style={{
+                      borderRadius: iconSize * 0.38,
+                      height: iconSize,
+                      left: iconInset,
+                      position: 'absolute',
+                      top: iconInset,
+                      width: iconSize,
+                      zIndex: 1,
+                    }}
                   />
                 </View>
-                <Text
-                  numberOfLines={1}
-                  style={[styles.categoryLabel, active && styles.categoryLabelActive]}
-                >
-                  {category.label}
-                </Text>
               </Pressable>
             );
           })}
         </ScrollView>
-        <View style={styles.foodHeading}>
-          <Text style={styles.foodSectionTitle}>O que você está com vontade?</Text>
-        </View>
-        <Text style={styles.foodCount}>
-          {visibleFoods.length} {visibleFoods.length === 1 ? 'item encontrado' : 'itens encontrados'}
-        </Text>
-        {visibleFoods.length ? (
-          <View style={styles.foodResultList}>
-            {visibleFoods.map((food) => (
-              <View key={food.id} style={styles.foodResultCard}>
-                <Image
-                  accessibilityLabel={food.name}
-                  resizeMode="cover"
-                  source={food.image}
-                  style={styles.foodResultImage}
-                />
-                <View style={styles.foodResultInfo}>
-                  <Text numberOfLines={2} style={styles.foodResultName}>{food.name}</Text>
-                  <Text style={styles.foodResultCategory}>{food.category}</Text>
-                  <Text style={styles.foodResultPrice}>
-                    {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(FOOD_CARD_PRICES[food.id])}
-                  </Text>
-                </View>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={`Ver loja para ${food.name}`}
-                  onPress={() => setSelectedRestaurantId(food.restaurantId)}
-                  style={({ pressed }) => [styles.foodStoreButton, pressed && styles.pressed]}
-                >
-                  <Text style={styles.foodStoreButtonText}>Ver loja</Text>
-                </Pressable>
-              </View>
-            ))}
-          </View>
-        ) : (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>Nenhum alimento encontrado</Text>
-            <Text style={styles.emptyText}>Tente outro nome ou escolha outra categoria.</Text>
-          </View>
-        )}
       </ScrollView>
       )}
     </View>
@@ -1540,17 +2299,13 @@ const styles = StyleSheet.create({
   },
   searchHeader: {
     backgroundColor: COLORS.orange,
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
     paddingBottom: 10,
-    paddingHorizontal: 14,
-    paddingTop: 4,
+    paddingHorizontal: 5,
+    paddingTop: 0,
   },
   searchHeaderExpanded: {
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
-    paddingBottom: 9,
-    paddingTop: 12,
   },
   headerTitle: {
     color: COLORS.white,
@@ -1561,21 +2316,20 @@ const styles = StyleSheet.create({
   searchBox: {
     alignItems: 'center',
     backgroundColor: COLORS.white,
-    borderRadius: 24,
+    borderRadius: 25,
     flexDirection: 'row',
-    height: 46,
-    paddingHorizontal: 14,
+    height: 40,
+    paddingHorizontal: 26,
   },
   searchIcon: {
     color: COLORS.orange,
-    fontSize: 23,
-    lineHeight: 27,
+    fontSize: 19,
+    lineHeight: 22,
     marginRight: 7,
   },
   searchInput: {
     color: COLORS.text,
     flex: 1,
-    fontSize: 14,
     height: '100%',
     paddingVertical: 0,
   },
@@ -1591,24 +2345,33 @@ const styles = StyleSheet.create({
   },
   searchFilters: {
     alignItems: 'center',
-    paddingTop: 12,
+    paddingTop: 10,
     paddingRight: 10,
+  },
+  searchFiltersCompact: {
+    alignItems: 'center',
+    minWidth: '100%',
   },
   searchFilterChip: {
     alignItems: 'center',
     backgroundColor: '#FFC477',
     borderRadius: 18,
-    height: 32,
+    height: 22,
     justifyContent: 'center',
-    marginRight: 8,
-    paddingHorizontal: 14,
+    paddingHorizontal: 0,
   },
   searchFilterChipActive: {
     backgroundColor: COLORS.white,
   },
   searchFilterText: {
     color: COLORS.text,
-    fontSize: 11,
+    fontSize: 8,
+    lineHeight: 9,
+    textAlign: 'center',
+  },
+  searchFilterTextCompact: {
+    fontSize: 9,
+    lineHeight: 11,
   },
   searchFilterTextActive: {
     fontWeight: '600',
@@ -1620,8 +2383,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     marginTop: -1,
     paddingBottom: 24,
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: 12,
+    paddingTop: 18,
   },
   searchSectionTitle: {
     color: COLORS.text,
@@ -1630,31 +2393,33 @@ const styles = StyleSheet.create({
     marginBottom: 11,
   },
   recentStores: {
+    paddingHorizontal: 2,
     paddingRight: 10,
   },
   recentStoresScroller: {
     flexGrow: 0,
     flexShrink: 0,
-    height: 86,
+    height: 102,
   },
   recentStore: {
     alignItems: 'center',
-    marginRight: 12,
-    width: 68,
+    marginRight: 8,
+    width: 84,
   },
   recentStoreCircle: {
     backgroundColor: '#D9D9D9',
-    borderRadius: 28,
-    height: 56,
+    borderRadius: 30,
+    height: 60,
     resizeMode: 'cover',
-    width: 56,
+    width: 60,
   },
   recentStoreLabel: {
     color: COLORS.text,
-    fontSize: 10,
+    fontSize: 9,
+    lineHeight: 11,
     marginTop: 6,
     textAlign: 'center',
-    width: 68,
+    width: 84,
   },
   recentSearchHeading: {
     marginBottom: 10,
@@ -1736,6 +2501,87 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingVertical: 12,
   },
+  restaurantSearchResultsContent: {
+    backgroundColor: COLORS.white,
+    flexGrow: 1,
+  },
+  restaurantSearchHeading: {
+    color: COLORS.text,
+    fontWeight: '700',
+  },
+  restaurantSpriteResult: {
+    position: 'relative',
+  },
+  restaurantSpriteHeaderButton: {
+    left: 0,
+    position: 'absolute',
+    top: 0,
+  },
+  restaurantSpriteProductButton: {
+    backgroundColor: 'transparent',
+    position: 'absolute',
+  },
+  restaurantGenericResult: {
+    backgroundColor: COLORS.white,
+  },
+  restaurantGenericHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginBottom: 14,
+    paddingHorizontal: 16,
+  },
+  restaurantGenericStore: {
+    alignItems: 'center',
+    flex: 1,
+    flexDirection: 'row',
+    minWidth: 0,
+  },
+  restaurantGenericLogo: {
+    borderRadius: 21,
+    height: 42,
+    width: 42,
+  },
+  restaurantGenericStoreInfo: {
+    flex: 1,
+    marginLeft: 9,
+    minWidth: 0,
+  },
+  restaurantGenericName: {
+    color: COLORS.text,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  restaurantGenericMetadata: {
+    color: COLORS.muted,
+    fontSize: 9,
+    marginTop: 4,
+  },
+  restaurantGenericFavorite: {
+    color: '#555555',
+    fontSize: 23,
+    lineHeight: 26,
+    marginLeft: 8,
+  },
+  restaurantGenericProducts: {
+    paddingHorizontal: 12,
+  },
+  restaurantGenericProduct: {
+    marginRight: 10,
+  },
+  restaurantGenericProductImage: {
+    borderRadius: 9,
+    width: '100%',
+  },
+  restaurantGenericProductPrice: {
+    color: COLORS.text,
+    fontSize: 10,
+    marginTop: 6,
+  },
+  restaurantGenericProductName: {
+    color: COLORS.text,
+    fontSize: 9,
+    marginTop: 2,
+  },
   mealFavoriteButton: {
     alignItems: 'center',
     height: 36,
@@ -1778,7 +2624,7 @@ const styles = StyleSheet.create({
   mealEmptyState: { backgroundColor: COLORS.white, borderRadius: 10, padding: 18 },
   mealInfoButton: {
     alignItems: 'center',
-    backgroundColor: '#D5262C',
+    backgroundColor: '#FF8500',
     borderRadius: 4,
     height: 21,
     justifyContent: 'center',
@@ -1791,7 +2637,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   restaurantScreen: {
-    backgroundColor: '#F3F3F5',
+    backgroundColor: COLORS.white,
     flex: 1,
   },
   restaurantScroll: {
@@ -1799,7 +2645,7 @@ const styles = StyleSheet.create({
   },
   restaurantHero: {
     backgroundColor: COLORS.text,
-    height: 190,
+    height: 210,
     overflow: 'hidden',
     position: 'relative',
   },
@@ -1815,8 +2661,11 @@ const styles = StyleSheet.create({
   restaurantHeroHeader: {
     alignItems: 'center',
     flexDirection: 'row',
-    paddingHorizontal: 10,
-    paddingTop: 12,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+    top: 58,
+    paddingHorizontal: 14,
   },
   restaurantBackButton: {
     alignItems: 'center',
@@ -1835,38 +2684,71 @@ const styles = StyleSheet.create({
   restaurantSearchBox: {
     alignItems: 'center',
     backgroundColor: COLORS.white,
-    borderRadius: 20,
+    borderColor: '#E8E8E8',
+    borderRadius: 24,
+    borderWidth: 1,
     flex: 1,
     flexDirection: 'row',
-    height: 40,
-    marginLeft: 8,
-    paddingHorizontal: 12,
+    height: 48,
+    marginLeft: 0,
+    paddingHorizontal: 16,
   },
   restaurantSearchText: {
     color: COLORS.muted,
     fontSize: 12,
   },
+  restaurantSearchInput: {
+    color: COLORS.text,
+    flex: 1,
+    fontSize: 14,
+    height: '100%',
+    paddingVertical: 0,
+  },
+  restaurantSearchClear: {
+    alignItems: 'center',
+    height: 30,
+    justifyContent: 'center',
+    width: 28,
+  },
+  restaurantSearchClearText: {
+    color: COLORS.muted,
+    fontSize: 20,
+  },
+  restaurantSearchEmpty: {
+    backgroundColor: COLORS.white,
+    paddingHorizontal: 16,
+    paddingVertical: 24,
+  },
+  restaurantSearchEmptyText: {
+    color: COLORS.muted,
+    fontSize: 13,
+  },
   restaurantInfo: {
-    backgroundColor: '#F3F3F5',
-    paddingBottom: 16,
+    backgroundColor: COLORS.white,
+    paddingBottom: 0,
   },
   restaurantInfoRow: {
     alignItems: 'center',
     flexDirection: 'row',
-    marginTop: -26,
-    paddingHorizontal: 16,
+    height: 148,
+    marginTop: -42,
+    paddingHorizontal: 12,
+    position: 'relative',
   },
   restaurantLogo: {
     borderColor: COLORS.white,
-    borderRadius: 34,
+    alignSelf: 'flex-start',
+    borderRadius: 42,
     borderWidth: 2,
-    height: 68,
-    width: 68,
+    height: 84,
+    resizeMode: 'cover',
+    width: 84,
   },
   restaurantInfoText: {
-    flex: 1,
-    marginLeft: 10,
-    paddingTop: 25,
+    left: 12,
+    position: 'absolute',
+    right: 34,
+    top: 96,
   },
   restaurantNameRow: {
     alignItems: 'center',
@@ -1874,7 +2756,8 @@ const styles = StyleSheet.create({
   },
   restaurantName: {
     color: COLORS.text,
-    fontSize: 15,
+    fontSize: 17,
+    lineHeight: 21,
     fontWeight: '700',
   },
   restaurantVerified: {
@@ -1890,15 +2773,41 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     width: 14,
   },
+  restaurantVerifiedIcon: {
+    height: 14,
+    marginLeft: 5,
+    resizeMode: 'contain',
+    width: 14,
+  },
+  restaurantRatingRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginTop: 2,
+  },
+  restaurantMetaRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    marginTop: 7,
+  },
+  restaurantMetaIcon: {
+    height: 14,
+    resizeMode: 'contain',
+    width: 14,
+  },
+  restaurantMetaIconSpaced: {
+    marginLeft: 8,
+  },
   restaurantRating: {
     color: COLORS.muted,
-    fontSize: 10,
-    marginTop: 3,
+    fontSize: 11,
+    lineHeight: 14,
+    marginTop: 1,
   },
   restaurantMeta: {
     color: COLORS.text,
-    fontSize: 9,
-    marginTop: 6,
+    fontSize: 11,
+    lineHeight: 15,
+    marginLeft: 3,
   },
   restaurantArrow: {
     color: COLORS.orange,
@@ -1906,12 +2815,51 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     paddingTop: 25,
   },
+  restaurantArrowIcon: {
+    height: 18,
+    position: 'absolute',
+    right: 12,
+    resizeMode: 'contain',
+    top: 94,
+    width: 18,
+  },
   restaurantDescription: {
     color: COLORS.text,
     fontSize: 12,
     lineHeight: 18,
     marginHorizontal: 16,
     marginTop: 12,
+  },
+  restaurantCompatibility: {
+    alignItems: 'center',
+    backgroundColor: '#CFF7BE',
+    borderRadius: 10,
+    flexDirection: 'row',
+    marginHorizontal: 12,
+    marginTop: 34,
+    minHeight: 52,
+    paddingHorizontal: 12,
+  },
+  restaurantCompatibilityIcon: {
+    alignItems: 'center',
+    backgroundColor: '#55D58A',
+    borderRadius: 17,
+    height: 34,
+    justifyContent: 'center',
+    marginRight: 14,
+    width: 34,
+  },
+  restaurantCompatibilityCheck: {
+    color: COLORS.white,
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  restaurantCompatibilityText: {
+    color: '#2E2E2E',
+    flex: 1,
+    fontSize: 11,
+    fontWeight: '600',
+    lineHeight: 15,
   },
   restaurantFoodSafety: {
     backgroundColor: '#FFFFFF',
@@ -1947,8 +2895,10 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   preparationSection: {
-    marginTop: 18,
-    paddingHorizontal: 16,
+    backgroundColor: COLORS.white,
+    marginTop: 46,
+    paddingBottom: 16,
+    paddingHorizontal: 12,
   },
   restaurantSectionTitle: {
     color: COLORS.text,
@@ -1956,10 +2906,13 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   preparationFeatures: {
-    alignItems: 'center',
+    alignItems: 'flex-start',
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
+    justifyContent: 'flex-start',
+    marginTop: 14,
+  },
+  preparationFeatureSpacing: {
+    marginRight: 10,
   },
   preparationFeature: {
     height: 76,
@@ -1967,8 +2920,8 @@ const styles = StyleSheet.create({
   },
   restaurantFilters: {
     backgroundColor: COLORS.white,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
   },
   restaurantFilter: {
     alignItems: 'center',
@@ -1993,16 +2946,20 @@ const styles = StyleSheet.create({
   },
   restaurantProductSection: {
     backgroundColor: COLORS.white,
-    marginTop: 10,
+    marginTop: 8,
     paddingBottom: 14,
-    paddingTop: 14,
-  },
-  restaurantProducts: {
+    paddingTop: 10,
     paddingHorizontal: 12,
+  },
+  restaurantProductsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
     paddingTop: 9,
   },
   restaurantProduct: {
-    marginRight: 10,
+    marginBottom: 12,
+    marginRight: 0,
   },
   restaurantProductImage: {
     borderRadius: 9,
@@ -2029,7 +2986,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     paddingHorizontal: 16,
-    paddingTop: 10,
+    paddingTop: 18,
+  },
+  foodDetailsSearchBox: {
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    borderColor: '#FF8500',
+    borderRadius: 24,
+    borderWidth: 1,
+    flexDirection: 'row',
+    height: 48,
+    paddingHorizontal: 16,
+    width: '100%',
+  },
+  foodDetailsSearchInput: {
+    color: COLORS.text,
+    flex: 1,
+    fontSize: 14,
+    height: '100%',
+    paddingVertical: 0,
+  },
+  foodDetailsSearchClear: {
+    color: COLORS.muted,
+    fontSize: 20,
   },
   foodDetailsBackButton: {
     alignItems: 'center',
@@ -2084,8 +3063,7 @@ const styles = StyleSheet.create({
   foodProfileNote: { color: COLORS.muted, fontSize: 10, lineHeight: 15, marginTop: 2, paddingHorizontal: 20 },
   foodDetailTag: {
     alignItems: 'center',
-    backgroundColor: '#EAEAEA',
-    borderRadius: 12,
+    borderRadius: 8,
     justifyContent: 'center',
     marginBottom: 6,
     marginRight: 6,
@@ -2235,7 +3213,7 @@ const styles = StyleSheet.create({
   },
   foodRecommendationButton: {
     alignItems: 'center',
-    backgroundColor: '#D5262C',
+    backgroundColor: '#FF8500',
     borderRadius: 5,
     justifyContent: 'center',
     marginTop: 8,
@@ -2251,9 +3229,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingTop: 12,
   },
+  homeLandingContent: {
+    backgroundColor: COLORS.white,
+    flexGrow: 1,
+    paddingBottom: 18,
+    paddingHorizontal: 0,
+    paddingTop: 0,
+  },
   banner: {
     borderRadius: 12,
-    height: 126,
     overflow: 'hidden',
     position: 'relative',
   },
@@ -2269,29 +3253,56 @@ const styles = StyleSheet.create({
   bannerCopy: {
     alignItems: 'center',
     flexDirection: 'row',
-    left: 10,
     position: 'absolute',
-    top: 10,
   },
   bannerBadge: {
-    alignItems: 'center',
-    backgroundColor: COLORS.white,
-    borderRadius: 12,
-    height: 25,
-    justifyContent: 'center',
-    marginRight: 6,
-    width: 25,
-  },
-  bannerKoala: {
-    height: 23,
-    width: 23,
+    height: 28,
+    width: 28,
+    marginRight: 16,
   },
   bannerText: {
     color: COLORS.white,
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: '700',
     textShadowColor: 'rgba(0,0,0,0.7)',
     textShadowRadius: 4,
+  },
+  profileSectionTitle: {
+    color: '#111111',
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 16,
+    marginTop: 45,
+  },
+  profilePromotionCarousel: {
+    flexGrow: 0,
+  },
+  profilePromotionCarouselFrame: {
+    overflow: 'hidden',
+  },
+  profilePromotionCarouselContent: {
+    alignItems: 'flex-start',
+  },
+  profilePromotionPage: {
+    alignItems: 'flex-start',
+  },
+  profilePromotionPageImage: {
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  homeLandingScroll: {
+    backgroundColor: COLORS.white,
+    flex: 1,
+    overflow: 'hidden',
+  },
+  profilePromotionHitArea: {
+    bottom: 0,
+    position: 'absolute',
+    top: 0,
+  },
+  categoryScroll: {
+    alignSelf: 'center',
+    flexGrow: 0,
   },
   sectionTitle: {
     color: COLORS.text,
@@ -2316,45 +3327,65 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   categoryList: {
-    paddingBottom: 8,
-    paddingRight: 8,
+    alignItems: 'center',
   },
   categoryItem: {
     alignItems: 'center',
-    marginRight: 13,
-    width: 64,
+    flexGrow: 0,
   },
   categoryCircle: {
-    backgroundColor: '#E5E5E5',
+    alignItems: 'center',
+    backgroundColor: COLORS.orange,
     borderColor: 'transparent',
-    borderRadius: 28,
-    borderWidth: 2,
+    borderWidth: 0,
     height: 56,
+    justifyContent: 'center',
     overflow: 'hidden',
     width: 56,
   },
+  categoryCircleBackground: {
+    zIndex: 0,
+  },
   categoryCircleActive: {
-    backgroundColor: '#FFF2DF',
     borderColor: COLORS.orange,
-  },
-  categoryImage: {
-    height: '100%',
-    width: '100%',
-  },
-  categoryLabel: {
-    color: COLORS.muted,
-    fontSize: 9,
-    marginTop: 5,
-    textAlign: 'center',
-  },
-  categoryLabelActive: {
-    color: COLORS.text,
-    fontWeight: '700',
+    borderWidth: 2,
   },
   foodHeading: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
+  },
+  productSearchResultsContent: {
+    backgroundColor: COLORS.white,
+    flexGrow: 1,
+  },
+  productSearchHeading: {
+    color: COLORS.text,
+    fontWeight: '700',
+  },
+  productSearchRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  productSearchText: {
+    flex: 1,
+    minWidth: 0,
+  },
+  productSearchName: {
+    color: COLORS.text,
+    fontWeight: '400',
+  },
+  productSearchRestaurant: {
+    color: COLORS.muted,
+    marginTop: 2,
+    minWidth: 0,
+    overflow: 'visible',
+  },
+  productSearchLogo: {
+    flexShrink: 0,
+  },
+  productSearchEmpty: {
+    color: COLORS.muted,
   },
   foodCount: {
     alignSelf: 'flex-start',

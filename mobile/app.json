@@ -3,6 +3,12 @@
     "name": "Oullin",
     "slug": "oullin",
     "version": "1.0.0",
+    "experiments": {
+      "baseUrl": "/Oullin---Frontend"
+    },
+    "web": {
+      "bundler": "metro"
+    },
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "splash": {
@@ -14,6 +20,14 @@
         "expo-location",
         {
           "locationWhenInUsePermission": "Permitir que o Oullin use sua localização para cadastrar o endereço de entrega."
+        }
+      ],
+      [
+        "expo-navigation-bar",
+        {
+          "enforceContrast": false,
+          "hidden": true,
+          "style": "dark"
         }
       ]
     ],

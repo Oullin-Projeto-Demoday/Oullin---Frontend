@@ -25,9 +25,8 @@ const COLORS = {
 };
 
 const LOGO = require('./assets/oullin-logo-cropped.png');
-const MASCOT = require('./assets/mascote-email.png');
 const NAME_MASCOT = require('./assets/mascote-name.png');
-const WELCOME_BACKGROUND = require('./assets/welcome-background.png');
+const WELCOME_BACKGROUND = require('./assets/email-delivery.png');
 const FACEBOOK_ICON = require('./assets/facebook-icon.png');
 const GOOGLE_ICON = require('./assets/google-icon.png');
 
@@ -187,7 +186,6 @@ function EmailScreen({ email, onChangeEmail, onBack, onContinue }) {
           {!!error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
         </View>
         <View style={styles.formActions}>
-          <Image source={MASCOT} style={styles.cornerMascot} resizeMode="contain" />
           <Pressable accessibilityRole="button" onPress={onBack} style={styles.backButton}>
             <Text style={styles.backArrow}>←</Text>
           </Pressable>
@@ -502,7 +500,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   input: {
-    borderColor: COLORS.border,
+    borderColor: Platform.select({ web: '#0D4889', default: COLORS.border }),
     borderRadius: 10,
     borderWidth: 1,
     fontSize: 15,
@@ -528,13 +526,6 @@ const styles = StyleSheet.create({
     height: 100,
     justifyContent: 'space-between',
     marginBottom: 6,
-  },
-  cornerMascot: {
-    bottom: 130,
-    height: 90,
-    left: -44,
-    position: 'absolute',
-    width: 117,
   },
   backButton: {
     alignItems: 'center',

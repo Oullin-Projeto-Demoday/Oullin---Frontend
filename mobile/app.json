@@ -7,7 +7,19 @@
       "baseUrl": "/Oullin---Frontend"
     },
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "favicon": "./public/favicon.png",
+      "name": "Oullin",
+      "shortName": "Oullin",
+      "description": "Mais segurança no prato.",
+      "themeColor": "#FF8500",
+      "backgroundColor": "#FFFDF9",
+      "display": "standalone",
+      "orientation": "portrait",
+      "startUrl": "/",
+      "scope": "/",
+      "dir": "ltr",
+      "lang": "pt-BR"
     },
     "orientation": "portrait",
     "userInterfaceStyle": "light",

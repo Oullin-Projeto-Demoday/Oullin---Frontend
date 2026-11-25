@@ -272,11 +272,6 @@ function AddressEditor({ address, onCancel, onSave }) {
             value={form.street || ''}
           />
           <AddressFormField
-            label="Número"
-            onChangeText={(value) => updateField('number', value)}
-            value={form.number || ''}
-          />
-          <AddressFormField
             autoCapitalize="words"
             label="Bairro"
             onChangeText={(value) => updateField('neighborhood', value)}
@@ -462,20 +457,11 @@ function AddressDetailsScreen({ address, onBack, onSave, onAdjustMap }) {
           {[form.neighborhood, form.city, form.state].filter(Boolean).join(', ')}
         </Text>
         {!!form.postalCode && <Text style={styles.confirmationSubtitle}>CEP {form.postalCode}</Text>}
-        {!form.number && (
-          <TextInput
-            keyboardType="number-pad"
-            onChangeText={(number) => setForm((value) => ({ ...value, number }))}
-            placeholder="Número"
-            style={styles.detailsInput}
-            value={form.number || ''}
-          />
-        )}
         <TextInput
           editable={!noComplement}
           onChangeText={(complement) => setForm((value) => ({ ...value, complement }))}
           placeholder="Complemento"
-          style={[styles.detailsInput, !form.number && styles.detailsInputFollowingNumber]}
+          style={styles.detailsInput}
           value={noComplement ? '' : form.complement || ''}
         />
         <Pressable
@@ -945,9 +931,7 @@ export default function AddressScreen({
         ? {
             ...pendingAddress,
             street: place.street || place.name || pendingAddress.street,
-            number: pendingAddress.number || (
-              pendingAddress.numberNeedsConfirmation ? '' : place.number
-            ),
+            number: pendingAddress.number || pendingAddress.requestedNumber || place.number,
             neighborhood: place.neighborhood || pendingAddress.neighborhood,
             city: place.city || pendingAddress.city,
             state: place.state || pendingAddress.state,
@@ -1002,6 +986,47 @@ export default function AddressScreen({
   async function useCurrentLocation() {
     setLocationLoading(true);
     try {
+      if (Platform.OS === 'web') {
+        if (!navigator.geolocation) {
+          throw new Error('Este navegador não fornece acesso à localização.');
+        }
+
+        const position = await new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(
+            resolve,
+            (error) => {
+              if (error?.code === 1) {
+                reject(new Error('Permita o acesso à localização no navegador para continuar.'));
+              } else {
+                reject(new Error('Não foi possível obter sua localização atual.'));
+              }
+            },
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 },
+          );
+        });
+        const coordinates = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        };
+        const place = await reverseNominatimAddress(coordinates);
+        if (!place) {
+          throw new Error('Não foi possível encontrar um endereço para esta localização.');
+        }
+
+        const newAddress = {
+          id: `address-${Date.now()}`,
+          street: place.street || place.name || 'Minha localização atual',
+          number: place.number || '',
+          neighborhood: place.neighborhood || '',
+          city: place.city || '',
+          state: place.state || '',
+          reference: 'Adicionado pela localização atual',
+          coordinates,
+        };
+        setPendingAddress(newAddress);
+        return;
+      }
+
       let permission = await Location.getForegroundPermissionsAsync();
       if (permission.status !== 'granted' && permission.canAskAgain) {
         permission = await Location.requestForegroundPermissionsAsync();
@@ -1280,14 +1305,12 @@ const styles = StyleSheet.create({
   detailsMarkerPin: {
     alignItems: 'center',
     backgroundColor: COLORS.orange,
-    borderColor: COLORS.white,
-    borderRadius: 14,
-    borderBottomLeftRadius: 3,
-    borderWidth: 2,
-    height: 28,
+    borderRadius: 12,
+    borderBottomRightRadius: 2,
+    height: 24,
     justifyContent: 'center',
     transform: [{ rotate: '45deg' }],
-    width: 28,
+    width: 24,
   },
   adjustPointerButton: {
     backgroundColor: COLORS.orange,
@@ -1313,11 +1336,8 @@ const styles = StyleSheet.create({
     color: COLORS.text,
     fontSize: 12,
     height: 38,
-    marginTop: 41,
+    marginTop: 22,
     paddingHorizontal: 11,
-  },
-  detailsInputFollowingNumber: {
-    marginTop: 12,
   },
   detailsCheckRow: {
     alignItems: 'center',
@@ -1532,24 +1552,20 @@ const styles = StyleSheet.create({
   mapMarker: {
     alignItems: 'center',
     backgroundColor: '#F07800',
-    borderColor: COLORS.white,
-    borderBottomLeftRadius: 3,
-    borderBottomRightRadius: 17,
-    borderTopLeftRadius: 17,
-    borderTopRightRadius: 17,
-    borderWidth: 2,
-    height: 34,
+    borderRadius: 12,
+    borderBottomRightRadius: 2,
+    height: 24,
     justifyContent: 'center',
-    marginTop: -30,
+    marginTop: -17,
     transform: [{ rotate: '45deg' }],
-    width: 34,
+    width: 24,
   },
   mapMarkerDot: {
     backgroundColor: COLORS.white,
     borderRadius: 5,
-    height: 10,
+    height: 8,
     transform: [{ rotate: '-45deg' }],
-    width: 10,
+    width: 8,
   },
   mapMoveHint: {
     backgroundColor: 'rgba(255,255,255,0.94)',

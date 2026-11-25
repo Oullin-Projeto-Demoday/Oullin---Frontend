@@ -218,42 +218,58 @@ function SelectionField({ question, selected, onToggle }) {
   );
 }
 
-function TabIcon({ label, active }) {
+function TabIcon({ label, active, compact = false }) {
   if (label === 'Início') {
     return (
-      <View style={styles.koalaBadge}>
+      <View style={[styles.koalaBadge, compact && styles.compactKoalaBadge]}>
         <Image
           accessibilityLabel="Coala"
           resizeMode="contain"
           source={require('./assets/nav-koala.png')}
-          style={styles.koalaIcon}
+          style={[styles.koalaIcon, compact && styles.compactKoalaIcon]}
         />
       </View>
     );
   }
 
-  const iconStyle = [styles.tabIconShape, active && styles.activeTabIconShape];
+  const iconStyle = [
+    styles.tabIconShape,
+    compact && styles.compactTabIconShape,
+    active && styles.activeTabIconShape,
+  ];
   if (label === 'Buscar') {
     return (
-      <View style={styles.searchIcon}>
+      <View style={[styles.searchIcon, compact && styles.compactSearchIcon]}>
         <View style={iconStyle} />
-        <View style={[styles.searchHandle, active && styles.activeSearchHandle]} />
+        <View
+          style={[
+            styles.searchHandle,
+            compact && styles.compactSearchHandle,
+            active && styles.activeSearchHandle,
+          ]}
+        />
       </View>
     );
   }
   if (label === 'Pedidos') {
     return (
-      <View style={[styles.receiptIcon, active && styles.activeReceiptIcon]}>
-        <View style={[styles.receiptLine, active && styles.activeReceiptLine]} />
-        <View style={[styles.receiptLine, active && styles.activeReceiptLine]} />
-        <View style={[styles.receiptLine, active && styles.activeReceiptLine]} />
+      <View
+        style={[
+          styles.receiptIcon,
+          compact && styles.compactReceiptIcon,
+          active && styles.activeReceiptIcon,
+        ]}
+      >
+        <View style={[styles.receiptLine, compact && styles.compactReceiptLine, active && styles.activeReceiptLine]} />
+        <View style={[styles.receiptLine, compact && styles.compactReceiptLine, active && styles.activeReceiptLine]} />
+        <View style={[styles.receiptLine, compact && styles.compactReceiptLine, active && styles.activeReceiptLine]} />
       </View>
     );
   }
   return (
-    <View style={styles.profileIcon}>
-      <View style={[styles.profileHead, active && styles.activeProfileIcon]} />
-      <View style={[styles.profileBody, active && styles.activeProfileIcon]} />
+    <View style={[styles.profileIcon, compact && styles.compactProfileIcon]}>
+      <View style={[styles.profileHead, compact && styles.compactProfileHead, active && styles.activeProfileIcon]} />
+      <View style={[styles.profileBody, compact && styles.compactProfileBody, active && styles.activeProfileIcon]} />
     </View>
   );
 }
@@ -308,12 +324,16 @@ function PreferencesScreen({ onBack, onContinue, selections, setSelections }) {
   );
 }
 
-function BottomNavigation({ activeTab, onSelectTab, bottomInset }) {
+function BottomNavigation({ activeTab, onSelectTab, bottomInset, compact = false }) {
+  const compactWebNavigation = compact && Platform.OS === 'web';
+  const displayedActiveTab = compactWebNavigation ? 'Pedidos' : activeTab;
+
   return (
     <View
       style={[
         styles.bottomNav,
-        { paddingBottom: Math.max(bottomInset + 6, 14) },
+        compactWebNavigation && styles.compactBottomNav,
+        { paddingBottom: compactWebNavigation ? 2 : Math.max(bottomInset + 6, 14) },
       ]}
     >
       {[
@@ -322,17 +342,29 @@ function BottomNavigation({ activeTab, onSelectTab, bottomInset }) {
         { label: 'Pedidos' },
         { label: 'Perfil' },
       ].map((tab) => {
-        const active = activeTab === tab.label;
+        const active = displayedActiveTab === tab.label;
         return (
           <Pressable
             accessibilityRole="button"
             accessibilityState={{ selected: active }}
             key={tab.label}
             onPress={() => onSelectTab(tab.label)}
-            style={styles.tab}
+            hitSlop={compactWebNavigation ? { top: 6, bottom: 6 } : undefined}
+            style={[styles.tab, compactWebNavigation && styles.compactTab]}
           >
-            <TabIcon active={active} label={tab.label} />
-            <Text style={[styles.tabLabel, active && styles.activeTabText]}>{tab.label}</Text>
+            <TabIcon active={active} compact={compactWebNavigation} label={tab.label} />
+            <Text
+              style={[
+                styles.tabLabel,
+                compactWebNavigation && styles.compactTabLabel,
+                active && styles.activeTabText,
+              ]}
+            >
+              {tab.label}
+            </Text>
+            {compactWebNavigation && active && (
+              <View style={styles.compactActiveTabIndicator} />
+            )}
           </Pressable>
         );
       })}
@@ -370,6 +402,7 @@ function AppContent() {
   const [cartItems, setCartItems] = useState(INITIAL_CART_ITEMS);
   const [profileSetupComplete, setProfileSetupComplete] = useState(false);
   const [searchStatusBarBackground, setSearchStatusBarBackground] = useState('#FF8500');
+  const [compactSearchNavigation, setCompactSearchNavigation] = useState(false);
   const currentRoute = routeStack[routeStack.length - 1];
   const statusBarBackground = currentRoute === ROUTES.search
     ? searchStatusBarBackground
@@ -466,6 +499,7 @@ function AppContent() {
           </View>
         ) : currentRoute === ROUTES.search ? (
           <SearchScreen
+            onCompactNavigationChange={setCompactSearchNavigation}
             onStatusBarBackgroundChange={setSearchStatusBarBackground}
             profileSelections={selections}
           />
@@ -505,6 +539,7 @@ function AppContent() {
       <BottomNavigation
         activeTab={activeTab}
         bottomInset={insets.bottom}
+        compact={compactSearchNavigation}
         onSelectTab={(tab) => resetNavigation(TAB_ROUTES[tab])}
       />
     </SafeAreaView>
@@ -512,6 +547,69 @@ function AppContent() {
 }
 
 export default function App() {
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined' || typeof document === 'undefined') {
+      return undefined;
+    }
+
+    const ensureLink = (rel, href, extra = {}) => {
+      let link = document.querySelector(`link[rel="${rel}"]`);
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = rel;
+        document.head.appendChild(link);
+      }
+      link.href = href;
+      Object.entries(extra).forEach(([name, value]) => link.setAttribute(name, value));
+    };
+
+    ensureLink('manifest', './manifest.webmanifest');
+    ensureLink('icon', './favicon.png', { type: 'image/png', sizes: '64x64' });
+    ensureLink('apple-touch-icon', './icon-192.png', { sizes: '192x192' });
+
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (viewport) {
+      viewport.setAttribute(
+        'content',
+        'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=5, viewport-fit=cover',
+      );
+    }
+
+    let themeColor = document.querySelector('meta[name="theme-color"]');
+    if (!themeColor) {
+      themeColor = document.createElement('meta');
+      themeColor.name = 'theme-color';
+      document.head.appendChild(themeColor);
+    }
+    themeColor.content = '#FF8500';
+
+    let appleCapable = document.querySelector('meta[name="apple-mobile-web-app-capable"]');
+    if (!appleCapable) {
+      appleCapable = document.createElement('meta');
+      appleCapable.name = 'apple-mobile-web-app-capable';
+      document.head.appendChild(appleCapable);
+    }
+    appleCapable.content = 'yes';
+
+    let appleStatusBar = document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]');
+    if (!appleStatusBar) {
+      appleStatusBar = document.createElement('meta');
+      appleStatusBar.name = 'apple-mobile-web-app-status-bar-style';
+      document.head.appendChild(appleStatusBar);
+    }
+    appleStatusBar.content = 'default';
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((error) => {
+          console.error('Não foi possível ativar a PWA do Oullin.', error);
+        });
+      });
+    }
+
+    return undefined;
+  }, []);
+
   return (
     <SafeAreaProvider>
       {Platform.OS === 'android' && <NavigationBar hidden style="dark" />}
@@ -719,10 +817,81 @@ const styles = StyleSheet.create({
     minHeight: 68,
     paddingTop: 6,
   },
+  compactBottomNav: {
+    backgroundColor: '#0D4889',
+    minHeight: 0,
+    paddingTop: 1,
+  },
   tab: {
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center',
+  },
+  compactTab: {
+    paddingVertical: 0,
+  },
+  compactKoalaBadge: {
+    height: 14,
+    width: 26,
+  },
+  compactKoalaIcon: {
+    height: 14,
+    width: 26,
+  },
+  compactSearchIcon: {
+    height: 14,
+    width: 14,
+  },
+  compactTabIconShape: {
+    borderRadius: 6,
+    borderWidth: 1,
+    height: 9,
+    width: 9,
+  },
+  compactSearchHandle: {
+    height: 1,
+    left: 9,
+    top: 9,
+    width: 5,
+  },
+  compactReceiptIcon: {
+    borderRadius: 2,
+    borderWidth: 1,
+    height: 14,
+    paddingHorizontal: 1,
+    width: 11,
+  },
+  compactReceiptLine: {
+    height: 1,
+    width: 5,
+  },
+  compactProfileIcon: {
+    height: 14,
+    width: 14,
+  },
+  compactProfileHead: {
+    borderRadius: 3,
+    borderWidth: 1,
+    height: 5,
+    marginBottom: 1,
+    width: 5,
+  },
+  compactProfileBody: {
+    borderWidth: 1,
+    height: 6,
+    width: 11,
+  },
+  compactTabLabel: {
+    fontSize: 6,
+    lineHeight: 7,
+    marginTop: 1,
+  },
+  compactActiveTabIndicator: {
+    backgroundColor: COLORS.amber,
+    borderRadius: 1,
+    height: 1.5,
+    marginTop: 1,
+    width: 10,
   },
   koalaBadge: {
     alignItems: 'center',

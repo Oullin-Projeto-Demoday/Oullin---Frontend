@@ -17,6 +17,8 @@ import {
   filterMealsForProfile,
   FoodDetailsScreen,
   getDietaryProfileRules,
+  RESTAURANT_DIRECTORY,
+  RestaurantDetailScreen,
 } from './SearchScreen';
 
 const COLORS = {
@@ -56,10 +58,9 @@ const PROMOTIONS = [
 ];
 
 const HOME_FOOD_FEATURES = [
-  { type: 'utensils', label: 'Utensílios usados' },
-  { type: 'ingredientCard', label: 'Ingredientes' },
+  { type: 'utensils', label: 'Utensílios dedicados' },
+  { type: 'ingredientCard', label: 'Ingredientes utilizados' },
   { type: 'nutrition', label: 'Ficha nutricional' },
-  { type: 'certificate', label: 'Dados do vendedor' },
 ];
 
 const HOME_FOOD_DETAILS = {
@@ -149,6 +150,29 @@ const HOME_FOOD_DETAILS = {
   },
 };
 
+function getHomeFoodDetails(food, profileRules) {
+  const foodDetails = HOME_FOOD_DETAILS[food.name] || HOME_FOOD_DETAILS[food.detailName] || {};
+  const recommendations = filterMealsForProfile(
+    FOODS
+      .filter((candidate) => candidate.name !== food.name)
+      .map((candidate) => ({
+        ...candidate,
+        ...HOME_FOOD_DETAILS[candidate.name],
+      })),
+    profileRules,
+  );
+
+  return {
+    ...food,
+    ...foodDetails,
+    description: foodDetails.description || food.detail,
+    features: HOME_FOOD_FEATURES,
+    name: food.detailName || food.name,
+    recommendations,
+    restaurantName: food.seller || food.restaurantName,
+  };
+}
+
 const RECOMMENDED_RESTAURANTS = [
   { id: 'subway', name: 'Subway', image: require('./assets/subway-logo.png') },
   { id: 'carolli-fit', name: 'Carólli Fit', image: require('./assets/carolli-fit-logo.png') },
@@ -174,6 +198,29 @@ const RECOMMENDATION_FILTERS = [
   { label: 'Entrega Rápida', width: 116 },
   { label: 'Em Promoção', width: 116 },
 ];
+
+function getHomeRestaurantDetails(restaurant) {
+  const registeredRestaurant = RESTAURANT_DIRECTORY.find(
+    (candidate) =>
+      candidate.id === restaurant.id ||
+      candidate.name.toLocaleLowerCase('pt-BR') === restaurant.name.toLocaleLowerCase('pt-BR'),
+  );
+  if (registeredRestaurant) return registeredRestaurant;
+
+  return {
+    id: restaurant.id,
+    name: restaurant.name,
+    image: restaurant.image,
+    heroImage: restaurant.image,
+    rating: restaurant.rating || '4,8 (452)',
+    deliveryTime: 'A confirmar',
+    minimumOrder: 'A confirmar',
+    description: 'Cardápio e dados de entrega ainda não cadastrados.',
+    filters: ['Todo Oullin', 'Perfil alimentar', restaurant.category || 'Restaurantes'],
+    features: [],
+    sections: [],
+  };
+}
 
 export function RegistrationCompleteScreen({ onFinish }) {
   const dotOne = useRef(new Animated.Value(0.35)).current;
@@ -286,9 +333,14 @@ function FoodCard({ food, onPress }) {
   );
 }
 
-function RecommendedRestaurantCard({ restaurant, showDivider = true }) {
+function RecommendedRestaurantCard({ restaurant, onPress, showDivider = true }) {
   return (
-    <View style={styles.recommendedRestaurantCard}>
+    <Pressable
+      accessibilityLabel={`Ver restaurante ${restaurant.name}`}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={styles.recommendedRestaurantCard}
+    >
       <Image source={restaurant.image} resizeMode="contain" style={styles.recommendedLogo} />
       <View style={styles.recommendedRestaurantInfo}>
         <Text numberOfLines={1} style={styles.recommendedRestaurantName}>{restaurant.name}</Text>
@@ -302,13 +354,18 @@ function RecommendedRestaurantCard({ restaurant, showDivider = true }) {
         </View>
         {showDivider && <View style={styles.recommendedDivider} />}
       </View>
-    </View>
+    </Pressable>
   );
 }
 
-function NearbyRestaurantCard({ restaurant }) {
+function NearbyRestaurantCard({ restaurant, onPress }) {
   return (
-    <View style={styles.nearbyRestaurantCard}>
+    <Pressable
+      accessibilityLabel={`Ver restaurante ${restaurant.name}`}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={styles.nearbyRestaurantCard}
+    >
       <Image source={restaurant.image} resizeMode="cover" style={styles.nearbyRestaurantImage} />
       <Text style={styles.nearbyRestaurantDistance}>{restaurant.distance}</Text>
       <Text numberOfLines={1} style={styles.nearbyRestaurantName}>{restaurant.name}</Text>
@@ -321,7 +378,7 @@ function NearbyRestaurantCard({ restaurant }) {
           style={styles.ratingStar}
         />
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -336,6 +393,7 @@ export function HomeScreen({
 }) {
   const [promotionIndex, setPromotionIndex] = useState(0);
   const [selectedFood, setSelectedFood] = useState(null);
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
   const { width: screenWidth } = useWindowDimensions();
   const promotionOpacity = useRef(new Animated.Value(1)).current;
   const currentPromotion = PROMOTIONS[promotionIndex];
@@ -377,8 +435,21 @@ export function HomeScreen({
         item={selectedFood}
         onBack={() => setSelectedFood(null)}
         onChickenInfoScreenChange={onChickenInfoScreenChange}
-        onSelectItem={setSelectedFood}
+        onSelectItem={(food) => setSelectedFood(getHomeFoodDetails(food, profileRules))}
+        homeReferenceLayout
         profileSelections={profileSelections}
+        screenWidth={screenWidth}
+      />
+    );
+  }
+
+  if (selectedRestaurant) {
+    return (
+      <RestaurantDetailScreen
+        onBack={() => setSelectedRestaurant(null)}
+        onChickenInfoScreenChange={onChickenInfoScreenChange}
+        profileSelections={profileSelections}
+        restaurant={getHomeRestaurantDetails(selectedRestaurant)}
         screenWidth={screenWidth}
       />
     );
@@ -460,27 +531,7 @@ export function HomeScreen({
             <FoodCard
               key={food.name}
               food={food}
-              onPress={() => {
-                const foodDetails = HOME_FOOD_DETAILS[food.name] || {};
-                const recommendations = filterMealsForProfile(
-                  FOODS
-                    .filter((candidate) => candidate.name !== food.name)
-                    .map((candidate) => ({
-                      ...candidate,
-                      ...HOME_FOOD_DETAILS[candidate.name],
-                    })),
-                  profileRules,
-                );
-                setSelectedFood({
-                  ...food,
-                  ...foodDetails,
-                  description: foodDetails.description || food.detail,
-                  features: HOME_FOOD_FEATURES,
-                  name: food.detailName || food.name,
-                  recommendations,
-                  restaurantName: food.seller,
-                });
-              }}
+              onPress={() => setSelectedFood(getHomeFoodDetails(food, profileRules))}
             />
           ))}
         </ScrollView>
@@ -509,6 +560,7 @@ export function HomeScreen({
                   {RECOMMENDED_RESTAURANTS.slice(row * 3, row * 3 + 3).map((restaurant) => (
                     <RecommendedRestaurantCard
                       key={restaurant.id}
+                      onPress={() => setSelectedRestaurant(restaurant)}
                       restaurant={restaurant}
                       showDivider={row < 2}
                     />
@@ -529,7 +581,11 @@ export function HomeScreen({
             showsHorizontalScrollIndicator={false}
           >
             {NEARBY_RESTAURANTS.map((restaurant) => (
-              <NearbyRestaurantCard key={restaurant.name} restaurant={restaurant} />
+              <NearbyRestaurantCard
+                key={restaurant.name}
+                onPress={() => setSelectedRestaurant(restaurant)}
+                restaurant={restaurant}
+              />
             ))}
           </ScrollView>
         </View>

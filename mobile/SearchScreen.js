@@ -365,6 +365,17 @@ const MEAL_FEATURES = [
   { type: 'certificate', label: 'Certificações' },
 ];
 
+const DEFAULT_RESTAURANT_FEATURES = [
+  { type: 'utensils', label: 'Utensílios do preparo' },
+  { type: 'ingredientCard', label: 'Dados de ingredientes' },
+];
+
+const DEFAULT_FOOD_FEATURES = [
+  { type: 'utensils', label: 'Utensílios do preparo' },
+  { type: 'ingredientCard', label: 'Ingredientes do prato' },
+  { type: 'nutrition', label: 'Dados nutricionais a confirmar' },
+];
+
 const MEAL_SEARCH_ITEMS = [
   {
     id: 'meal-chicken',
@@ -2084,14 +2095,13 @@ export function FoodDetailsScreen({
   onChickenInfoScreenChange,
   profileSelections = {},
   screenWidth,
+  homeReferenceLayout = false,
 }) {
   const [detailSearchQuery, setDetailSearchQuery] = useState('');
   const [showChickenUtensils, setShowChickenUtensils] = useState(false);
   const [showChickenIngredients, setShowChickenIngredients] = useState(false);
   const [showChickenNutrition, setShowChickenNutrition] = useState(false);
   const isSaudavelChicken = isSaudavelLifeChicken(item);
-  const isChickenMeal =
-    normalizeSearchTerm(item.detailName || item.name || '') === 'marmita de frango';
   const productFeatures = item.features || [];
   const featureSize = productFeatures.length >= 4
     ? Math.min(56, (screenWidth - 72) / 4)
@@ -2251,7 +2261,7 @@ export function FoodDetailsScreen({
           >
             {item.detailName || item.name}
           </Text>
-          {!!item.price && !isSaudavelChicken && (
+          {!homeReferenceLayout && !!item.price && !isSaudavelChicken && (
             <Text
               style={[
                 styles.foodProductPrice,
@@ -2264,7 +2274,7 @@ export function FoodDetailsScreen({
               {item.price}
             </Text>
           )}
-          {!!item.description && !isSaudavelChicken && (
+          {!homeReferenceLayout && !!item.description && !isSaudavelChicken && (
             <Text
               style={[
                 styles.foodProductDescription,
@@ -2278,7 +2288,7 @@ export function FoodDetailsScreen({
               {item.description}
             </Text>
           )}
-          {!!item.restaurantName && !isSaudavelChicken && (
+          {!homeReferenceLayout && !!item.restaurantName && !isSaudavelChicken && (
             <Text
               style={[
                 styles.foodProductRestaurant,
@@ -2349,7 +2359,7 @@ export function FoodDetailsScreen({
             ))}
           </View>
         )}
-        {!!profileRules.length && !isSaudavelChicken && (
+        {!!profileRules.length && !isSaudavelChicken && !homeReferenceLayout && (
           <Text style={styles.foodProfileNote}>
             Confirme ingredientes e risco de contaminação cruzada com a loja antes de pedir.
           </Text>
@@ -2375,7 +2385,7 @@ export function FoodDetailsScreen({
                   { marginRight: featureGap },
                 ]}
               >
-                {isChickenMeal && feature.type === 'utensils' ? (
+                {isSaudavelChicken && feature.type === 'utensils' ? (
                   <Pressable
                     accessibilityLabel="Abrir utensílios do frango"
                     accessibilityRole="button"
@@ -2388,7 +2398,7 @@ export function FoodDetailsScreen({
                       useReferenceIcons
                     />
                   </Pressable>
-                ) : isChickenMeal && ['ingredients', 'ingredientCard'].includes(feature.type) ? (
+                ) : isSaudavelChicken && ['ingredients', 'ingredientCard'].includes(feature.type) ? (
                   <Pressable
                     accessibilityLabel="Abrir ingredientes e alergênicos"
                     accessibilityRole="button"
@@ -2401,7 +2411,7 @@ export function FoodDetailsScreen({
                       useReferenceIcons
                     />
                   </Pressable>
-                ) : isChickenMeal && feature.type === 'nutrition' ? (
+                ) : isSaudavelChicken && feature.type === 'nutrition' ? (
                   <Pressable
                     accessibilityLabel="Abrir ficha nutricional"
                     accessibilityRole="button"
@@ -2427,7 +2437,7 @@ export function FoodDetailsScreen({
           </View>
         )}
 
-        {!!(item.ingredients || item.utensils) && !isSaudavelChicken && (
+        {!!(item.ingredients || item.utensils) && !isSaudavelChicken && !homeReferenceLayout && (
           <View style={styles.productPreparation}>
             {!!item.ingredients && (
               <View style={styles.productPreparationBlock}>
@@ -2585,7 +2595,7 @@ function RestaurantProductRow({ title, items, screenWidth, onSelectItem }) {
             <Pressable
               accessibilityLabel={`Ver ${item.detailName || item.name}`}
               accessibilityRole="button"
-              onPress={() => onSelectItem(item)}
+              onPress={() => onSelectItem(item, title)}
             >
               <Image
                 accessibilityLabel={item.detailName || item.name}
@@ -2600,7 +2610,7 @@ function RestaurantProductRow({ title, items, screenWidth, onSelectItem }) {
             </Pressable>
             <Pressable
               accessibilityRole="button"
-              onPress={() => onSelectItem(item)}
+              onPress={() => onSelectItem(item, title)}
               style={styles.mealInfoButton}
             >
               <Text style={styles.mealInfoButtonText}>Ver informações</Text>
@@ -2624,10 +2634,21 @@ export function RestaurantDetailScreen({
   const [selectedItem, setSelectedItem] = useState(null);
   const [restaurantSearchQuery, setRestaurantSearchQuery] = useState('');
   const scrollRef = useRef(null);
-  const recommendations = restaurant.sections.flatMap((section) => section.items);
+  const restaurantSections = Array.isArray(restaurant.sections) ? restaurant.sections : [];
+  const recommendations = restaurantSections.flatMap((section) => section.items);
+  const preparationFeatures = restaurant.features?.length
+    ? restaurant.features.slice(0, 2)
+    : DEFAULT_RESTAURANT_FEATURES;
+  const profileRules = getDietaryProfileRules(profileSelections);
+  const hasConfirmedCompatibility = Boolean(restaurant.compatibilityText);
+  const compatibilityText = restaurant.compatibilityText || (
+    profileRules.length
+      ? `Compatibilidade a confirmar para: ${profileRules.map((rule) => rule.label).join(', ')}. Consulte a loja.`
+      : 'Compatibilidade alimentar não informada; confirme ingredientes e alergênicos com a loja.'
+  );
   const normalizedRestaurantQuery = normalizeSearchTerm(restaurantSearchQuery);
   const filteredSections = normalizedRestaurantQuery
-    ? restaurant.sections.map((section) => ({
+    ? restaurantSections.map((section) => ({
         ...section,
         items: section.items.filter((item) => {
         const ingredients = Array.isArray(item.ingredients)
@@ -2650,7 +2671,7 @@ export function RestaurantDetailScreen({
           return haystack.includes(normalizedRestaurantQuery);
         }),
       })).filter((section) => section.items.length > 0)
-    : restaurant.sections;
+    : restaurantSections;
 
   useEffect(() => {
     onStatusBarBackgroundChange?.(selectedItem ? COLORS.white : COLORS.orange);
@@ -2661,11 +2682,26 @@ export function RestaurantDetailScreen({
     return () => onCompactNavigationChange?.(false);
   }, [onCompactNavigationChange, selectedItem]);
 
-  function selectProduct(item) {
+  function selectProduct(item, sectionTitle) {
+    const itemSection = restaurantSections.find((section) =>
+      section.items.some((candidate) =>
+        candidate === item ||
+        (item.id && candidate.id === item.id) ||
+        candidate.name === item.name,
+      ),
+    );
+    const productFeatures = item.features?.length
+      ? item.features
+      : restaurant.features?.length
+        ? restaurant.features.slice(0, 2)
+        : DEFAULT_FOOD_FEATURES;
+
     setSelectedItem({
       ...item,
-      features: item.features || restaurant.features,
-      filters: item.filters || [],
+      features: productFeatures,
+      filters: item.filters?.length
+        ? item.filters
+        : [sectionTitle || itemSection?.title || 'Cardápio'],
       recommendations: item.recommendations || recommendations,
       restaurantName: restaurant.name,
     });
@@ -2756,9 +2792,9 @@ export function RestaurantDetailScreen({
                 <Image source={require('./assets/restaurant-clock.png')} style={styles.restaurantMetaIcon} />
                 <Text style={styles.restaurantMeta}>{restaurant.deliveryTime}</Text>
                 <Image source={require('./assets/restaurant-tag.png')} style={[styles.restaurantMetaIcon, styles.restaurantMetaIconSpaced]} />
-                <Text style={styles.restaurantMeta}>R$ 30,00</Text>
+                <Text style={styles.restaurantMeta}>{restaurant.deliveryFee || 'A confirmar'}</Text>
                 <Image source={require('./assets/restaurant-cart.png')} style={[styles.restaurantMetaIcon, styles.restaurantMetaIconSpaced]} />
-                <Text style={styles.restaurantMeta}>Min. {restaurant.minimumOrder}</Text>
+                <Text style={styles.restaurantMeta}>Min. {restaurant.minimumOrder || 'A confirmar'}</Text>
               </View>
             </View>
             <Image
@@ -2767,14 +2803,30 @@ export function RestaurantDetailScreen({
               style={styles.restaurantArrowIcon}
             />
           </View>
-          {restaurant.compatibilityText ? (
-            <View style={styles.restaurantCompatibility}>
-              <View style={styles.restaurantCompatibilityIcon}>
-                <Text style={styles.restaurantCompatibilityCheck}>✓</Text>
-              </View>
-              <Text style={styles.restaurantCompatibilityText}>{restaurant.compatibilityText}</Text>
+          <View
+            style={[
+              styles.restaurantCompatibility,
+              !hasConfirmedCompatibility && styles.restaurantCompatibilityUnverified,
+            ]}
+          >
+            <View
+              style={[
+                styles.restaurantCompatibilityIcon,
+                !hasConfirmedCompatibility && styles.restaurantCompatibilityIconUnverified,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.restaurantCompatibilityCheck,
+                  !hasConfirmedCompatibility && styles.restaurantCompatibilityInfo,
+                ]}
+              >
+                {hasConfirmedCompatibility ? '✓' : 'i'}
+              </Text>
             </View>
-          ) : (
+            <Text style={styles.restaurantCompatibilityText}>{compatibilityText}</Text>
+          </View>
+          {!hasConfirmedCompatibility && !!restaurant.description && (
             <Text style={styles.restaurantDescription}>{restaurant.description}</Text>
           )}
 
@@ -2783,7 +2835,7 @@ export function RestaurantDetailScreen({
               {restaurant.featuresTitle || 'Como preparamos seu prato'}
             </Text>
             <View style={styles.preparationFeatures}>
-              {restaurant.features.map((feature, index) => (
+              {preparationFeatures.map((feature, index) => (
                 <View
                   key={`${feature.label}-${index}`}
                   style={index === 0 ? styles.preparationFeatureSpacing : undefined}
@@ -2831,6 +2883,13 @@ export function RestaurantDetailScreen({
             title={section.title}
           />
         ))}
+        {!recommendations.length && !normalizedRestaurantQuery && (
+          <View style={styles.restaurantSearchEmpty}>
+            <Text style={styles.restaurantSearchEmptyText}>
+              Cardápio ainda não cadastrado. As informações da loja serão atualizadas quando disponíveis.
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </View>
   );
@@ -3333,15 +3392,24 @@ export default function SearchScreen({
 
   function selectRestaurantFood(restaurant, item) {
     const restaurantItems = restaurant.sections.flatMap((section) => section.items);
+    const itemSection = restaurant.sections.find((section) =>
+      section.items.some((candidate) => candidate === item),
+    );
     const isSaudavelChicken = isSaudavelLifeChicken(item, restaurant.name);
     setSelectedProduct({
       ...item,
       features: isSaudavelChicken
         ? SAUDAVEL_LIFE_CHICKEN_FEATURES
-        : item.features || restaurant.features || [],
+        : item.features?.length
+          ? item.features
+          : restaurant.features?.length
+            ? restaurant.features.slice(0, 2)
+            : DEFAULT_FOOD_FEATURES,
       filters: isSaudavelChicken
         ? SAUDAVEL_LIFE_CHICKEN_FILTERS
-        : item.filters || [],
+        : item.filters?.length
+          ? item.filters
+          : [itemSection?.title || 'Cardápio'],
       recommendations: isSaudavelChicken
         ? item.recommendations || SAUDAVEL_LIFE_CHICKEN_RECOMMENDATIONS
         : restaurantItems.filter((recommendation) => recommendation !== item),
@@ -3374,8 +3442,14 @@ export default function SearchScreen({
         onSelectItem={(item) =>
           setSelectedProduct({
             ...item,
-            features: item.features || selectedProduct.features,
-            filters: item.filters || [],
+            features: item.features?.length
+              ? item.features
+              : selectedProduct.features?.length
+                ? selectedProduct.features
+                : DEFAULT_FOOD_FEATURES,
+            filters: item.filters?.length
+              ? item.filters
+              : selectedProduct.filters || [],
             recommendations: item.recommendations || selectedProduct.recommendations,
             restaurantName: item.restaurantName || selectedProduct.restaurantName,
           })
@@ -4445,6 +4519,11 @@ const styles = StyleSheet.create({
     minHeight: 52,
     paddingHorizontal: 12,
   },
+  restaurantCompatibilityUnverified: {
+    backgroundColor: '#F3F3F3',
+    borderColor: '#E1E1E1',
+    borderWidth: 1,
+  },
   restaurantCompatibilityIcon: {
     alignItems: 'center',
     backgroundColor: '#55D58A',
@@ -4454,10 +4533,16 @@ const styles = StyleSheet.create({
     marginRight: 14,
     width: 34,
   },
+  restaurantCompatibilityIconUnverified: {
+    backgroundColor: '#D8D8D8',
+  },
   restaurantCompatibilityCheck: {
     color: COLORS.white,
     fontSize: 20,
     fontWeight: '700',
+  },
+  restaurantCompatibilityInfo: {
+    color: '#555555',
   },
   restaurantCompatibilityText: {
     color: '#2E2E2E',

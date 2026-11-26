@@ -2270,7 +2270,23 @@ function ChickenNutritionInfoScreen({ onBack, screenWidth }) {
   );
 }
 
-function ChickenIngredientsScreen({ onBack, screenWidth }) {
+function getIngredientCards(item) {
+  const productName = normalizeSearchTerm(item.detailName || item.name || '');
+  if (/marmita.*frango|frango.*marmita/.test(productName)) {
+    return CHICKEN_INGREDIENTS;
+  }
+
+  const ingredientsText = formatFoodInformation(item.ingredients);
+  if (!ingredientsText) return [];
+
+  return ingredientsText
+    .split(/[;,]/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .slice(0, 5);
+}
+
+function ChickenIngredientsScreen({ item, onBack, screenWidth }) {
   const { height: screenHeight } = useWindowDimensions();
   const [selectedIngredient, setSelectedIngredient] = useState(null);
   const [showQuestionHelp, setShowQuestionHelp] = useState(false);
@@ -2283,6 +2299,19 @@ function ChickenIngredientsScreen({ onBack, screenWidth }) {
   const closeModal = () => {
     setShowQuestionHelp(false);
   };
+  const productName = item?.detailName || item?.name || 'marmita';
+  const ingredientCards = getIngredientCards(item || {});
+  const visibleIngredients = ingredientCards.length
+    ? ingredientCards
+    : CHICKEN_INGREDIENTS;
+  const allergenInfo = [
+    { name: 'Glúten', isContained: /pastel|pizza|hamburg|pao|massa|biscoito|sanduiche/.test(normalizeSearchTerm(productName)) },
+    { name: 'Lactose', isContained: /pizza|creme|queijo|fruta|sobremesa|bolo|taca/.test(normalizeSearchTerm(productName)) },
+    { name: 'Ovo', isContained: /pastel|bolo|massa|maionese/.test(normalizeSearchTerm(productName)) },
+    { name: 'Soja', isContained: /vegano|vegetal|hamburg|molho/.test(normalizeSearchTerm(productName)) },
+    { name: 'Amendoim e castanhas', isContained: /sobremesa|fruta|granola/.test(normalizeSearchTerm(productName)) },
+    { name: 'Peixe', isContained: /sushi/.test(normalizeSearchTerm(productName)) },
+  ];
 
   if (selectedIngredient) {
     return (
@@ -2352,9 +2381,9 @@ function ChickenIngredientsScreen({ onBack, screenWidth }) {
               },
             ]}
           >
-            Composição da marmita
+            {`Composição de ${normalizeSearchTerm(productName)}`}
           </Text>
-          {CHICKEN_INGREDIENTS.map((ingredient) => (
+          {visibleIngredients.map((ingredient) => (
             <View
               key={ingredient}
               style={[
@@ -2395,29 +2424,31 @@ function ChickenIngredientsScreen({ onBack, screenWidth }) {
                   {ingredient}
                 </Text>
               </View>
-              <Pressable
-                accessibilityLabel={`Ver mais sobre ${ingredient}`}
-                accessibilityRole="button"
-                onPress={() => setSelectedIngredient(CHICKEN_NUTRITION_TABLES[ingredient])}
-                style={({ pressed }) => [
-                  styles.chickenIngredientMoreButton,
-                  {
-                    borderRadius: size(7),
-                    minHeight: size(20),
-                    paddingHorizontal: size(8),
-                  },
-                  pressed && styles.chickenUtensilsPressed,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.chickenIngredientMoreText,
-                    { fontSize: size(8) },
+              {CHICKEN_NUTRITION_TABLES[ingredient] ? (
+                <Pressable
+                  accessibilityLabel={`Ver mais sobre ${ingredient}`}
+                  accessibilityRole="button"
+                  onPress={() => setSelectedIngredient(CHICKEN_NUTRITION_TABLES[ingredient])}
+                  style={({ pressed }) => [
+                    styles.chickenIngredientMoreButton,
+                    {
+                      borderRadius: size(7),
+                      minHeight: size(20),
+                      paddingHorizontal: size(8),
+                    },
+                    pressed && styles.chickenUtensilsPressed,
                   ]}
                 >
-                  Ver mais
-                </Text>
-              </Pressable>
+                  <Text
+                    style={[
+                      styles.chickenIngredientMoreText,
+                      { fontSize: size(8) },
+                    ]}
+                  >
+                    Ver mais
+                  </Text>
+                </Pressable>
+              ) : null}
             </View>
           ))}
           <Text
@@ -2456,7 +2487,7 @@ function ChickenIngredientsScreen({ onBack, screenWidth }) {
           >
             Confira antes de consumir
           </Text>
-          {CHICKEN_ALLERGENS.map((allergen) => (
+          {allergenInfo.map((allergen) => (
             <View
               key={allergen.name}
               style={[
@@ -2658,6 +2689,7 @@ export function FoodDetailsScreen({
   if (showChickenIngredients) {
     return (
       <ChickenIngredientsScreen
+        item={getDemonstrationFoodInformation(item)}
         onBack={() => setShowChickenIngredients(false)}
         screenWidth={screenWidth}
       />
@@ -2675,6 +2707,15 @@ export function FoodDetailsScreen({
     if (homeInfoScreen === 'utensils') {
       return (
         <ChickenUtensilsScreen
+          item={getDemonstrationFoodInformation(item)}
+          onBack={() => setHomeInfoScreen(null)}
+          screenWidth={screenWidth}
+        />
+      );
+    }
+    if (homeInfoScreen === 'ingredients') {
+      return (
+        <ChickenIngredientsScreen
           item={getDemonstrationFoodInformation(item)}
           onBack={() => setHomeInfoScreen(null)}
           screenWidth={screenWidth}

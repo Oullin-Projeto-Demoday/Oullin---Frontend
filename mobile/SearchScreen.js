@@ -3151,9 +3151,7 @@ function RestaurantProductRow({
   title,
   items,
   screenWidth,
-  onAddToCart,
   onSelectItem,
-  restaurantName,
 }) {
   const cardWidth = Math.min(128, (screenWidth - 48) / 3);
 
@@ -3181,15 +3179,10 @@ function RestaurantProductRow({
             <Pressable
               accessibilityRole="button"
               onPress={() => onSelectItem(item, title)}
-              style={[styles.mealInfoButton, styles.restaurantProductInfoButton]}
+              style={styles.mealInfoButton}
             >
               <Text style={styles.mealInfoButtonText}>Ver informações</Text>
             </Pressable>
-            <SearchAddToCartButton
-              fullWidth
-              item={{ ...item, restaurantName }}
-              onAddToCart={onAddToCart}
-            />
           </View>
         ))}
       </View>
@@ -3453,9 +3446,7 @@ export function RestaurantDetailScreen({
           <RestaurantProductRow
             key={section.title}
             items={section.items}
-            onAddToCart={onAddToCart}
             onSelectItem={selectProduct}
-            restaurantName={restaurant.name}
             screenWidth={screenWidth}
             title={section.title}
           />
@@ -3472,67 +3463,7 @@ export function RestaurantDetailScreen({
   );
 }
 
-function SearchAddToCartButton({
-  fullWidth = false,
-  item,
-  onAddToCart,
-  scale = 1,
-}) {
-  const [feedback, setFeedback] = useState(null);
-
-  function addItemToCart() {
-    const added = onAddToCart?.(item) === true;
-    setFeedback(added ? 'Adicionado' : 'Falhou; confira o preço');
-  }
-
-  return (
-    <View
-      style={[
-        styles.searchAddToCartAction,
-        fullWidth && styles.searchAddToCartActionFullWidth,
-      ]}
-    >
-      <Pressable
-        accessibilityLabel={`Adicionar ${item.detailName || item.name} ao carrinho`}
-        accessibilityRole="button"
-        onPress={addItemToCart}
-        style={[
-          styles.searchAddToCartButton,
-          {
-            height: 34 * scale,
-            width: fullWidth ? '100%' : 78 * scale,
-          },
-        ]}
-      >
-        <Text style={[styles.searchAddToCartButtonText, { fontSize: 10 * scale }]}>
-          Adicionar
-        </Text>
-      </Pressable>
-      {!!feedback && (
-        <Text
-          accessibilityLiveRegion="polite"
-          style={[
-            styles.searchAddToCartFeedback,
-            {
-              color: feedback === 'Adicionado' ? '#258A52' : '#B42318',
-              fontSize: 8 * scale,
-            },
-          ]}
-        >
-          {feedback}
-        </Text>
-      )}
-    </View>
-  );
-}
-
-function MarmitaSearchResults({
-  items,
-  onAddToCart,
-  onBack,
-  onOpenRestaurant,
-  onSelectFood,
-}) {
+function MarmitaSearchResults({ items, onBack, onOpenRestaurant, onSelectFood }) {
   const [favorite, setFavorite] = useState(false);
 
   return (
@@ -3599,21 +3530,13 @@ function MarmitaSearchResults({
                 <Text numberOfLines={1} style={styles.mealListTags}>{(item.filters || []).join(' · ')}</Text>
               </View>
             </Pressable>
-            <View style={styles.mealListActions}>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => onSelectFood(item)}
-                style={[styles.mealInfoButton, styles.mealListInfoButton]}
-              >
-                <Text style={styles.mealInfoButtonText}>Ver informações</Text>
-              </Pressable>
-              <SearchAddToCartButton
-                fullWidth
-                item={{ ...item, restaurantName: item.restaurantName || 'Saudável Life' }}
-                onAddToCart={onAddToCart}
-                scale={1}
-              />
-            </View>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => onSelectFood(item)}
+              style={styles.mealInfoButton}
+            >
+              <Text style={styles.mealInfoButtonText}>Ver informações</Text>
+            </Pressable>
           </View>
         )) : (
           <View style={styles.mealEmptyState}>
@@ -3627,7 +3550,6 @@ function MarmitaSearchResults({
 
 function RestaurantSearchResultCard({
   restaurant,
-  onAddToCart,
   onSelectFood,
   onSelectRestaurant,
   screenWidth,
@@ -3681,12 +3603,6 @@ function RestaurantSearchResultCard({
                 {item.name}
               </Text>
             </Pressable>
-            <SearchAddToCartButton
-              fullWidth
-              item={{ ...item, restaurantName: restaurant.name }}
-              onAddToCart={onAddToCart}
-              scale={scale}
-            />
           </View>
         ))}
       </ScrollView>
@@ -3696,7 +3612,6 @@ function RestaurantSearchResultCard({
 
 function RestaurantSearchResults({
   restaurants,
-  onAddToCart,
   onSelectRestaurant,
   onSelectFood,
   screenWidth,
@@ -3738,7 +3653,6 @@ function RestaurantSearchResults({
       {restaurants.length ? restaurants.map((restaurant) => (
         <RestaurantSearchResultCard
           key={restaurant.id}
-          onAddToCart={onAddToCart}
           onSelectFood={onSelectFood}
           onSelectRestaurant={onSelectRestaurant}
           restaurant={restaurant}
@@ -3755,7 +3669,6 @@ function RestaurantSearchResults({
 
 function ProductSearchResults({
   items,
-  onAddToCart,
   onSelectProduct,
   screenWidth,
   heading = 'Opções encontradas',
@@ -3791,8 +3704,11 @@ function ProductSearchResults({
       </Text>
       {items.length ? (
         items.map((item) => (
-          <View
+          <Pressable
+            accessibilityLabel={`Ver informações de ${item.detailName || item.name}`}
+            accessibilityRole="button"
             key={item.id}
+            onPress={() => onSelectProduct(item)}
             style={[
               styles.productSearchRow,
               {
@@ -3801,62 +3717,50 @@ function ProductSearchResults({
               },
             ]}
           >
-            <Pressable
-              accessibilityLabel={`Ver informações de ${item.detailName || item.name}`}
-              accessibilityRole="button"
-              onPress={() => onSelectProduct(item)}
-              style={styles.productSearchRowDetails}
-            >
-              <View style={styles.productSearchText}>
-                <Text
-                  numberOfLines={2}
-                  style={[styles.productSearchName, { fontSize: 15 * scale, lineHeight: 18 * scale }]}
-                >
-                  {item.name}
+            <View style={styles.productSearchText}>
+              <Text
+                numberOfLines={2}
+                style={[styles.productSearchName, { fontSize: 15 * scale, lineHeight: 18 * scale }]}
+              >
+                {item.name}
+              </Text>
+              {!!item.price && (
+                <Text style={[styles.productSearchPrice, { fontSize: 10 * scale }]}>
+                  {item.price}
                 </Text>
-                {!!item.price && (
-                  <Text style={[styles.productSearchPrice, { fontSize: 10 * scale }]}>
-                    {item.price}
-                  </Text>
-                )}
-                <Text
-                  numberOfLines={1}
-                  ellipsizeMode="clip"
-                  style={[
-                    styles.productSearchRestaurant,
-                    {
-                      flexShrink: 1,
-                      fontSize: 10 * scale,
-                      lineHeight: 13 * scale,
-                      width: '100%',
-                    },
-                  ]}
-                >
-                  {item.restaurantLabel}
-                </Text>
-              </View>
-              <Image
-                accessibilityLabel={item.restaurantImage
-                  ? `Logo de ${item.restaurantName}`
-                  : `Imagem de ${item.detailName || item.name}`}
-                resizeMode="contain"
-                source={item.restaurantImage || item.image}
+              )}
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="clip"
                 style={[
-                  styles.productSearchLogo,
+                  styles.productSearchRestaurant,
                   {
-                    height: 30 * scale,
-                    marginLeft: 4 * scale,
-                    width: 32 * scale,
+                    flexShrink: 1,
+                    fontSize: 10 * scale,
+                    lineHeight: 13 * scale,
+                    width: '100%',
                   },
                 ]}
-              />
-            </Pressable>
-            <SearchAddToCartButton
-              item={item}
-              onAddToCart={onAddToCart}
-              scale={scale}
+              >
+                {item.restaurantLabel}
+              </Text>
+            </View>
+            <Image
+              accessibilityLabel={item.restaurantImage
+                ? `Logo de ${item.restaurantName}`
+                : `Imagem de ${item.detailName || item.name}`}
+              resizeMode="contain"
+              source={item.restaurantImage || item.image}
+              style={[
+                styles.productSearchLogo,
+                {
+                  height: 30 * scale,
+                  marginLeft: 4 * scale,
+                  width: 32 * scale,
+                },
+              ]}
             />
-          </View>
+          </Pressable>
         ))
       ) : (
         <Text style={[styles.productSearchEmpty, { fontSize: 13 * scale }]}>
@@ -4418,7 +4322,6 @@ export default function SearchScreen({
 
       {showRestaurantFilter ? (
         <RestaurantSearchResults
-          onAddToCart={onAddToCart}
           onSelectRestaurant={setSelectedRestaurantId}
           onSelectFood={selectRestaurantFood}
           restaurants={RESTAURANT_DIRECTORY.filter((restaurant) => restaurant.verified)}
@@ -4433,7 +4336,6 @@ export default function SearchScreen({
       ) : filterApplied && ['todo oullin', 'bebidas', 'menor preco'].includes(normalizedSelectedFilter) ? (
         <ProductSearchResults
           items={filteredCatalogProducts}
-          onAddToCart={onAddToCart}
           onSelectProduct={selectSearchResultProduct}
           screenWidth={screenWidth}
           heading={
@@ -4501,7 +4403,6 @@ export default function SearchScreen({
         </ScrollView>
       ) : exactRestaurantMatch ? (
         <RestaurantSearchResults
-          onAddToCart={onAddToCart}
           onSelectRestaurant={setSelectedRestaurantId}
           onSelectFood={selectRestaurantFood}
           restaurants={matchingRestaurants.filter(
@@ -4512,13 +4413,11 @@ export default function SearchScreen({
       ) : visibleSearchResults.length > 0 ? (
         <ProductSearchResults
           items={visibleSearchResults}
-          onAddToCart={onAddToCart}
           onSelectProduct={selectSearchResultProduct}
           screenWidth={screenWidth}
         />
       ) : matchingRestaurants.length > 0 ? (
         <RestaurantSearchResults
-          onAddToCart={onAddToCart}
           onSelectRestaurant={setSelectedRestaurantId}
           onSelectFood={selectRestaurantFood}
           restaurants={matchingRestaurants}
@@ -4527,7 +4426,6 @@ export default function SearchScreen({
       ) : showSaudavelLife ? (
         <MarmitaSearchResults
           items={compatibleMealItems}
-          onAddToCart={onAddToCart}
           onBack={() => {
             setSelectedCategory('Todos');
             setQuery('');
@@ -4538,7 +4436,6 @@ export default function SearchScreen({
       ) : selectedCategory !== 'Todos' ? (
         <ProductSearchResults
           items={filteredCategoryProducts}
-          onAddToCart={onAddToCart}
           onSelectProduct={selectSearchResultProduct}
           screenWidth={screenWidth}
           heading={`Opções de ${selectedCategory}`}
@@ -4546,7 +4443,6 @@ export default function SearchScreen({
       ) : normalizedQuery ? (
         <ProductSearchResults
           items={visibleSearchResults}
-          onAddToCart={onAddToCart}
           onSelectProduct={selectSearchResultProduct}
           screenWidth={screenWidth}
         />
@@ -5110,8 +5006,6 @@ const styles = StyleSheet.create({
   },
   mealListItem: { backgroundColor: COLORS.white, borderColor: '#ECECEC', borderRadius: 10, borderWidth: 1, marginBottom: 10, padding: 10 },
   mealListItemContent: { alignItems: 'center', flexDirection: 'row' },
-  mealListActions: { alignItems: 'center', flexDirection: 'row', marginTop: 7 },
-  mealListInfoButton: { flex: 1, marginRight: 8, marginTop: 0 },
   mealListImage: { borderRadius: 8, height: 88, width: 96 },
   mealListDetails: { flex: 1, marginLeft: 10 },
   mealListName: { color: COLORS.text, fontSize: 13, fontWeight: '700' },
@@ -5132,35 +5026,6 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontSize: 8,
     fontWeight: '600',
-  },
-  searchAddToCartAction: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 8,
-  },
-  searchAddToCartActionFullWidth: {
-    alignItems: 'stretch',
-    flex: 1,
-    marginLeft: 0,
-  },
-  searchAddToCartButton: {
-    alignItems: 'center',
-    backgroundColor: COLORS.addToCart,
-    borderRadius: 8,
-    justifyContent: 'center',
-    paddingHorizontal: 6,
-  },
-  searchAddToCartButtonText: {
-    color: COLORS.white,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-  searchAddToCartFeedback: {
-    marginTop: 3,
-    textAlign: 'center',
-  },
-  restaurantProductInfoButton: {
-    alignSelf: 'stretch',
   },
   restaurantScreen: {
     backgroundColor: COLORS.white,
@@ -6411,12 +6276,6 @@ const styles = StyleSheet.create({
   productSearchRow: {
     alignItems: 'center',
     flexDirection: 'row',
-  },
-  productSearchRowDetails: {
-    alignItems: 'center',
-    flex: 1,
-    flexDirection: 'row',
-    minWidth: 0,
   },
   productSearchText: {
     flex: 1,

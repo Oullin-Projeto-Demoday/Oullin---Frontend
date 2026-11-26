@@ -16,23 +16,6 @@ const COLORS = {
   white: '#FFFFFF',
 };
 
-export const INITIAL_CART_ITEMS = [
-  {
-    id: 'cart-chicken-pie-1',
-    name: 'Torta de frango',
-    priceCents: 1000,
-    quantity: 1,
-    image: require('./assets/marmita-detail-frango.png'),
-  },
-  {
-    id: 'cart-chicken-pie-2',
-    name: 'Torta de frango',
-    priceCents: 1000,
-    quantity: 1,
-    image: require('./assets/marmita-detail-frango.png'),
-  },
-];
-
 function formatPrice(cents) {
   return `R$${(cents / 100).toFixed(2).replace('.', ',')}`;
 }

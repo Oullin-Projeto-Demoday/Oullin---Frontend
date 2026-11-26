@@ -14,7 +14,7 @@ import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-
 import { NavigationBar } from 'expo-navigation-bar';
 import AddressScreen from './AddressScreen';
 import BottomNavigation from './BottomNavigation';
-import CartScreen, { INITIAL_CART_ITEMS } from './CartScreen';
+import CartScreen from './CartScreen';
 import DeliveryScreen from './DeliveryScreen';
 import OrderSummaryScreen from './OrderSummaryScreen';
 import PayScreen from './PayScreen';
@@ -323,7 +323,7 @@ function AppContent() {
   const [firstName, setFirstName] = useState('');
   const [userProfile, setUserProfile] = useState({});
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const [cartItems, setCartItems] = useState(INITIAL_CART_ITEMS);
+  const [cartItems, setCartItems] = useState([]);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('apple');
   const [profileSetupComplete, setProfileSetupComplete] = useState(false);
   const [searchStatusBarBackground, setSearchStatusBarBackground] = useState('#FF8500');

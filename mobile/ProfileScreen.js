@@ -1,102 +1,119 @@
 import React from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 const COLORS = {
-  blue: '#1189E8',
-  orange: '#FFB400',
+  amber: '#FFB400',
+  avatar: '#D9D9D9',
   text: '#111111',
-  muted: '#737373',
   white: '#FFFFFF',
 };
 
-const RESTRICTION_LABELS = [
-  ['amendoim', 'Amendoim'],
-  ['castanhas', 'Castanhas'],
-  ['proteina do leite', 'Leite'],
-  ['lactose', 'Leite'],
-  ['frutos do mar', 'Camarão'],
-  ['ovos', 'Ovo'],
-  ['soja', 'Soja'],
-  ['gluten', 'Glúten'],
-  ['celiaca', 'Glúten'],
-  ['sodio', 'Sódio'],
-  ['kosher', 'Kosher'],
-  ['halal', 'Halal'],
-  ['vegetarianismo', 'Carne'],
-  ['veganismo', 'Origem animal'],
+const MENU_ITEMS = [
+  {
+    id: 'info',
+    label: 'Informações do\nperfil',
+    icon: require('./assets/profile-info.png'),
+  },
+  {
+    id: 'coupons',
+    label: 'Cupons',
+    icon: require('./assets/profile-coupons.png'),
+  },
+  {
+    id: 'payment',
+    label: 'Métodos de\npagamento',
+    icon: require('./assets/profile-payment-methods.png'),
+  },
+  {
+    id: 'settings',
+    label: 'Configurações',
+    icon: require('./assets/profile-settings.png'),
+  },
+  {
+    id: 'support',
+    label: 'Ajuda e\nsuporte',
+    icon: require('./assets/profile-support.png'),
+  },
+  {
+    id: 'logout',
+    label: 'Sair',
+    icon: require('./assets/profile-logout.png'),
+  },
 ];
 
-const FOOD_LABELS = [
-  ['pao', 'Pão'],
-  ['pizza', 'Pizza'],
-  ['bolo', 'Bolo'],
-  ['salgadinho', 'Salgadinhos'],
-  ['chocolate', 'Chocolate'],
-  ['massa', 'Massa'],
-  ['sorvete', 'Sorvete'],
-  ['molho', 'Molho'],
-  ['bolacha', 'Bolacha'],
-  ['hamburguer', 'Hambúrguer'],
-  ['japonesa', 'Comida japonesa'],
-  ['sobremesas', 'Sobremesas'],
-  ['cerveja', 'Cerveja'],
-  ['queijo', 'Queijo'],
-  ['iogurte', 'Iogurte'],
-  ['congelados', 'Congelados'],
-];
-
-function normalize(value) {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLocaleLowerCase('pt-BR');
-}
-
-function shortenSelection(value, mappings) {
-  const normalized = normalize(value);
-  return mappings.find(([part]) => normalized.includes(part))?.[1] || value;
-}
-
-function getRestrictionLabels(value) {
-  const normalized = normalize(value);
-  if (normalized.includes('amendoim') && normalized.includes('castanhas')) {
-    return ['Amendoim', 'Castanhas'];
-  }
-  return [shortenSelection(value, RESTRICTION_LABELS)];
-}
-
-function ProfileTag({ children }) {
+function ProfileMenuItem({ item, onPress }) {
   return (
-    <View style={styles.tag}>
-      <Text numberOfLines={1} style={styles.tagText}>{children}</Text>
-    </View>
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [styles.menuItem, pressed && styles.pressed]}
+    >
+      <Image accessible={false} resizeMode="contain" source={item.icon} style={styles.menuIcon} />
+      <Text style={styles.menuLabel}>{item.label}</Text>
+    </Pressable>
   );
 }
 
-function ProfileSection({ title, values, emptyText }) {
-  return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {values.length ? (
-        <View style={styles.tags}>
-          {values.map((value, index) => (
-            <ProfileTag key={`${value}-${index}`}>{value}</ProfileTag>
-          ))}
-        </View>
-      ) : (
-        <Text style={styles.emptyValue}>{emptyText}</Text>
-      )}
-    </View>
-  );
-}
-
-export default function ProfileScreen({ user = {}, address, selections = {} }) {
+export default function ProfileScreen({
+  user = {},
+  address,
+  selections = {},
+  onLogout,
+}) {
   const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Seu nome';
-  const avoidFoods = [...new Set((selections.restrictions || []).flatMap(getRestrictionLabels))];
-  const favoriteFoods = [...new Set((selections.favoriteFoods || []).map((value) =>
-    shortenSelection(value, FOOD_LABELS),
-  ))];
-  const foodsToEat = [...new Set([...favoriteFoods, ...(selections.dailyMeals || [])])];
+  const email = user.email || 'E-mail não informado';
+
+  function showProfileInformation() {
+    const addressLine = address
+      ? [
+        address.street,
+        address.number,
+        address.complement,
+        address.neighborhood,
+        address.city,
+        address.state,
+        address.postalCode,
+      ].filter(Boolean).join(', ')
+      : 'Não cadastrado';
+    const restrictions = selections.restrictions?.join(', ') || 'Não informado';
+    const preferences = [
+      ...(selections.favoriteFoods || []),
+      ...(selections.dailyMeals || []),
+    ].join(', ') || 'Não informadas';
+
+    Alert.alert(
+      'Informações do perfil',
+      `Nome: ${fullName}\nE-mail: ${email}\nEndereço: ${addressLine}\nA evitar: ${restrictions}\nPreferências: ${preferences}`,
+    );
+  }
+
+  function handleMenuItem(item) {
+    if (item.id === 'info') {
+      showProfileInformation();
+      return;
+    }
+
+    if (item.id === 'logout') {
+      if (onLogout) onLogout();
+      return;
+    }
+
+    const messages = {
+      coupons: 'Nenhum cupom disponível no momento.',
+      payment: 'Nenhum método de pagamento cadastrado.',
+      settings: 'As configurações ainda não estão disponíveis.',
+      support: 'A área de ajuda e suporte ainda não está disponível.',
+    };
+    Alert.alert(item.label, messages[item.id]);
+  }
 
   return (
     <View style={styles.screen}>
@@ -104,54 +121,27 @@ export default function ProfileScreen({ user = {}, address, selections = {} }) {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.profileHeader}>
-          <View style={styles.avatarRing}>
-            <Image
-              accessibilityLabel="Mascote do perfil"
-              resizeMode="contain"
-              source={require('./assets/mascote-loading.png')}
-              style={styles.avatarImage}
-            />
-          </View>
+        <View style={styles.profileCard}>
+          <View
+            accessibilityLabel="Foto de perfil"
+            accessible
+            style={styles.avatar}
+          />
           <View style={styles.userInfo}>
-            <Text numberOfLines={2} style={styles.userName}>{fullName}</Text>
-            {!!user.email && <Text numberOfLines={1} style={styles.userEmail}>{user.email}</Text>}
+            <Text numberOfLines={1} style={styles.userName}>{fullName}</Text>
+            <Text numberOfLines={1} style={styles.userEmail}>{email}</Text>
           </View>
         </View>
 
-        <View style={styles.locationSection}>
-          <Text style={styles.sectionTitle}>Localização</Text>
-          {address ? (
-            <View style={styles.addressInfo}>
-              <Text style={styles.addressLine}>
-                {[address.street, address.number].filter(Boolean).join(' ')}
-              </Text>
-              <Text style={styles.addressLine}>
-                {[address.state, address.city].filter(Boolean).join(' ')}
-              </Text>
-              {!!address.complement && (
-                <Text style={styles.addressLine}>Complemento: {address.complement}</Text>
-              )}
-              {!!address.neighborhood && (
-                <Text style={styles.addressLine}>Bairro: {address.neighborhood}</Text>
-              )}
-              {!!address.postalCode && <Text style={styles.addressLine}>CEP {address.postalCode}</Text>}
-            </View>
-          ) : (
-            <Text style={styles.emptyValue}>Nenhum endereço cadastrado.</Text>
-          )}
+        <View style={styles.menu}>
+          {MENU_ITEMS.map((item) => (
+            <ProfileMenuItem
+              item={item}
+              key={item.id}
+              onPress={() => handleMenuItem(item)}
+            />
+          ))}
         </View>
-
-        <ProfileSection
-          emptyText="Nenhuma restrição informada."
-          title="O que você deve evitar consumir"
-          values={avoidFoods}
-        />
-        <ProfileSection
-          emptyText="Nenhuma preferência informada."
-          title="O que você pode comer"
-          values={foodsToEat}
-        />
       </ScrollView>
     </View>
   );
@@ -163,85 +153,61 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    paddingBottom: 24,
-    paddingHorizontal: 12,
-    paddingTop: 38,
+    flexGrow: 1,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    paddingTop: 8,
   },
-  profileHeader: {
+  profileCard: {
     alignItems: 'center',
+    borderColor: COLORS.amber,
+    borderRadius: 11,
+    borderWidth: 1,
     flexDirection: 'row',
+    height: 124,
+    paddingHorizontal: 12,
   },
-  avatarRing: {
-    alignItems: 'center',
-    borderColor: COLORS.blue,
-    borderRadius: 50,
-    borderWidth: 3,
-    height: 104,
-    justifyContent: 'center',
-    width: 104,
-  },
-  avatarImage: {
-    height: 90,
-    width: 90,
+  avatar: {
+    backgroundColor: COLORS.avatar,
+    borderRadius: 15,
+    height: 30,
+    width: 30,
   },
   userInfo: {
     flex: 1,
-    marginLeft: 6,
+    marginLeft: 12,
   },
   userName: {
     color: COLORS.text,
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '500',
   },
   userEmail: {
     color: COLORS.text,
-    fontSize: 12,
-    marginTop: 6,
+    fontSize: 9,
+    marginTop: 2,
   },
-  locationSection: {
-    marginTop: 66,
+  menu: {
+    marginTop: 10,
   },
-  section: {
-    marginTop: 16,
+  menuItem: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    minHeight: 59,
+    paddingHorizontal: 10,
   },
-  sectionTitle: {
-    color: COLORS.text,
-    fontSize: 19,
-    fontWeight: '700',
-    lineHeight: 24,
+  menuIcon: {
+    height: 26,
+    marginRight: 16,
+    width: 26,
   },
-  addressInfo: {
-    marginTop: 9,
-  },
-  addressLine: {
+  menuLabel: {
     color: COLORS.text,
     fontSize: 13,
     lineHeight: 16,
+    maxWidth: 145,
   },
-  tags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    columnGap: 7,
-    rowGap: 8,
-    marginTop: 15,
-    paddingHorizontal: 6,
-  },
-  tag: {
-    alignItems: 'center',
-    backgroundColor: COLORS.orange,
-    borderRadius: 14,
-    height: 22,
-    justifyContent: 'center',
-    paddingHorizontal: 3,
-    width: 79,
-  },
-  tagText: {
-    color: COLORS.white,
-    fontSize: 10,
-  },
-  emptyValue: {
-    color: COLORS.muted,
-    fontSize: 12,
-    marginTop: 8,
+  pressed: {
+    opacity: 0.65,
   },
 });

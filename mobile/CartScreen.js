@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Alert,
   Image,
   Pressable,
   ScrollView,
@@ -11,37 +10,36 @@ import {
 } from 'react-native';
 
 const COLORS = {
-  orange: '#FF8500',
   amber: '#FFB400',
-  blue: '#124F8C',
+  background: '#F2F2F2',
   text: '#171717',
-  muted: '#8A8A8A',
-  border: '#E4E4E4',
   white: '#FFFFFF',
 };
 
 export const INITIAL_CART_ITEMS = [
   {
-    id: 'cart-fries',
-    name: 'Batata Frita',
+    id: 'cart-chicken-pie-1',
+    name: 'Torta de frango',
     priceCents: 1000,
     quantity: 1,
-    image: require('./assets/cart-fries.png'),
+    image: require('./assets/marmita-detail-frango.png'),
   },
   {
-    id: 'cart-veggie-pizza',
-    name: 'Pizza vegetariana',
-    priceCents: 5200,
+    id: 'cart-chicken-pie-2',
+    name: 'Torta de frango',
+    priceCents: 1000,
     quantity: 1,
-    image: require('./assets/cart-pizza.png'),
+    image: require('./assets/marmita-detail-frango.png'),
   },
 ];
 
-const DELIVERY_CENTS = 1099;
-const SERVICE_CENTS = 399;
-
 function formatPrice(cents) {
   return `R$${(cents / 100).toFixed(2).replace('.', ',')}`;
+}
+
+function formatTotal(cents) {
+  const amount = (cents / 100).toFixed(2).replace('.', ',').replace(/,00$/, '');
+  return `R$ ${amount}`;
 }
 
 function CartText({ size = 12, style, ...props }) {
@@ -50,59 +48,44 @@ function CartText({ size = 12, style, ...props }) {
   return <Text {...props} style={[style, { fontSize: size * scale }]} />;
 }
 
-function PaymentIcon() {
-  return (
-    <View style={styles.paymentIcon}>
-      <View style={styles.paymentCardStripe} />
-      <View style={styles.paymentCardLine} />
-      <View style={styles.paymentPlusHorizontal} />
-      <View style={styles.paymentPlusVertical} />
-    </View>
-  );
-}
-
-function CartItem({ item, onChangeQuantity, onRemove }) {
+function CartItem({ item, onChangeQuantity }) {
   return (
     <View style={styles.itemCard}>
-      <Image accessibilityLabel={item.name} source={item.image} style={styles.itemImage} />
+      <Image
+        accessibilityLabel={item.name}
+        source={item.image}
+        style={styles.itemImage}
+        resizeMode="cover"
+      />
       <View style={styles.itemInfo}>
-        <CartText numberOfLines={1} size={12} style={styles.itemName}>{item.name}</CartText>
+        <CartText numberOfLines={1} size={11} style={styles.itemName}>{item.name}</CartText>
         <CartText size={12} style={styles.itemPrice}>{formatPrice(item.priceCents)}</CartText>
-        <View style={styles.quantityControl}>
-          <Pressable
-            accessibilityLabel={`Diminuir ${item.name}`}
-            accessibilityRole="button"
-            onPress={() => onChangeQuantity(item.id, -1)}
-            style={styles.quantityButton}
-          >
-            <CartText size={14} style={styles.quantitySymbol}>−</CartText>
-          </Pressable>
-          <CartText size={11} style={styles.quantityValue}>{item.quantity}</CartText>
-          <Pressable
-            accessibilityLabel={`Aumentar ${item.name}`}
-            accessibilityRole="button"
-            onPress={() => onChangeQuantity(item.id, 1)}
-            style={styles.quantityButton}
-          >
-            <CartText size={14} style={styles.quantitySymbol}>+</CartText>
-          </Pressable>
-        </View>
       </View>
-      <Pressable
-        accessibilityLabel={`Remover ${item.name} do carrinho`}
-        accessibilityRole="button"
-        onPress={() => onRemove(item.id)}
-        style={styles.removeButton}
-      >
-        <Image source={require('./assets/cart-trash.png')} style={styles.removeIcon} />
-      </Pressable>
+      <View style={styles.quantityControl}>
+        <Pressable
+          accessibilityLabel={`Diminuir ${item.name}`}
+          accessibilityRole="button"
+          onPress={() => onChangeQuantity(item.id, -1)}
+          style={styles.decreaseButton}
+        >
+          <CartText size={14} style={styles.decreaseSymbol}>−</CartText>
+        </Pressable>
+        <CartText size={11} style={styles.quantityValue}>{item.quantity}</CartText>
+        <Pressable
+          accessibilityLabel={`Aumentar ${item.name}`}
+          accessibilityRole="button"
+          onPress={() => onChangeQuantity(item.id, 1)}
+          style={styles.increaseButton}
+        >
+          <CartText size={14} style={styles.increaseSymbol}>+</CartText>
+        </Pressable>
+      </View>
     </View>
   );
 }
 
-export default function CartScreen({ items, onItemsChange, onBack, onAddItems }) {
+export default function CartScreen({ items, onItemsChange, onBack, onContinueDelivery }) {
   const subtotal = items.reduce((sum, item) => sum + item.priceCents * item.quantity, 0);
-  const total = subtotal + (items.length ? DELIVERY_CENTS + SERVICE_CENTS : 0);
 
   function changeQuantity(id, amount) {
     onItemsChange((current) => current.flatMap((item) => {
@@ -110,10 +93,6 @@ export default function CartScreen({ items, onItemsChange, onBack, onAddItems })
       const quantity = item.quantity + amount;
       return quantity > 0 ? [{ ...item, quantity }] : [];
     }));
-  }
-
-  function removeItem(id) {
-    onItemsChange((current) => current.filter((item) => item.id !== id));
   }
 
   return (
@@ -126,7 +105,7 @@ export default function CartScreen({ items, onItemsChange, onBack, onAddItems })
           onPress={onBack}
           style={styles.backButton}
         >
-          <Text style={styles.backArrow}>‹</Text>
+          <Text style={styles.backArrow}>←</Text>
         </Pressable>
         <CartText size={16} style={styles.headerTitle}>Meu carrinho</CartText>
         <View style={styles.headerSpacer} />
@@ -143,7 +122,6 @@ export default function CartScreen({ items, onItemsChange, onBack, onAddItems })
                 item={item}
                 key={item.id}
                 onChangeQuantity={changeQuantity}
-                onRemove={removeItem}
               />
             ))}
           </View>
@@ -153,39 +131,19 @@ export default function CartScreen({ items, onItemsChange, onBack, onAddItems })
             <CartText size={12} style={styles.emptyDescription}>Adicione pratos para continuar.</CartText>
           </View>
         )}
-
-        <Pressable
-          accessibilityRole="button"
-          onPress={onAddItems}
-          style={styles.addMoreButton}
-        >
-          <Image source={require('./assets/cart-add.png')} style={styles.addMoreIcon} />
-          <CartText size={11} style={styles.addMoreText}>Adicionar mais itens</CartText>
-        </Pressable>
-
-        {!!items.length && (
-          <View style={styles.summary}>
-            <SummaryLine label="Subtotal" value={formatPrice(subtotal)} />
-            <SummaryLine label="Entrega" value={formatPrice(DELIVERY_CENTS)} />
-            <SummaryLine label="Taxa de serviço" value={formatPrice(SERVICE_CENTS)} />
-            <View style={styles.summaryDivider} />
-            <SummaryLine label="Total" value={formatPrice(total)} total />
-            <CartText size={8} style={styles.summaryNote}>
-              Confira ingredientes e possíveis alérgenos antes de finalizar.
-            </CartText>
-          </View>
-        )}
       </ScrollView>
 
       {!!items.length && (
         <View style={styles.footer}>
+          <View style={styles.totalBar}>
+            <SummaryLine label="Total" value={formatTotal(subtotal)} total />
+          </View>
           <Pressable
             accessibilityRole="button"
-            onPress={() => Alert.alert('Pagamento', 'A etapa de pagamento será disponibilizada em breve.')}
+            onPress={onContinueDelivery}
             style={({ pressed }) => [styles.checkoutButton, pressed && styles.pressed]}
           >
-            <PaymentIcon />
-            <CartText size={13} style={styles.checkoutText}>Continuar para o pagamento</CartText>
+            <CartText size={16} style={styles.checkoutText}>Ir para entrega</CartText>
           </Pressable>
         </View>
       )}
@@ -196,10 +154,10 @@ export default function CartScreen({ items, onItemsChange, onBack, onAddItems })
 function SummaryLine({ label, value, total = false }) {
   return (
     <View style={styles.summaryLine}>
-      <CartText size={total ? 13 : 11} style={[styles.summaryLabel, total && styles.summaryTotal]}>
+      <CartText size={total ? 18 : 11} style={[styles.summaryLabel, total && styles.summaryTotal]}>
         {label}
       </CartText>
-      <CartText size={total ? 13 : 11} style={[styles.summaryValue, total && styles.summaryTotal]}>
+      <CartText size={total ? 18 : 11} style={[styles.summaryValue, total && styles.summaryTotal]}>
         {value}
       </CartText>
     </View>
@@ -208,168 +166,139 @@ function SummaryLine({ label, value, total = false }) {
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.background,
     flex: 1,
   },
   header: {
     alignItems: 'center',
+    backgroundColor: COLORS.white,
+    borderBottomLeftRadius: 18,
+    borderBottomRightRadius: 18,
     flexDirection: 'row',
-    height: 54,
+    height: 76,
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
   },
   backButton: {
-    alignItems: 'flex-start',
+    alignItems: 'center',
     justifyContent: 'center',
-    width: 40,
+    width: 30,
   },
   backArrow: {
-    color: COLORS.orange,
-    fontSize: 32,
-    lineHeight: 36,
+    color: COLORS.amber,
+    fontSize: 24,
+    lineHeight: 28,
   },
   headerTitle: {
     color: COLORS.text,
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
   },
   headerSpacer: {
-    width: 40,
+    width: 30,
   },
   content: {
     flexGrow: 1,
-    paddingLeft: 10,
-    paddingRight: 15,
+    paddingHorizontal: 10,
+    paddingTop: 24,
     paddingBottom: 12,
   },
   itemsList: {
-    paddingTop: 14,
+    width: '100%',
   },
   itemCard: {
     alignItems: 'center',
-    borderColor: COLORS.amber,
-    borderRadius: 10,
-    borderWidth: 1,
+    backgroundColor: COLORS.white,
+    borderRadius: 5,
     flexDirection: 'row',
-    height: 80,
-    marginBottom: 8,
-    paddingHorizontal: 7,
-    paddingVertical: 6,
+    height: 94,
+    marginBottom: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 7,
   },
   itemImage: {
-    borderRadius: 7,
-    height: 66,
-    width: 66,
+    borderRadius: 4,
+    height: 78,
+    width: 78,
   },
   itemInfo: {
-    alignSelf: 'stretch',
     flex: 1,
-    justifyContent: 'space-between',
-    marginLeft: 7,
-    paddingVertical: 2,
+    alignSelf: 'flex-start',
+    marginLeft: 12,
+    paddingTop: 3,
   },
   itemName: {
     color: COLORS.text,
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 10,
+    fontWeight: '400',
   },
   itemPrice: {
     color: COLORS.text,
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '500',
+    marginTop: 2,
   },
   quantityControl: {
     alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: COLORS.orange,
-    borderRadius: 12,
-    flexDirection: 'row',
-    height: 18,
+    height: 72,
     justifyContent: 'space-between',
-    minWidth: 62,
+    marginRight: 5,
+    width: 22,
   },
-  quantityButton: {
+  decreaseButton: {
     alignItems: 'center',
-    height: 20,
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.amber,
+    borderRadius: 10,
+    borderWidth: 1,
+    height: 18,
     justifyContent: 'center',
     width: 18,
   },
-  quantitySymbol: {
-    color: COLORS.white,
-    fontSize: 15,
+  decreaseSymbol: {
+    color: COLORS.amber,
+    fontSize: 13,
     fontWeight: '700',
-    lineHeight: 18,
+    lineHeight: 16,
+  },
+  increaseButton: {
+    alignItems: 'center',
+    backgroundColor: COLORS.amber,
+    borderRadius: 10,
+    height: 18,
+    justifyContent: 'center',
+    width: 18,
+  },
+  increaseSymbol: {
+    color: COLORS.white,
+    fontSize: 13,
+    fontWeight: '700',
+    lineHeight: 16,
   },
   quantityValue: {
-    color: COLORS.white,
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  removeButton: {
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    height: 24,
-    justifyContent: 'center',
-    marginLeft: 5,
-    width: 16,
-  },
-  removeIcon: {
-    height: 16,
-    width: 16,
-  },
-  addMoreButton: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    marginTop: 11,
-    minHeight: 30,
-    paddingLeft: 32,
-  },
-  addMoreIcon: {
-    height: 18,
-    marginRight: 27,
-    width: 18,
-  },
-  addMoreText: {
     color: COLORS.text,
     fontSize: 11,
-    fontWeight: '600',
-  },
-  summary: {
-    marginTop: 34,
-    paddingLeft: 12,
-    paddingRight: 16,
   },
   summaryLine: {
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    minHeight: 19,
+    width: '100%',
   },
   summaryLabel: {
-    color: COLORS.muted,
-    fontSize: 10,
-    fontWeight: '600',
+    color: COLORS.text,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  summaryTotal: {
+    color: COLORS.text,
+    fontSize: 18,
+    fontWeight: '700',
   },
   summaryValue: {
     color: COLORS.text,
-    fontSize: 10,
+    fontSize: 18,
     fontWeight: '700',
-  },
-  summaryDivider: {
-    backgroundColor: COLORS.amber,
-    height: StyleSheet.hairlineWidth,
-    marginVertical: 4,
-  },
-  summaryTotal: {
-    color: '#4B1E4B',
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  summaryNote: {
-    color: COLORS.muted,
-    fontSize: 8,
-    marginTop: 8,
   },
   emptyState: {
     alignItems: 'center',
@@ -381,69 +310,35 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   emptyDescription: {
-    color: COLORS.muted,
+    color: '#8A8A8A',
     fontSize: 12,
     marginTop: 7,
   },
   footer: {
     backgroundColor: COLORS.white,
-    paddingBottom: 32,
-    paddingHorizontal: 13,
-    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  totalBar: {
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    height: 56,
+    justifyContent: 'center',
+    paddingHorizontal: 22,
   },
   checkoutButton: {
     alignItems: 'center',
-    backgroundColor: COLORS.orange,
-    borderRadius: 18,
-    flexDirection: 'row',
-    height: 36,
+    backgroundColor: COLORS.amber,
+    borderRadius: 5,
+    height: 44,
     justifyContent: 'center',
+    marginHorizontal: 10,
   },
   checkoutText: {
     color: COLORS.white,
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: '700',
-    marginLeft: 10,
-  },
-  paymentIcon: {
-    borderColor: COLORS.white,
-    borderRadius: 2,
-    borderWidth: 1.3,
-    height: 14,
-    position: 'relative',
-    width: 19,
-  },
-  paymentCardStripe: {
-    backgroundColor: COLORS.white,
-    height: 2,
-    left: 0,
-    position: 'absolute',
-    right: 0,
-    top: 3,
-  },
-  paymentCardLine: {
-    backgroundColor: COLORS.white,
-    bottom: 2,
-    height: 1,
-    left: 3,
-    position: 'absolute',
-    width: 5,
-  },
-  paymentPlusHorizontal: {
-    backgroundColor: COLORS.white,
-    height: 1.5,
-    position: 'absolute',
-    right: -4,
-    top: 8,
-    width: 7,
-  },
-  paymentPlusVertical: {
-    backgroundColor: COLORS.white,
-    height: 7,
-    position: 'absolute',
-    right: -1.2,
-    top: 5.2,
-    width: 1.5,
+    letterSpacing: 0.2,
+    marginBottom: 0,
   },
   pressed: {
     opacity: 0.84,

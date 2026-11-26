@@ -426,6 +426,16 @@ function AppContent() {
     });
   }
 
+  function logOut() {
+    setUserProfile({});
+    setFirstName('');
+    setSelectedAddress(null);
+    setCartItems(INITIAL_CART_ITEMS);
+    setProfileSetupComplete(false);
+    setSelections({});
+    resetNavigation(ROUTES.onboarding);
+  }
+
   useEffect(() => {
     if (Platform.OS !== 'android') return undefined;
 
@@ -493,7 +503,11 @@ function AppContent() {
               onComplete={(address) => {
                 setSelectedAddress(address);
                 setProfileSetupComplete(true);
-                resetNavigation(ROUTES.home);
+                if (routeStack[routeStack.length - 2] === ROUTES.orders) {
+                  goBack();
+                } else {
+                  resetNavigation(ROUTES.home);
+                }
               }}
             />
           </View>
@@ -526,12 +540,17 @@ function AppContent() {
         ) : currentRoute === ROUTES.orders ? (
           <CartScreen
             items={cartItems}
-            onAddItems={() => resetNavigation(ROUTES.home)}
             onBack={() => resetNavigation(ROUTES.home)}
+            onContinueDelivery={() => navigate(ROUTES.address)}
             onItemsChange={setCartItems}
           />
         ) : currentRoute === ROUTES.profile ? (
-          <ProfileScreen address={selectedAddress} selections={selections} user={userProfile} />
+          <ProfileScreen
+            address={selectedAddress}
+            onLogout={logOut}
+            selections={selections}
+            user={userProfile}
+          />
         ) : (
           <PlaceholderScreen tab={currentRoute} />
         )}

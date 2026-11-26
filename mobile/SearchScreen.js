@@ -3103,7 +3103,7 @@ export function FoodDetailsScreen({
           </View>
         )}
       </ScrollView>
-      {homeReferenceLayout && onAddToCart && (
+      {onAddToCart && (
         <View style={styles.homeAddToCartBar}>
           <Pressable
             accessibilityLabel={`Adicionar ${item.detailName || item.name} ao carrinho`}
@@ -3167,6 +3167,7 @@ export function RestaurantDetailScreen({
   restaurant,
   screenWidth,
   onBack,
+  onAddToCart,
   onStatusBarBackgroundChange,
   onCompactNavigationChange,
   onChickenInfoScreenChange,
@@ -3255,6 +3256,7 @@ export function RestaurantDetailScreen({
       <FoodDetailsScreen
         item={selectedItem}
         onBack={() => setSelectedItem(null)}
+        onAddToCart={onAddToCart}
         onSelectItem={selectProduct}
         onChickenInfoScreenChange={onChickenInfoScreenChange}
         profileSelections={profileSelections}
@@ -3739,6 +3741,7 @@ function ProductSearchResults({
 
 export default function SearchScreen({
   homeFoods = [],
+  onAddToCart,
   profileSelections = {},
   onStatusBarBackgroundChange,
   onCompactNavigationChange,
@@ -4073,6 +4076,7 @@ export default function SearchScreen({
       <FoodDetailsScreen
         item={selectedProduct}
         onBack={() => setSelectedProduct(null)}
+        onAddToCart={onAddToCart}
         onChickenInfoScreenChange={onChickenInfoScreenChange}
         profileSelections={profileSelections}
         onSelectItem={(item) =>
@@ -4107,6 +4111,7 @@ export default function SearchScreen({
   if (selectedRestaurant) {
     return (
       <RestaurantDetailScreen
+        onAddToCart={onAddToCart}
         onBack={() => {
           setSelectedRestaurantId(null);
         }}

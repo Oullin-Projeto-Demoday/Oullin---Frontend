@@ -521,6 +521,7 @@ function AppContent() {
         ) : currentRoute === ROUTES.search ? (
           <SearchScreen
             homeFoods={FOODS}
+            onAddToCart={addProductToCart}
             onCompactNavigationChange={setCompactSearchNavigation}
             onStatusBarBackgroundChange={setSearchStatusBarBackground}
             onChickenInfoScreenChange={setHideBottomNavigation}

@@ -448,6 +448,7 @@ export function HomeScreen({
   if (selectedRestaurant) {
     return (
       <RestaurantDetailScreen
+        onAddToCart={onAddToCart}
         onBack={() => setSelectedRestaurant(null)}
         onChickenInfoScreenChange={onChickenInfoScreenChange}
         profileSelections={profileSelections}

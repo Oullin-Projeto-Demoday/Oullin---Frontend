@@ -366,8 +366,9 @@ function AppContent() {
 
   function addProductToCart(product) {
     const name = product.detailName || product.name;
+    const image = product.detailImage || product.image;
     const priceCents = getProductPriceInCents(product);
-    if (!name || !product.image || priceCents === null) return false;
+    if (!name || !image || priceCents === null) return false;
 
     const id = `${product.restaurantName || product.seller || 'home'}:${name}`
       .toLocaleLowerCase('pt-BR');
@@ -381,7 +382,7 @@ function AppContent() {
 
       return [...current, {
         id,
-        image: product.image,
+        image,
         name,
         priceCents,
         quantity: 1,

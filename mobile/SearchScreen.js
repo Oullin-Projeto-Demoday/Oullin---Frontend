@@ -2749,7 +2749,7 @@ export function FoodDetailsScreen({
             source={heroImageSource}
             style={[styles.foodReferenceHeroImage, heroImageSizeStyle]}
           />
-          {!homeReferenceLayout && onBack && (
+          {onBack && (
             <Pressable
               accessibilityLabel="Voltar"
               accessibilityRole="button"
@@ -3308,6 +3308,16 @@ export function RestaurantDetailScreen({
           />
           <View style={styles.restaurantHeroShade} />
           <View style={styles.restaurantHeroHeader}>
+            {onBack && (
+              <Pressable
+                accessibilityLabel="Voltar"
+                accessibilityRole="button"
+                onPress={onBack}
+                style={styles.restaurantBackButton}
+              >
+                <Text style={styles.restaurantBackText}>‹</Text>
+              </Pressable>
+            )}
             <View style={styles.restaurantSearchBox}>
               <Text style={styles.searchIcon}>⌕</Text>
               <TextInput
@@ -5064,6 +5074,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     height: 40,
     justifyContent: 'center',
+    marginRight: 8,
     width: 40,
   },
   restaurantBackText: {

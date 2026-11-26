@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Image,
   Keyboard,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
@@ -300,10 +301,10 @@ const SEARCH_FILTERS = [
 ];
 
 const SEARCH_FILTER_WIDTHS = {
-  'Todo Oullin': 68,
-  'Perfil alimentar': 88,
-  restaurantes: 86,
-  bebidas: 79,
+  'Todo Oullin': 70,
+  'Perfil alimentar': 92,
+  restaurantes: 82,
+  bebidas: 89,
   região: 70,
   'menor preço': 90,
 };
@@ -407,6 +408,95 @@ const SAUDAVEL_LIFE_CHICKEN_FEATURES = [
   { type: 'ingredients', label: 'Ingredientes atualizados' },
   { type: 'nutrition', label: 'Ficha nutricional' },
 ];
+
+const CHICKEN_UTENSILS = [
+  {
+    title: 'Tábua de corte',
+    description: 'Usada para apoiar e cortar o frango cru.',
+    image: require('./assets/chicken-cutting-board.png'),
+  },
+  {
+    title: 'Faca de cozinha',
+    description: 'Usada para cortar e preparar o filé de frango.',
+    image: require('./assets/chicken-kitchen-knife.png'),
+  },
+  {
+    title: 'Frigideira',
+    description: 'Usada para grelhar o frango.',
+    image: require('./assets/chicken-frying-pan.png'),
+  },
+  {
+    title: 'Pegador e espátula',
+    description: 'Usados para virar e retirar o frango da frigideira.',
+    image: require('./assets/chicken-tongs-spatula.png'),
+  },
+];
+
+const CHICKEN_INGREDIENTS = [
+  'Peito de frango grelhado',
+  'Arroz Cozido',
+  'Purê de batata',
+  'Cebolinha e temperos',
+];
+
+const CHICKEN_ALLERGENS = [
+  { name: 'Glúten', isContained: false },
+  { name: 'Lactose', isContained: false },
+  { name: 'Ovo', isContained: false },
+  { name: 'Soja', isContained: false },
+  { name: 'Amendoim e castanhas', isContained: false },
+  { name: 'Carne', isContained: true },
+  { name: 'Batata', isContained: true },
+  { name: 'Arroz', isContained: true },
+];
+
+const CHICKEN_NUTRITION_COMPONENTS = [
+  { component: 'Energia', unit: 'KJ' },
+  { component: 'Energia', unit: 'kcal' },
+  { component: 'Umidade', unit: 'g' },
+  { component: 'Carboidrato total', unit: 'g' },
+  { component: 'Carboidrato disponível', unit: 'g' },
+  { component: 'Proteína', unit: 'g' },
+  { component: 'Lipídios', unit: 'g' },
+  { component: 'Fibra alimentar', unit: 'g' },
+  { component: 'Álcool', unit: 'g' },
+  { component: 'Cinzas', unit: 'g' },
+  { component: 'Colesterol', unit: 'Mg' },
+  { component: 'Ácidos graxos saturados', unit: 'g' },
+  { component: 'Ácidos graxos monoinsaturados', unit: 'g' },
+  { component: 'Ácidos Graxos polinsaturados', unit: 'g' },
+];
+
+const CHICKEN_NUTRITION_TABLES = {
+  'Peito de frango grelhado': {
+    title: 'Peito de frango grelhado',
+    values: [
+      '637', '150', '64,0', '0,00', '0,00', '32,1', '2,45',
+      '0,00', '0,00', '1,44', '1,44', '89,1', '0,90', '0,30',
+    ],
+  },
+  'Arroz Cozido': {
+    title: 'Arroz cozido',
+    values: [
+      '555', '131', '66,9', '30,0', '28,8', '32,1', '2,45',
+      '0,00', '0,00', '1,44', '1,44', '89,1', '0,90', '0,30',
+    ],
+  },
+  'Purê de batata': {
+    title: 'Pure Batata',
+    values: [
+      '272', '65', '85,2', '10,9', '9,62', '1,60', '1,93',
+      '1,21', '0,00', '0,48', '1,98', '0,75', '0,44', '0,57',
+    ],
+  },
+  'Cebolinha e temperos': {
+    title: 'Cebolinha e Temperos',
+    values: [
+      '42', '10', '97,0', '1,60', '0,92', '0,89', '0,15',
+      '0,68', '0,00', '0,37', '0,00', '0,03', '0,02', '0,06',
+    ],
+  },
+};
 
 const SAUDAVEL_LIFE_CHICKEN_RECOMMENDATIONS = [
   {
@@ -965,9 +1055,1043 @@ function FoodFeatureCard({ label, type, size, useReferenceIcons = false }) {
   );
 }
 
-export function FoodDetailsScreen({ item, onBack, onSelectItem, profileSelections = {}, screenWidth }) {
+function ChickenUtensilsScreen({ onBack, screenWidth }) {
+  const { height: screenHeight } = useWindowDimensions();
+  const [showQuestionHelp, setShowQuestionHelp] = useState(false);
+  const scale = Math.min(
+    screenWidth / 320,
+    Math.max(0.9, screenHeight / 674),
+    1,
+  );
+  const size = (value) => value * scale;
+
+  return (
+    <View style={styles.chickenUtensilsScreen}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.chickenUtensilsContent,
+          {
+            paddingHorizontal: size(21),
+            paddingTop: size(38),
+            paddingBottom: size(16),
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text
+          style={[
+            styles.chickenUtensilsTitle,
+            {
+              fontSize: size(16),
+              lineHeight: size(19),
+            },
+          ]}
+        >
+          Utensílios do frango
+        </Text>
+        <Text
+          style={[
+            styles.chickenUtensilsSubtitle,
+            {
+              fontSize: size(9),
+              lineHeight: size(11),
+            },
+          ]}
+        >
+          Veja os utensílios usados para preparar o frango grelhado desta marmita.
+        </Text>
+
+        <View style={[styles.chickenUtensilsList, { marginTop: size(30) }]}>
+          {CHICKEN_UTENSILS.map((utensil) => (
+            <View
+              key={utensil.title}
+              style={[
+                styles.chickenUtensilCard,
+                {
+                  borderRadius: size(10),
+                  height: size(74),
+                  marginBottom: size(6),
+                  paddingHorizontal: size(8),
+                },
+              ]}
+            >
+              <Image
+                accessibilityLabel={utensil.title}
+                resizeMode="contain"
+                source={utensil.image}
+                style={{
+                  height: size(46),
+                  width: size(59),
+                }}
+              />
+              <View style={{ flex: 1, marginLeft: size(6) }}>
+                <Text
+                  style={[
+                    styles.chickenUtensilTitle,
+                    {
+                      fontSize: size(10.5),
+                      lineHeight: size(13),
+                    },
+                  ]}
+                >
+                  {utensil.title}
+                </Text>
+                <Text
+                  style={[
+                    styles.chickenUtensilDescription,
+                    {
+                      fontSize: size(7.5),
+                      lineHeight: size(9.5),
+                    },
+                  ]}
+                >
+                  {utensil.description}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        <View
+          style={[
+            styles.chickenPreparationCare,
+            {
+              borderRadius: size(10),
+              marginTop: size(7),
+              minHeight: size(150),
+              padding: size(12),
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.chickenPreparationCareTitle,
+              {
+                fontSize: size(12),
+                lineHeight: size(15),
+              },
+            ]}
+          >
+            Cuidados durante o preparo do frango
+          </Text>
+          {[
+            'Separar o frango cru dos outros ingredientes.',
+            'Higienizar tábua, faca e superfícies após o uso.',
+            'Usar utensílios limpos para retirar e servir o frango.',
+          ].map((tip, index) => (
+            <Text
+              key={tip}
+              style={[
+                styles.chickenPreparationTip,
+                {
+                  fontSize: size(9),
+                  lineHeight: size(13),
+                  marginTop: index === 0 ? size(5) : size(2),
+                },
+              ]}
+            >
+              {index + 1}. {tip}
+            </Text>
+          ))}
+        </View>
+      </ScrollView>
+
+      <View
+        style={[
+          styles.chickenUtensilsFooter,
+          {
+            paddingHorizontal: size(21),
+            paddingBottom: size(21),
+            paddingTop: size(4),
+          },
+        ]}
+      >
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setShowQuestionHelp(true)}
+          style={({ pressed }) => [
+            styles.chickenUtensilsButton,
+            styles.chickenUtensilsQuestionButton,
+            {
+              borderRadius: size(10),
+              height: size(35),
+              marginRight: size(7),
+            },
+            pressed && styles.chickenUtensilsPressed,
+          ]}
+        >
+          <Text
+            style={[
+              styles.chickenUtensilsQuestionText,
+              { fontSize: size(9.5) },
+            ]}
+          >
+            Tenho dúvidas
+          </Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onBack}
+          style={({ pressed }) => [
+            styles.chickenUtensilsButton,
+            styles.chickenUtensilsConfirmButton,
+            {
+              borderRadius: size(10),
+              height: size(35),
+            },
+            pressed && styles.chickenUtensilsPressed,
+          ]}
+        >
+          <Text
+            style={[
+              styles.chickenUtensilsConfirmText,
+              { fontSize: size(9.5) },
+            ]}
+          >
+            Entendi
+          </Text>
+        </Pressable>
+      </View>
+      <Modal
+        animationType="fade"
+        onRequestClose={() => setShowQuestionHelp(false)}
+        transparent
+        visible={showQuestionHelp}
+      >
+        <View style={styles.chickenQuestionModalBackdrop}>
+          <View style={styles.chickenQuestionModal}>
+            <Text style={styles.chickenQuestionModalTitle}>Dúvidas sobre o preparo</Text>
+            <Text style={styles.chickenQuestionModalText}>
+              Confirme com a loja como os utensílios são higienizados e usados no preparo.
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setShowQuestionHelp(false)}
+              style={({ pressed }) => [
+                styles.chickenQuestionModalClose,
+                pressed && styles.chickenUtensilsPressed,
+              ]}
+            >
+              <Text style={styles.chickenQuestionModalCloseText}>Fechar</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+function ChickenNutritionTableScreen({ ingredient, onBack, screenWidth }) {
+  const { height: screenHeight } = useWindowDimensions();
+  const scale = Math.min(
+    screenWidth / 320,
+    Math.max(0.9, screenHeight / 674),
+    1.25,
+  );
+  const size = (value) => value * scale;
+  const nutritionRows = CHICKEN_NUTRITION_COMPONENTS.map((row, index) => ({
+    ...row,
+    value: ingredient.values[index],
+  }));
+
+  return (
+    <View style={styles.chickenNutritionScreen}>
+      <ScrollView
+        contentContainerStyle={styles.chickenNutritionContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View
+          style={[
+            styles.chickenNutritionTopSpace,
+            {
+              height: size(55),
+              paddingHorizontal: size(15),
+            },
+          ]}
+        >
+          <Pressable
+            accessibilityLabel="Voltar aos ingredientes"
+            accessibilityRole="button"
+            onPress={onBack}
+            style={({ pressed }) => [
+              styles.chickenNutritionBackButton,
+              {
+                height: size(34),
+                width: size(34),
+              },
+              pressed && styles.chickenUtensilsPressed,
+            ]}
+          >
+            <Text
+              style={[
+                styles.chickenNutritionBackText,
+                { fontSize: size(25), lineHeight: size(29) },
+              ]}
+            >
+              ‹
+            </Text>
+          </Pressable>
+        </View>
+
+        <View
+          style={[
+            styles.chickenNutritionTitleBar,
+            {
+              height: size(61),
+              paddingHorizontal: size(19),
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.chickenNutritionSource,
+              {
+                fontSize: size(10),
+                marginRight: size(19),
+              },
+            ]}
+          >
+            TBCA
+          </Text>
+          <Text
+            style={[
+              styles.chickenNutritionTitle,
+              {
+                fontSize: size(13),
+                lineHeight: size(17),
+              },
+            ]}
+          >
+            {ingredient.title}
+          </Text>
+        </View>
+
+        <View
+          style={[
+            styles.chickenNutritionTable,
+            {
+              paddingHorizontal: size(15),
+              paddingTop: size(8),
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.chickenNutritionHeaderRow,
+              {
+                minHeight: size(34),
+                paddingBottom: size(4),
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.chickenNutritionHeaderComponent,
+                { fontSize: size(9) },
+              ]}
+            >
+              Componente
+            </Text>
+            <Text
+              style={[
+                styles.chickenNutritionHeaderUnit,
+                { fontSize: size(9) },
+              ]}
+            >
+              Unidades
+            </Text>
+            <Text
+              style={[
+                styles.chickenNutritionHeaderValue,
+                { fontSize: size(9) },
+              ]}
+            >
+              Valor por 100g
+            </Text>
+          </View>
+          {nutritionRows.map((row, index) => (
+            <View
+              key={`${row.component}-${row.unit}`}
+              style={[
+                styles.chickenNutritionDataRow,
+                {
+                  minHeight: size(40),
+                  paddingVertical: size(3),
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.chickenNutritionComponent,
+                  {
+                    fontSize: size(10),
+                    lineHeight: size(13),
+                  },
+                ]}
+              >
+                {row.component}
+              </Text>
+              <Text
+                style={[
+                  styles.chickenNutritionUnit,
+                  { fontSize: size(10) },
+                ]}
+              >
+                {row.unit}
+              </Text>
+              <Text
+                style={[
+                  styles.chickenNutritionValue,
+                  { fontSize: size(10) },
+                ]}
+              >
+                {row.value}
+              </Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
+
+function ChickenNutritionInfoScreen({ onBack, screenWidth }) {
+  const { height: screenHeight } = useWindowDimensions();
+  const [showQuestionHelp, setShowQuestionHelp] = useState(false);
+  const scale = Math.min(
+    screenWidth / 320,
+    Math.max(0.9, screenHeight / 674),
+    1,
+  );
+  const size = (value) => value * scale;
+  const nutrients = [
+    ['Carboidratos', '58 g'],
+    ['Açúcares totais', '5 g'],
+    ['Proteínas', '32 g'],
+    ['Gorduras totais', '12 g'],
+    ['Gorduras saturadas', '3 g'],
+    ['Fibra alimentar', '6 g'],
+    ['Sódio', '480 mg'],
+  ];
+
+  return (
+    <View style={styles.chickenNutritionInfoScreen}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.chickenNutritionInfoContent,
+          {
+            paddingHorizontal: size(19),
+            paddingTop: size(34),
+            paddingBottom: size(12),
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text
+          style={[
+            styles.chickenNutritionInfoTitle,
+            {
+              fontSize: size(14),
+              lineHeight: size(18),
+            },
+          ]}
+        >
+          Informações nutricionais
+        </Text>
+        <Text
+          style={[
+            styles.chickenNutritionInfoSubtitle,
+            {
+              fontSize: size(8),
+              lineHeight: size(11),
+            },
+          ]}
+        >
+          Entenda os nutrientes da sua marmita.
+        </Text>
+
+        <View
+          style={[
+            styles.chickenNutritionEnergyCard,
+            {
+              borderRadius: size(9),
+              marginTop: size(15),
+              minHeight: size(65),
+              padding: size(9),
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.chickenNutritionEnergyLabel,
+              { fontSize: size(7), lineHeight: size(9) },
+            ]}
+          >
+            Valor energético
+          </Text>
+          <Text
+            style={[
+              styles.chickenNutritionEnergyValue,
+              {
+                fontSize: size(19),
+                lineHeight: size(23),
+              },
+            ]}
+          >
+            480 kcal
+          </Text>
+          <Text
+            style={[
+              styles.chickenNutritionServing,
+              { fontSize: size(7), lineHeight: size(9) },
+            ]}
+          >
+            Porção: 350 g
+          </Text>
+        </View>
+
+        <View
+          style={[
+            styles.chickenNutritionSummary,
+            { marginTop: size(10) },
+          ]}
+        >
+          {[
+            ['58 g', 'Carboidratos'],
+            ['32 g', 'Proteínas'],
+            ['12 g', 'Gorduras'],
+          ].map(([value, label]) => (
+            <View
+              key={label}
+              style={[
+                styles.chickenNutritionSummaryCard,
+                {
+                  borderRadius: size(7),
+                  height: size(36),
+                  marginRight: size(5),
+                  paddingHorizontal: size(6),
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.chickenNutritionSummaryValue,
+                  { fontSize: size(10), lineHeight: size(12) },
+                ]}
+              >
+                {value}
+              </Text>
+              <Text
+                style={[
+                  styles.chickenNutritionSummaryLabel,
+                  { fontSize: size(6.5), lineHeight: size(8) },
+                ]}
+              >
+                {label}
+              </Text>
+            </View>
+          ))}
+        </View>
+
+        <View
+          style={[
+            styles.chickenNutritionDetailCard,
+            {
+              borderRadius: size(9),
+              marginTop: size(6),
+              minHeight: size(206),
+              padding: size(9),
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.chickenNutritionDetailHeader,
+              { marginBottom: size(4) },
+            ]}
+          >
+            <Text
+              style={[
+                styles.chickenNutritionDetailHeading,
+                { fontSize: size(7), lineHeight: size(9) },
+              ]}
+            >
+              Nutriente
+            </Text>
+            <Text
+              style={[
+                styles.chickenNutritionDetailHeading,
+                { fontSize: size(7), lineHeight: size(9) },
+              ]}
+            >
+              Quantidade
+            </Text>
+          </View>
+          {nutrients.map(([label, amount]) => (
+            <View
+              key={label}
+              style={[
+                styles.chickenNutritionDetailRow,
+                { minHeight: size(19) },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.chickenNutritionDetailLabel,
+                  { fontSize: size(7), lineHeight: size(9) },
+                ]}
+              >
+                {label}
+              </Text>
+              <Text
+                style={[
+                  styles.chickenNutritionDetailAmount,
+                  { fontSize: size(7), lineHeight: size(9) },
+                ]}
+              >
+                {amount}
+              </Text>
+            </View>
+          ))}
+          <Text
+            style={[
+              styles.chickenNutritionDisclaimer,
+              {
+                fontSize: size(6),
+                lineHeight: size(8),
+                marginTop: size(3),
+              },
+            ]}
+          >
+            Valores ilustrativos para a porção.
+          </Text>
+        </View>
+      </ScrollView>
+
+      <View
+        style={[
+          styles.chickenUtensilsFooter,
+          {
+            paddingHorizontal: size(19),
+            paddingBottom: size(21),
+            paddingTop: size(4),
+          },
+        ]}
+      >
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setShowQuestionHelp(true)}
+          style={({ pressed }) => [
+            styles.chickenUtensilsButton,
+            styles.chickenUtensilsQuestionButton,
+            {
+              borderRadius: size(9),
+              height: size(35),
+              marginRight: size(7),
+            },
+            pressed && styles.chickenUtensilsPressed,
+          ]}
+        >
+          <Text
+            style={[
+              styles.chickenUtensilsQuestionText,
+              { fontSize: size(8) },
+            ]}
+          >
+            Tenho dúvidas
+          </Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onBack}
+          style={({ pressed }) => [
+            styles.chickenUtensilsButton,
+            styles.chickenUtensilsConfirmButton,
+            {
+              borderRadius: size(9),
+              height: size(35),
+            },
+            pressed && styles.chickenUtensilsPressed,
+          ]}
+        >
+          <Text
+            style={[
+              styles.chickenUtensilsConfirmText,
+              { fontSize: size(8) },
+            ]}
+          >
+            Entendi
+          </Text>
+        </Pressable>
+      </View>
+
+      <Modal
+        animationType="fade"
+        onRequestClose={() => setShowQuestionHelp(false)}
+        transparent
+        visible={showQuestionHelp}
+      >
+        <View style={styles.chickenQuestionModalBackdrop}>
+          <View style={styles.chickenQuestionModal}>
+            <Text style={styles.chickenQuestionModalTitle}>Tenho dúvidas</Text>
+            <Text style={styles.chickenQuestionModalText}>
+              Confirme as informações nutricionais com o responsável pelo preparo.
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => setShowQuestionHelp(false)}
+              style={({ pressed }) => [
+                styles.chickenQuestionModalClose,
+                pressed && styles.chickenUtensilsPressed,
+              ]}
+            >
+              <Text style={styles.chickenQuestionModalCloseText}>Fechar</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+function ChickenIngredientsScreen({ onBack, screenWidth }) {
+  const { height: screenHeight } = useWindowDimensions();
+  const [selectedIngredient, setSelectedIngredient] = useState(null);
+  const [showQuestionHelp, setShowQuestionHelp] = useState(false);
+  const scale = Math.min(
+    screenWidth / 320,
+    Math.max(0.9, screenHeight / 674),
+    1,
+  );
+  const size = (value) => value * scale;
+  const closeModal = () => {
+    setShowQuestionHelp(false);
+  };
+
+  if (selectedIngredient) {
+    return (
+      <ChickenNutritionTableScreen
+        ingredient={selectedIngredient}
+        onBack={() => setSelectedIngredient(null)}
+        screenWidth={screenWidth}
+      />
+    );
+  }
+
+  return (
+    <View style={styles.chickenUtensilsScreen}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.chickenUtensilsContent,
+          {
+            paddingHorizontal: size(21),
+            paddingTop: size(34),
+            paddingBottom: size(16),
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text
+          style={[
+            styles.chickenUtensilsTitle,
+            {
+              fontSize: size(16),
+              lineHeight: size(20),
+            },
+          ]}
+        >
+          Ingredientes e alergênicos
+        </Text>
+
+        <Text
+          style={[
+            styles.chickenUtensilsSubtitle,
+            {
+              fontSize: size(9),
+              lineHeight: size(12),
+              marginTop: size(4),
+            },
+          ]}
+        >
+          Saiba exatamente o que compõe sua refeição.
+        </Text>
+
+        <View
+          style={[
+            styles.chickenIngredientsCard,
+            {
+              borderRadius: size(10),
+              marginTop: size(12),
+              padding: size(12),
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.chickenIngredientsSectionTitle,
+              {
+                fontSize: size(11),
+                lineHeight: size(14),
+                marginBottom: size(7),
+              },
+            ]}
+          >
+            Composição da marmita
+          </Text>
+          {CHICKEN_INGREDIENTS.map((ingredient) => (
+            <View
+              key={ingredient}
+              style={[
+                styles.chickenIngredientRow,
+                {
+                  minHeight: size(27),
+                  paddingVertical: size(3),
+                },
+              ]}
+            >
+              <View
+                style={[
+                  styles.chickenIngredientCopy,
+                  {
+                    marginRight: size(4),
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.chickenIngredientBullet,
+                    {
+                      height: size(4),
+                      marginRight: size(6),
+                      width: size(4),
+                    },
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.chickenIngredientName,
+                    {
+                      fontSize: size(9),
+                      lineHeight: size(12),
+                    },
+                  ]}
+                >
+                  {ingredient}
+                </Text>
+              </View>
+              <Pressable
+                accessibilityLabel={`Ver mais sobre ${ingredient}`}
+                accessibilityRole="button"
+                onPress={() => setSelectedIngredient(CHICKEN_NUTRITION_TABLES[ingredient])}
+                style={({ pressed }) => [
+                  styles.chickenIngredientMoreButton,
+                  {
+                    borderRadius: size(7),
+                    minHeight: size(20),
+                    paddingHorizontal: size(8),
+                  },
+                  pressed && styles.chickenUtensilsPressed,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.chickenIngredientMoreText,
+                    { fontSize: size(8) },
+                  ]}
+                >
+                  Ver mais
+                </Text>
+              </Pressable>
+            </View>
+          ))}
+          <Text
+            style={[
+              styles.chickenIngredientsNoteText,
+              {
+                fontSize: size(7),
+                lineHeight: size(9),
+                marginTop: size(13),
+              },
+            ]}
+          >
+            Ingredientes completos informados pelo responsável.
+          </Text>
+        </View>
+
+        <View
+          style={[
+            styles.chickenIngredientsAllergenCard,
+            {
+              borderRadius: size(10),
+              marginTop: size(10),
+              padding: size(12),
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.chickenIngredientsSectionTitle,
+              {
+                fontSize: size(10),
+                lineHeight: size(13),
+                marginBottom: size(7),
+              },
+            ]}
+          >
+            Confira antes de consumir
+          </Text>
+          {CHICKEN_ALLERGENS.map((allergen) => (
+            <View
+              key={allergen.name}
+              style={[
+                styles.chickenAllergenRow,
+                {
+                  minHeight: size(22),
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.chickenAllergenName,
+                  {
+                    fontSize: size(8),
+                    lineHeight: size(10),
+                  },
+                ]}
+              >
+                {allergen.name}
+              </Text>
+              <Image
+                accessibilityLabel={allergen.isContained ? 'Contém' : 'Não contém'}
+                resizeMode="contain"
+                source={allergen.isContained
+                  ? require('./assets/allergen-contained.png')
+                  : require('./assets/allergen-not-contained.png')}
+                style={{
+                  height: size(17),
+                  width: size(allergen.isContained ? 43 : 57),
+                }}
+              />
+            </View>
+          ))}
+          <Text
+            style={[
+              styles.chickenIngredientsWarning,
+              {
+                fontSize: size(7),
+                lineHeight: size(9),
+                marginTop: size(5),
+              },
+            ]}
+          >
+            Informações de alergênicos e risco de contaminação cruzada devem
+            ser confirmadas com o responsável.
+          </Text>
+        </View>
+      </ScrollView>
+
+      <View
+        style={[
+          styles.chickenUtensilsFooter,
+          {
+            paddingHorizontal: size(21),
+            paddingBottom: size(21),
+            paddingTop: size(4),
+          },
+        ]}
+      >
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setShowQuestionHelp(true)}
+          style={({ pressed }) => [
+            styles.chickenUtensilsButton,
+            styles.chickenUtensilsQuestionButton,
+            {
+              borderRadius: size(10),
+              height: size(35),
+              marginRight: size(7),
+            },
+            pressed && styles.chickenUtensilsPressed,
+          ]}
+        >
+          <Text
+            style={[
+              styles.chickenUtensilsQuestionText,
+              { fontSize: size(9.5) },
+            ]}
+          >
+            Tenho dúvidas
+          </Text>
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onBack}
+          style={({ pressed }) => [
+            styles.chickenUtensilsButton,
+            styles.chickenUtensilsConfirmButton,
+            {
+              borderRadius: size(10),
+              height: size(35),
+            },
+            pressed && styles.chickenUtensilsPressed,
+          ]}
+        >
+          <Text
+            style={[
+              styles.chickenUtensilsConfirmText,
+              { fontSize: size(9.5) },
+            ]}
+          >
+            Entendi
+          </Text>
+        </Pressable>
+      </View>
+
+      <Modal
+        animationType="fade"
+        onRequestClose={closeModal}
+        transparent
+        visible={showQuestionHelp}
+      >
+        <View style={styles.chickenQuestionModalBackdrop}>
+          <View style={styles.chickenQuestionModal}>
+            <Text style={styles.chickenQuestionModalTitle}>Tenho dúvidas</Text>
+            <Text style={styles.chickenQuestionModalText}>
+              Informações de alergênicos e risco de contaminação cruzada devem
+              ser confirmadas com o responsável.
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={closeModal}
+              style={({ pressed }) => [
+                styles.chickenQuestionModalClose,
+                pressed && styles.chickenUtensilsPressed,
+              ]}
+            >
+              <Text style={styles.chickenQuestionModalCloseText}>Fechar</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
+
+export function FoodDetailsScreen({
+  item,
+  onBack,
+  onSelectItem,
+  onChickenInfoScreenChange,
+  profileSelections = {},
+  screenWidth,
+}) {
   const [detailSearchQuery, setDetailSearchQuery] = useState('');
+  const [showChickenUtensils, setShowChickenUtensils] = useState(false);
+  const [showChickenIngredients, setShowChickenIngredients] = useState(false);
+  const [showChickenNutrition, setShowChickenNutrition] = useState(false);
   const isSaudavelChicken = isSaudavelLifeChicken(item);
+  const isChickenMeal =
+    normalizeSearchTerm(item.detailName || item.name || '') === 'marmita de frango';
   const productFeatures = item.features || [];
   const featureSize = productFeatures.length >= 4
     ? Math.min(56, (screenWidth - 72) / 4)
@@ -986,6 +2110,44 @@ export function FoodDetailsScreen({ item, onBack, onSelectItem, profileSelection
       normalizeSearchTerm(filter),
     ),
   );
+  useEffect(() => {
+    const showChickenInfoScreen =
+      showChickenUtensils || showChickenIngredients || showChickenNutrition;
+    if (!showChickenInfoScreen) return undefined;
+    onChickenInfoScreenChange?.(true);
+    return () => onChickenInfoScreenChange?.(false);
+  }, [
+    onChickenInfoScreenChange,
+    showChickenIngredients,
+    showChickenNutrition,
+    showChickenUtensils,
+  ]);
+
+  if (showChickenUtensils) {
+    return (
+      <ChickenUtensilsScreen
+        onBack={() => setShowChickenUtensils(false)}
+        screenWidth={screenWidth}
+      />
+    );
+  }
+  if (showChickenIngredients) {
+    return (
+      <ChickenIngredientsScreen
+        onBack={() => setShowChickenIngredients(false)}
+        screenWidth={screenWidth}
+      />
+    );
+  }
+  if (showChickenNutrition) {
+    return (
+      <ChickenNutritionInfoScreen
+        onBack={() => setShowChickenNutrition(false)}
+        screenWidth={screenWidth}
+      />
+    );
+  }
+
   const normalizedDetailQuery = normalizeSearchTerm(detailSearchQuery);
   const visibleRecommendations = normalizedDetailQuery
     ? recommendations.filter((recommendation) =>
@@ -1213,12 +2375,53 @@ export function FoodDetailsScreen({ item, onBack, onSelectItem, profileSelection
                   { marginRight: featureGap },
                 ]}
               >
-                <FoodFeatureCard
-                  label={feature.label}
-                  size={featureSize}
-                  type={feature.type}
-                  useReferenceIcons
-                />
+                {isChickenMeal && feature.type === 'utensils' ? (
+                  <Pressable
+                    accessibilityLabel="Abrir utensílios do frango"
+                    accessibilityRole="button"
+                    onPress={() => setShowChickenUtensils(true)}
+                  >
+                    <FoodFeatureCard
+                      label={feature.label}
+                      size={featureSize}
+                      type={feature.type}
+                      useReferenceIcons
+                    />
+                  </Pressable>
+                ) : isChickenMeal && ['ingredients', 'ingredientCard'].includes(feature.type) ? (
+                  <Pressable
+                    accessibilityLabel="Abrir ingredientes e alergênicos"
+                    accessibilityRole="button"
+                    onPress={() => setShowChickenIngredients(true)}
+                  >
+                    <FoodFeatureCard
+                      label={feature.label}
+                      size={featureSize}
+                      type={feature.type}
+                      useReferenceIcons
+                    />
+                  </Pressable>
+                ) : isChickenMeal && feature.type === 'nutrition' ? (
+                  <Pressable
+                    accessibilityLabel="Abrir ficha nutricional"
+                    accessibilityRole="button"
+                    onPress={() => setShowChickenNutrition(true)}
+                  >
+                    <FoodFeatureCard
+                      label={feature.label}
+                      size={featureSize}
+                      type={feature.type}
+                      useReferenceIcons
+                    />
+                  </Pressable>
+                ) : (
+                  <FoodFeatureCard
+                    label={feature.label}
+                    size={featureSize}
+                    type={feature.type}
+                    useReferenceIcons
+                  />
+                )}
               </View>
             ))}
           </View>
@@ -1415,6 +2618,7 @@ export function RestaurantDetailScreen({
   onBack,
   onStatusBarBackgroundChange,
   onCompactNavigationChange,
+  onChickenInfoScreenChange,
   profileSelections = {},
 }) {
   const [selectedItem, setSelectedItem] = useState(null);
@@ -1477,6 +2681,7 @@ export function RestaurantDetailScreen({
         item={selectedItem}
         onBack={() => setSelectedItem(null)}
         onSelectItem={selectProduct}
+        onChickenInfoScreenChange={onChickenInfoScreenChange}
         profileSelections={profileSelections}
         screenWidth={screenWidth}
       />
@@ -1966,6 +3171,7 @@ export default function SearchScreen({
   profileSelections = {},
   onStatusBarBackgroundChange,
   onCompactNavigationChange,
+  onChickenInfoScreenChange,
 }) {
   const { width: screenWidth } = useWindowDimensions();
   const isWeb = Platform.OS === 'web';
@@ -2000,14 +3206,6 @@ export default function SearchScreen({
   );
   const profileSectionFontSize = Math.min(screenWidth * 30 / 608, 30);
   const categoryMarginTop = 0;
-  const compactFilterWidths = {
-    'Todo Oullin': isWeb ? 43 : 68,
-    'Perfil alimentar': isWeb ? 56 : 88,
-    restaurantes: isWeb ? 50 : 118,
-    bebidas: isWeb ? 40 : 74,
-    região: isWeb ? 38 : 68,
-    'menor preço': isWeb ? 53 : 88,
-  };
   const [query, setQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedSearchFilter, setSelectedSearchFilter] = useState('Todo Oullin');
@@ -2171,6 +3369,7 @@ export default function SearchScreen({
       <FoodDetailsScreen
         item={selectedProduct}
         onBack={() => setSelectedProduct(null)}
+        onChickenInfoScreenChange={onChickenInfoScreenChange}
         profileSelections={profileSelections}
         onSelectItem={(item) =>
           setSelectedProduct({
@@ -2202,6 +3401,7 @@ export default function SearchScreen({
         }}
         onStatusBarBackgroundChange={onStatusBarBackgroundChange}
         onCompactNavigationChange={onCompactNavigationChange}
+        onChickenInfoScreenChange={onChickenInfoScreenChange}
         profileSelections={profileSelections}
         restaurant={selectedRestaurant}
         screenWidth={screenWidth}
@@ -2219,9 +3419,11 @@ export default function SearchScreen({
             paddingBottom: isWeb
               ? screenWidth * (showSearchFilters ? 26 : 18) / 608
               : isCompactScreen ? 10 : screenWidth * 22 / 608,
-            paddingHorizontal: isWeb
-              ? screenWidth * (showSearchFilters ? 10 : 18) / 608
-              : isCompactScreen ? 16 : screenWidth * (showSearchFilters ? 12 : 14) / 608,
+            paddingHorizontal: isCompactScreen
+              ? screenWidth * 14 / 393
+              : isWeb
+                ? screenWidth * (showSearchFilters ? 10 : 18) / 608
+                : screenWidth * (showSearchFilters ? 12 : 14) / 608,
             paddingTop: isWeb
               ? screenWidth * (showSearchFilters ? 91 : 102) / 608
               : isCompactScreen ? 48 : screenWidth * (showSearchFilters ? 85 : 97) / 608,
@@ -2256,11 +3458,12 @@ export default function SearchScreen({
               setShowRestaurantFilter(false);
             }}
             onSubmitEditing={() => submitSearch()}
-            placeholder="Peça no oullin"
+            placeholder="Peça na oullin"
             placeholderTextColor={COLORS.muted}
             returnKeyType="search"
             style={[
               styles.searchInput,
+              isWeb && styles.searchInputWeb,
               {
                 fontSize: isWeb
                   ? Math.min(screenWidth * 24 / 608, 15)
@@ -2334,9 +3537,7 @@ export default function SearchScreen({
                       paddingHorizontal: isWeb
                         ? screenWidth * 4 / 608
                         : isCompactScreen ? 12 : 0,
-                      width: isWeb || isCompactScreen
-                        ? compactFilterWidths[filter]
-                        : screenWidth * SEARCH_FILTER_WIDTHS[filter] / 393,
+                      width: screenWidth * SEARCH_FILTER_WIDTHS[filter] / 393,
                     },
                     active && styles.searchFilterChipActive,
                   ]}
@@ -2733,6 +3934,9 @@ const styles = StyleSheet.create({
     flex: 1,
     height: '100%',
     paddingVertical: 0,
+  },
+  searchInputWeb: {
+    outlineStyle: 'none',
   },
   clearButton: {
     alignItems: 'center',
@@ -3423,6 +4627,325 @@ const styles = StyleSheet.create({
   foodReferenceTagText: {
     fontSize: 7,
     lineHeight: 9,
+  },
+  chickenUtensilsScreen: {
+    backgroundColor: COLORS.white,
+    flex: 1,
+  },
+  chickenUtensilsContent: {
+    backgroundColor: COLORS.white,
+    flexGrow: 1,
+  },
+  chickenNutritionScreen: {
+    backgroundColor: COLORS.white,
+    flex: 1,
+  },
+  chickenNutritionContent: {
+    backgroundColor: COLORS.white,
+    flexGrow: 1,
+    paddingBottom: 12,
+  },
+  chickenNutritionTopSpace: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  chickenNutritionBackButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chickenNutritionBackText: {
+    color: COLORS.text,
+  },
+  chickenNutritionTitleBar: {
+    alignItems: 'center',
+    backgroundColor: COLORS.amber,
+    flexDirection: 'row',
+  },
+  chickenNutritionSource: {
+    color: COLORS.text,
+  },
+  chickenNutritionTitle: {
+    color: COLORS.text,
+    flex: 1,
+  },
+  chickenNutritionTable: {
+    width: '100%',
+  },
+  chickenNutritionHeaderRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  chickenNutritionHeaderComponent: {
+    color: '#222222',
+    flex: 4,
+    fontWeight: '700',
+  },
+  chickenNutritionHeaderUnit: {
+    color: '#222222',
+    flex: 2.6,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  chickenNutritionHeaderValue: {
+    color: '#222222',
+    flex: 3.4,
+    fontWeight: '700',
+    textAlign: 'right',
+  },
+  chickenNutritionDataRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  chickenNutritionComponent: {
+    color: COLORS.text,
+    flex: 4,
+    paddingRight: 4,
+  },
+  chickenNutritionUnit: {
+    color: COLORS.text,
+    flex: 2.6,
+    textAlign: 'center',
+  },
+  chickenNutritionValue: {
+    color: COLORS.text,
+    flex: 3.4,
+    textAlign: 'right',
+  },
+  chickenNutritionInfoScreen: {
+    backgroundColor: COLORS.white,
+    flex: 1,
+  },
+  chickenNutritionInfoContent: {
+    backgroundColor: COLORS.white,
+    flexGrow: 1,
+  },
+  chickenNutritionInfoTitle: {
+    color: COLORS.text,
+    fontWeight: '700',
+  },
+  chickenNutritionInfoSubtitle: {
+    color: COLORS.text,
+  },
+  chickenNutritionEnergyCard: {
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.orange,
+    borderWidth: 1,
+    justifyContent: 'center',
+  },
+  chickenNutritionEnergyLabel: {
+    color: COLORS.text,
+  },
+  chickenNutritionEnergyValue: {
+    color: COLORS.text,
+    fontWeight: '700',
+  },
+  chickenNutritionServing: {
+    color: COLORS.text,
+  },
+  chickenNutritionSummary: {
+    flexDirection: 'row',
+  },
+  chickenNutritionSummaryCard: {
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.orange,
+    borderWidth: 1,
+    flex: 1,
+    justifyContent: 'center',
+  },
+  chickenNutritionSummaryValue: {
+    color: COLORS.text,
+    fontWeight: '700',
+  },
+  chickenNutritionSummaryLabel: {
+    color: COLORS.text,
+  },
+  chickenNutritionDetailCard: {
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.orange,
+    borderWidth: 1,
+  },
+  chickenNutritionDetailHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  chickenNutritionDetailHeading: {
+    color: COLORS.text,
+    fontWeight: '700',
+  },
+  chickenNutritionDetailRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  chickenNutritionDetailLabel: {
+    color: COLORS.text,
+  },
+  chickenNutritionDetailAmount: {
+    color: COLORS.text,
+  },
+  chickenNutritionDisclaimer: {
+    color: COLORS.muted,
+  },
+  chickenIngredientsCard: {
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.orange,
+    borderWidth: 1,
+  },
+  chickenIngredientsAllergenCard: {
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.orange,
+    borderWidth: 1,
+  },
+  chickenIngredientsSectionTitle: {
+    color: COLORS.text,
+    fontWeight: '700',
+  },
+  chickenIngredientRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  chickenIngredientCopy: {
+    alignItems: 'center',
+    flex: 1,
+    flexDirection: 'row',
+  },
+  chickenIngredientBullet: {
+    backgroundColor: COLORS.orange,
+    borderRadius: 2,
+  },
+  chickenIngredientName: {
+    color: COLORS.text,
+    flex: 1,
+  },
+  chickenIngredientMoreButton: {
+    alignItems: 'center',
+    backgroundColor: '#FFF5E8',
+    justifyContent: 'center',
+  },
+  chickenIngredientMoreText: {
+    color: COLORS.orange,
+    fontWeight: '600',
+  },
+  chickenAllergenRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  chickenAllergenName: {
+    color: COLORS.text,
+    flex: 1,
+  },
+  chickenIngredientsNoteText: {
+    color: COLORS.text,
+  },
+  chickenIngredientsWarning: {
+    color: COLORS.muted,
+  },
+  chickenUtensilsTitle: {
+    color: COLORS.text,
+    fontWeight: '700',
+  },
+  chickenUtensilsSubtitle: {
+    color: COLORS.text,
+  },
+  chickenUtensilsList: {
+    width: '100%',
+  },
+  chickenUtensilCard: {
+    alignItems: 'center',
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.orange,
+    borderWidth: 1,
+    flexDirection: 'row',
+    width: '100%',
+  },
+  chickenUtensilTitle: {
+    color: COLORS.text,
+    fontWeight: '700',
+  },
+  chickenUtensilDescription: {
+    color: COLORS.muted,
+  },
+  chickenPreparationCare: {
+    borderColor: COLORS.orange,
+    borderWidth: 1,
+    width: '100%',
+  },
+  chickenPreparationCareTitle: {
+    color: COLORS.text,
+    fontWeight: '700',
+  },
+  chickenPreparationTip: {
+    color: COLORS.text,
+  },
+  chickenUtensilsFooter: {
+    backgroundColor: COLORS.white,
+    flexDirection: 'row',
+    width: '100%',
+  },
+  chickenUtensilsButton: {
+    alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+  },
+  chickenUtensilsQuestionButton: {
+    backgroundColor: COLORS.white,
+    borderColor: COLORS.orange,
+    borderWidth: 1,
+  },
+  chickenUtensilsConfirmButton: {
+    backgroundColor: COLORS.amber,
+  },
+  chickenUtensilsQuestionText: {
+    color: COLORS.text,
+  },
+  chickenUtensilsConfirmText: {
+    color: COLORS.white,
+    fontWeight: '700',
+  },
+  chickenUtensilsPressed: {
+    opacity: 0.75,
+  },
+  chickenQuestionModalBackdrop: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.42)',
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  chickenQuestionModal: {
+    backgroundColor: COLORS.white,
+    borderRadius: 16,
+    maxWidth: 360,
+    padding: 20,
+    width: '100%',
+  },
+  chickenQuestionModalTitle: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  chickenQuestionModalText: {
+    color: COLORS.text,
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 10,
+  },
+  chickenQuestionModalClose: {
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    backgroundColor: COLORS.amber,
+    borderRadius: 10,
+    justifyContent: 'center',
+    marginTop: 18,
+    minHeight: 36,
+    minWidth: 90,
+  },
+  chickenQuestionModalCloseText: {
+    color: COLORS.white,
+    fontSize: 13,
+    fontWeight: '700',
   },
   foodReferenceFeatures: {
     justifyContent: 'flex-start',

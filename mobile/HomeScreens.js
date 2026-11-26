@@ -330,6 +330,7 @@ export function HomeScreen({
   firstName,
   onNotifications,
   onSelectTab,
+  onChickenInfoScreenChange,
   profileSetupComplete,
   profileSelections = {},
 }) {
@@ -375,6 +376,7 @@ export function HomeScreen({
       <FoodDetailsScreen
         item={selectedFood}
         onBack={() => setSelectedFood(null)}
+        onChickenInfoScreenChange={onChickenInfoScreenChange}
         onSelectItem={setSelectedFood}
         profileSelections={profileSelections}
         screenWidth={screenWidth}

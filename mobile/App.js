@@ -15,6 +15,10 @@ import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-
 import { NavigationBar } from 'expo-navigation-bar';
 import AddressScreen from './AddressScreen';
 import CartScreen, { INITIAL_CART_ITEMS } from './CartScreen';
+import DeliveryScreen from './DeliveryScreen';
+import OrderSummaryScreen from './OrderSummaryScreen';
+import PayScreen from './PayScreen';
+import PixScreen from './PixScreen';
 import ProfileScreen from './ProfileScreen';
 import {
   HomeScreen,
@@ -43,6 +47,16 @@ const ROUTES = {
   profile: 'profile',
   address: 'address',
   notifications: 'notifications',
+  payment: 'payment',
+  pix: 'pix',
+  delivery: 'delivery',
+  summary: 'summary',
+};
+
+const PAYMENT_METHOD_LABELS = {
+  apple: 'Apple Pay',
+  nupay: 'NuPay',
+  pix: 'Pix',
 };
 
 const TAB_ROUTES = {
@@ -400,10 +414,24 @@ function AppContent() {
   const [userProfile, setUserProfile] = useState({});
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [cartItems, setCartItems] = useState(INITIAL_CART_ITEMS);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('apple');
   const [profileSetupComplete, setProfileSetupComplete] = useState(false);
   const [searchStatusBarBackground, setSearchStatusBarBackground] = useState('#FF8500');
   const [compactSearchNavigation, setCompactSearchNavigation] = useState(false);
+  const [hideBottomNavigation, setHideBottomNavigation] = useState(false);
   const currentRoute = routeStack[routeStack.length - 1];
+  const isPaymentFlowRoute = [
+    ROUTES.payment,
+    ROUTES.pix,
+    ROUTES.delivery,
+    ROUTES.summary,
+  ].includes(currentRoute);
+  const cartItemCount = cartItems.reduce((count, item) => count + item.quantity, 0);
+  const cartTotalCents = cartItems.reduce(
+    (total, item) => total + item.priceCents * item.quantity,
+    0,
+  );
+  const cartTotal = `R$ ${(cartTotalCents / 100).toFixed(2).replace('.', ',')}`;
   const statusBarBackground = currentRoute === ROUTES.search
     ? searchStatusBarBackground
     : COLORS.white;
@@ -489,7 +517,55 @@ function AppContent() {
         translucent
       />
       <View style={styles.mainContent}>
-        {currentRoute === ROUTES.notifications ? (
+        {currentRoute === ROUTES.summary ? (
+          <OrderSummaryScreen
+            items={cartItems}
+            onBack={goBack}
+            onFinishPayment={() => resetNavigation(ROUTES.delivery)}
+            onSelectTab={(tab) => resetNavigation(TAB_ROUTES[tab])}
+          />
+        ) : currentRoute === ROUTES.delivery ? (
+          <DeliveryScreen
+            address={
+              selectedAddress
+                ? [selectedAddress.street, selectedAddress.number].filter(Boolean).join(', ')
+                : 'Endereço não informado'
+            }
+            addressDetails={
+              selectedAddress
+                ? [
+                    selectedAddress.complement,
+                    selectedAddress.neighborhood,
+                    [selectedAddress.city, selectedAddress.state].filter(Boolean).join(' - '),
+                    selectedAddress.reference,
+                  ].filter(Boolean).join(' • ')
+                : ''
+            }
+            itemCount={cartItemCount}
+            onBack={goBack}
+            onSelectTab={(tab) => resetNavigation(TAB_ROUTES[tab])}
+            onViewOrders={() => resetNavigation(ROUTES.orders)}
+            paymentMethod={PAYMENT_METHOD_LABELS[selectedPaymentMethod]}
+            total={cartTotal}
+          />
+        ) : currentRoute === ROUTES.payment ? (
+          <PayScreen
+            itemCount={cartItemCount}
+            onBack={goBack}
+            onChoosePix={() => navigate(ROUTES.pix)}
+            onFinishPayment={() => resetNavigation(ROUTES.delivery)}
+            onOpenSummary={() => navigate(ROUTES.summary)}
+            onSelectPaymentMethod={setSelectedPaymentMethod}
+            onSelectTab={(tab) => resetNavigation(TAB_ROUTES[tab])}
+            selectedPaymentMethod={selectedPaymentMethod}
+            total={cartTotal}
+          />
+        ) : currentRoute === ROUTES.pix ? (
+          <PixScreen
+            onBack={goBack}
+            onSelectTab={(tab) => resetNavigation(TAB_ROUTES[tab])}
+          />
+        ) : currentRoute === ROUTES.notifications ? (
           <NotificationsScreen
             onBack={goBack}
             onConfigureAddress={() => navigate(ROUTES.address)}
@@ -504,7 +580,7 @@ function AppContent() {
                 setSelectedAddress(address);
                 setProfileSetupComplete(true);
                 if (routeStack[routeStack.length - 2] === ROUTES.orders) {
-                  goBack();
+                  navigate(ROUTES.payment);
                 } else {
                   resetNavigation(ROUTES.home);
                 }
@@ -515,6 +591,7 @@ function AppContent() {
           <SearchScreen
             onCompactNavigationChange={setCompactSearchNavigation}
             onStatusBarBackgroundChange={setSearchStatusBarBackground}
+            onChickenInfoScreenChange={setHideBottomNavigation}
             profileSelections={selections}
           />
         ) : currentRoute === ROUTES.home ? (
@@ -527,6 +604,7 @@ function AppContent() {
             firstName={firstName}
             onNotifications={() => navigate(ROUTES.notifications)}
             onSelectTab={(tab) => resetNavigation(TAB_ROUTES[tab])}
+            onChickenInfoScreenChange={setHideBottomNavigation}
             profileSetupComplete={profileSetupComplete}
             profileSelections={selections}
           />
@@ -555,12 +633,14 @@ function AppContent() {
           <PlaceholderScreen tab={currentRoute} />
         )}
       </View>
-      <BottomNavigation
-        activeTab={activeTab}
-        bottomInset={insets.bottom}
-        compact={compactSearchNavigation}
-        onSelectTab={(tab) => resetNavigation(TAB_ROUTES[tab])}
-      />
+      {!hideBottomNavigation && !isPaymentFlowRoute && (
+        <BottomNavigation
+          activeTab={activeTab}
+          bottomInset={insets.bottom}
+          compact={compactSearchNavigation}
+          onSelectTab={(tab) => resetNavigation(TAB_ROUTES[tab])}
+        />
+      )}
     </SafeAreaView>
   );
 }

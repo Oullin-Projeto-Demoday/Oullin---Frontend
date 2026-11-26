@@ -1,119 +1,37 @@
 import React from 'react';
 import {
-  Alert,
   Image,
-  Pressable,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
 
-const COLORS = {
-  amber: '#FFB400',
-  avatar: '#D9D9D9',
-  text: '#111111',
-  white: '#FFFFFF',
-};
+const PROFILE_AVATAR = require('./assets/profile-avatar.png');
 
-const MENU_ITEMS = [
-  {
-    id: 'info',
-    label: 'Informações do\nperfil',
-    icon: require('./assets/profile-info.png'),
-  },
-  {
-    id: 'coupons',
-    label: 'Cupons',
-    icon: require('./assets/profile-coupons.png'),
-  },
-  {
-    id: 'payment',
-    label: 'Métodos de\npagamento',
-    icon: require('./assets/profile-payment-methods.png'),
-  },
-  {
-    id: 'settings',
-    label: 'Configurações',
-    icon: require('./assets/profile-settings.png'),
-  },
-  {
-    id: 'support',
-    label: 'Ajuda e\nsuporte',
-    icon: require('./assets/profile-support.png'),
-  },
-  {
-    id: 'logout',
-    label: 'Sair',
-    icon: require('./assets/profile-logout.png'),
-  },
-];
-
-function ProfileMenuItem({ item, onPress }) {
+function PreferenceGroup({ emptyLabel, title, values }) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [styles.menuItem, pressed && styles.pressed]}
-    >
-      <Image accessible={false} resizeMode="contain" source={item.icon} style={styles.menuIcon} />
-      <Text style={styles.menuLabel}>{item.label}</Text>
-    </Pressable>
+    <View>
+      <Text style={styles.groupTitle}>{title}</Text>
+      <View style={styles.chips}>
+        {values.length ? values.map((value) => (
+          <Text key={value} style={styles.chip}>{value}</Text>
+        )) : (
+          <Text style={styles.emptyLabel}>{emptyLabel}</Text>
+        )}
+      </View>
+    </View>
   );
 }
 
-export default function ProfileScreen({
-  user = {},
-  address,
-  selections = {},
-  onLogout,
-}) {
+export default function ProfileScreen({ user = {}, selections = {} }) {
   const fullName = [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Seu nome';
   const email = user.email || 'E-mail não informado';
-
-  function showProfileInformation() {
-    const addressLine = address
-      ? [
-        address.street,
-        address.number,
-        address.complement,
-        address.neighborhood,
-        address.city,
-        address.state,
-        address.postalCode,
-      ].filter(Boolean).join(', ')
-      : 'Não cadastrado';
-    const restrictions = selections.restrictions?.join(', ') || 'Não informado';
-    const preferences = [
-      ...(selections.favoriteFoods || []),
-      ...(selections.dailyMeals || []),
-    ].join(', ') || 'Não informadas';
-
-    Alert.alert(
-      'Informações do perfil',
-      `Nome: ${fullName}\nE-mail: ${email}\nEndereço: ${addressLine}\nA evitar: ${restrictions}\nPreferências: ${preferences}`,
-    );
-  }
-
-  function handleMenuItem(item) {
-    if (item.id === 'info') {
-      showProfileInformation();
-      return;
-    }
-
-    if (item.id === 'logout') {
-      if (onLogout) onLogout();
-      return;
-    }
-
-    const messages = {
-      coupons: 'Nenhum cupom disponível no momento.',
-      payment: 'Nenhum método de pagamento cadastrado.',
-      settings: 'As configurações ainda não estão disponíveis.',
-      support: 'A área de ajuda e suporte ainda não está disponível.',
-    };
-    Alert.alert(item.label, messages[item.id]);
-  }
+  const restrictions = Array.isArray(selections.restrictions) ? selections.restrictions : [];
+  const preferences = [
+    ...(Array.isArray(selections.favoriteFoods) ? selections.favoriteFoods : []),
+    ...(Array.isArray(selections.dailyMeals) ? selections.dailyMeals : []),
+  ];
 
   return (
     <View style={styles.screen}>
@@ -121,10 +39,10 @@ export default function ProfileScreen({
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.profileCard}>
-          <View
-            accessibilityLabel="Foto de perfil"
-            accessible
+        <View style={styles.profileHeader}>
+          <Image
+            accessibilityLabel={`Foto de perfil de ${fullName}`}
+            source={PROFILE_AVATAR}
             style={styles.avatar}
           />
           <View style={styles.userInfo}>
@@ -133,14 +51,19 @@ export default function ProfileScreen({
           </View>
         </View>
 
-        <View style={styles.menu}>
-          {MENU_ITEMS.map((item) => (
-            <ProfileMenuItem
-              item={item}
-              key={item.id}
-              onPress={() => handleMenuItem(item)}
+        <View style={styles.preferencesCard}>
+          <PreferenceGroup
+            emptyLabel="Nenhuma restrição selecionada"
+            title="O que preciso evitar"
+            values={restrictions}
+          />
+          <View style={styles.foodGroup}>
+            <PreferenceGroup
+              emptyLabel="Nenhuma preferência selecionada"
+              title="O que eu gosto de comer"
+              values={preferences}
             />
-          ))}
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -149,65 +72,74 @@ export default function ProfileScreen({
 
 const styles = StyleSheet.create({
   screen: {
-    backgroundColor: COLORS.white,
+    backgroundColor: '#FFFFFF',
     flex: 1,
   },
   content: {
     flexGrow: 1,
     paddingBottom: 16,
-    paddingHorizontal: 16,
-    paddingTop: 8,
+    paddingHorizontal: 10,
+    paddingTop: 16,
   },
-  profileCard: {
+  profileHeader: {
     alignItems: 'center',
-    borderColor: COLORS.amber,
-    borderRadius: 11,
-    borderWidth: 1,
     flexDirection: 'row',
-    height: 124,
-    paddingHorizontal: 12,
+    minHeight: 76,
+    paddingHorizontal: 2,
   },
   avatar: {
-    backgroundColor: COLORS.avatar,
-    borderRadius: 15,
-    height: 30,
-    width: 30,
+    borderRadius: 30,
+    height: 60,
+    width: 60,
   },
   userInfo: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: 10,
   },
   userName: {
-    color: COLORS.text,
+    color: '#111111',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '700',
   },
   userEmail: {
-    color: COLORS.text,
-    fontSize: 9,
-    marginTop: 2,
+    color: '#111111',
+    fontSize: 10,
+    marginTop: 3,
   },
-  menu: {
-    marginTop: 10,
+  preferencesCard: {
+    backgroundColor: '#F3F3F3',
+    borderRadius: 10,
+    marginTop: 8,
+    paddingHorizontal: 11,
+    paddingVertical: 11,
   },
-  menuItem: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    minHeight: 59,
-    paddingHorizontal: 10,
-  },
-  menuIcon: {
-    height: 26,
-    marginRight: 16,
-    width: 26,
-  },
-  menuLabel: {
-    color: COLORS.text,
+  groupTitle: {
+    color: '#111111',
     fontSize: 13,
-    lineHeight: 16,
-    maxWidth: 145,
+    fontWeight: '700',
   },
-  pressed: {
-    opacity: 0.65,
+  chips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 7,
+  },
+  chip: {
+    backgroundColor: '#FFB400',
+    borderRadius: 14,
+    color: '#FFFFFF',
+    fontSize: 9,
+    marginBottom: 5,
+    marginRight: 5,
+    overflow: 'hidden',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  emptyLabel: {
+    color: '#666666',
+    fontSize: 10,
+    marginBottom: 5,
+  },
+  foodGroup: {
+    marginTop: 17,
   },
 });

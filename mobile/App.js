@@ -21,6 +21,7 @@ import PayScreen from './PayScreen';
 import PixScreen from './PixScreen';
 import ProfileScreen from './ProfileScreen';
 import {
+  FOODS,
   HomeScreen,
   NotificationsScreen,
   RegistrationCompleteScreen,
@@ -389,16 +390,6 @@ function AppContent() {
     return true;
   }
 
-  function logOut() {
-    setUserProfile({});
-    setFirstName('');
-    setSelectedAddress(null);
-    setCartItems(INITIAL_CART_ITEMS);
-    setProfileSetupComplete(false);
-    setSelections({});
-    resetNavigation(ROUTES.onboarding);
-  }
-
   useEffect(() => {
     if (Platform.OS !== 'android') return undefined;
 
@@ -529,6 +520,7 @@ function AppContent() {
           </View>
         ) : currentRoute === ROUTES.search ? (
           <SearchScreen
+            homeFoods={FOODS}
             onCompactNavigationChange={setCompactSearchNavigation}
             onStatusBarBackgroundChange={setSearchStatusBarBackground}
             onChickenInfoScreenChange={setHideBottomNavigation}
@@ -565,8 +557,6 @@ function AppContent() {
           />
         ) : currentRoute === ROUTES.profile ? (
           <ProfileScreen
-            address={selectedAddress}
-            onLogout={logOut}
             selections={selections}
             user={userProfile}
           />

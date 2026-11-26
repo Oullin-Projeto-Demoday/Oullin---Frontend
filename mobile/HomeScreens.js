@@ -33,7 +33,7 @@ const scale = Math.min(Dimensions.get('window').width / 390, 1.15);
 const size = (value) => Math.round(value * scale);
 const HOME_SIDE_GUTTER = 20;
 
-const FOODS = [
+export const FOODS = [
   { image: require('./assets/food-fries-card.png'), price: 'R$ 40,00', name: 'Batata Frita', detail: 'Porção 300g', seller: 'Mcdonalds', rating: '4,8 (452)', category: 'Porções' },
   { image: require('./assets/food-pastel-card.png'), price: 'R$ 15,00', name: 'Pastel', detail: 'Queijo, Pizza e Carne', seller: 'Feira', rating: '4,8 (452)', category: 'Salgados' },
   { image: require('./assets/food-veggie-burger-card.png'), price: 'R$ 52,00', name: 'Hambúrguer veg...', detail: 'Pão e hambúrguer vegetal', seller: 'Vegan house', rating: '4,8 (452)', category: 'Hambúrgueres', detailName: 'Hambúrguer vegano' },

@@ -58,8 +58,8 @@ const PROMOTIONS = [
 ];
 
 const HOME_FOOD_FEATURES = [
-  { type: 'utensils', label: 'Utensílios dedicados' },
-  { type: 'ingredientCard', label: 'Ingredientes utilizados' },
+  { type: 'utensils', label: 'Utensílios utilizados' },
+  { type: 'ingredientCard', label: 'Ingredientes atualizados' },
   { type: 'nutrition', label: 'Ficha nutricional' },
 ];
 
@@ -385,6 +385,7 @@ function NearbyRestaurantCard({ restaurant, onPress }) {
 export function HomeScreen({
   deliveryAddress,
   firstName,
+  onAddToCart,
   onNotifications,
   onSelectTab,
   onChickenInfoScreenChange,
@@ -434,6 +435,7 @@ export function HomeScreen({
       <FoodDetailsScreen
         item={selectedFood}
         onBack={() => setSelectedFood(null)}
+        onAddToCart={onAddToCart}
         onChickenInfoScreenChange={onChickenInfoScreenChange}
         onSelectItem={(food) => setSelectedFood(getHomeFoodDetails(food, profileRules))}
         homeReferenceLayout

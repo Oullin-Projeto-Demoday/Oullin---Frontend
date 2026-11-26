@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   BackHandler,
-  Image,
   Pressable,
   Platform,
   ScrollView,
@@ -14,6 +13,7 @@ import {
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NavigationBar } from 'expo-navigation-bar';
 import AddressScreen from './AddressScreen';
+import BottomNavigation from './BottomNavigation';
 import CartScreen, { INITIAL_CART_ITEMS } from './CartScreen';
 import DeliveryScreen from './DeliveryScreen';
 import OrderSummaryScreen from './OrderSummaryScreen';
@@ -65,6 +65,19 @@ const TAB_ROUTES = {
   Pedidos: ROUTES.orders,
   Perfil: ROUTES.profile,
 };
+
+function getProductPriceInCents(product) {
+  if (Number.isInteger(product.priceCents) && product.priceCents >= 0) {
+    return product.priceCents;
+  }
+
+  const price = String(product.price || '').replace(/[^\d,.-]/g, '');
+  const normalizedPrice = price.includes(',')
+    ? price.replace(/\./g, '').replace(',', '.')
+    : price;
+  const amount = Number(normalizedPrice);
+  return Number.isFinite(amount) && amount >= 0 ? Math.round(amount * 100) : null;
+}
 
 const QUESTIONS = [
   {
@@ -232,62 +245,6 @@ function SelectionField({ question, selected, onToggle }) {
   );
 }
 
-function TabIcon({ label, active, compact = false }) {
-  if (label === 'Início') {
-    return (
-      <View style={[styles.koalaBadge, compact && styles.compactKoalaBadge]}>
-        <Image
-          accessibilityLabel="Coala"
-          resizeMode="contain"
-          source={require('./assets/nav-koala.png')}
-          style={[styles.koalaIcon, compact && styles.compactKoalaIcon]}
-        />
-      </View>
-    );
-  }
-
-  const iconStyle = [
-    styles.tabIconShape,
-    compact && styles.compactTabIconShape,
-    active && styles.activeTabIconShape,
-  ];
-  if (label === 'Buscar') {
-    return (
-      <View style={[styles.searchIcon, compact && styles.compactSearchIcon]}>
-        <View style={iconStyle} />
-        <View
-          style={[
-            styles.searchHandle,
-            compact && styles.compactSearchHandle,
-            active && styles.activeSearchHandle,
-          ]}
-        />
-      </View>
-    );
-  }
-  if (label === 'Pedidos') {
-    return (
-      <View
-        style={[
-          styles.receiptIcon,
-          compact && styles.compactReceiptIcon,
-          active && styles.activeReceiptIcon,
-        ]}
-      >
-        <View style={[styles.receiptLine, compact && styles.compactReceiptLine, active && styles.activeReceiptLine]} />
-        <View style={[styles.receiptLine, compact && styles.compactReceiptLine, active && styles.activeReceiptLine]} />
-        <View style={[styles.receiptLine, compact && styles.compactReceiptLine, active && styles.activeReceiptLine]} />
-      </View>
-    );
-  }
-  return (
-    <View style={[styles.profileIcon, compact && styles.compactProfileIcon]}>
-      <View style={[styles.profileHead, compact && styles.compactProfileHead, active && styles.activeProfileIcon]} />
-      <View style={[styles.profileBody, compact && styles.compactProfileBody, active && styles.activeProfileIcon]} />
-    </View>
-  );
-}
-
 function PreferencesScreen({ onBack, onContinue, selections, setSelections }) {
 
   function toggleOption(questionId, option) {
@@ -334,54 +291,6 @@ function PreferencesScreen({ onBack, onContinue, selections, setSelections }) {
           <Text style={styles.continueText}>Continuar</Text>
         </Pressable>
       </View>
-    </View>
-  );
-}
-
-function BottomNavigation({ activeTab, onSelectTab, bottomInset, compact = false }) {
-  const compactWebNavigation = compact && Platform.OS === 'web';
-  const displayedActiveTab = compactWebNavigation ? 'Pedidos' : activeTab;
-
-  return (
-    <View
-      style={[
-        styles.bottomNav,
-        compactWebNavigation && styles.compactBottomNav,
-        { paddingBottom: compactWebNavigation ? 2 : Math.max(bottomInset + 6, 14) },
-      ]}
-    >
-      {[
-        { label: 'Início' },
-        { label: 'Buscar' },
-        { label: 'Pedidos' },
-        { label: 'Perfil' },
-      ].map((tab) => {
-        const active = displayedActiveTab === tab.label;
-        return (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityState={{ selected: active }}
-            key={tab.label}
-            onPress={() => onSelectTab(tab.label)}
-            hitSlop={compactWebNavigation ? { top: 6, bottom: 6 } : undefined}
-            style={[styles.tab, compactWebNavigation && styles.compactTab]}
-          >
-            <TabIcon active={active} compact={compactWebNavigation} label={tab.label} />
-            <Text
-              style={[
-                styles.tabLabel,
-                compactWebNavigation && styles.compactTabLabel,
-                active && styles.activeTabText,
-              ]}
-            >
-              {tab.label}
-            </Text>
-            {compactWebNavigation && active && (
-              <View style={styles.compactActiveTabIndicator} />
-            )}
-          </Pressable>
-        );
-      })}
     </View>
   );
 }
@@ -454,6 +363,32 @@ function AppContent() {
     });
   }
 
+  function addProductToCart(product) {
+    const name = product.detailName || product.name;
+    const priceCents = getProductPriceInCents(product);
+    if (!name || !product.image || priceCents === null) return false;
+
+    const id = `${product.restaurantName || product.seller || 'home'}:${name}`
+      .toLocaleLowerCase('pt-BR');
+    setCartItems((current) => {
+      const alreadyAdded = current.some((item) => item.id === id);
+      if (alreadyAdded) {
+        return current.map((item) => (
+          item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+        ));
+      }
+
+      return [...current, {
+        id,
+        image: product.image,
+        name,
+        priceCents,
+        quantity: 1,
+      }];
+    });
+    return true;
+  }
+
   function logOut() {
     setUserProfile({});
     setFirstName('');
@@ -519,6 +454,7 @@ function AppContent() {
       <View style={styles.mainContent}>
         {currentRoute === ROUTES.summary ? (
           <OrderSummaryScreen
+            bottomInset={insets.bottom}
             items={cartItems}
             onBack={goBack}
             onFinishPayment={() => resetNavigation(ROUTES.delivery)}
@@ -526,6 +462,7 @@ function AppContent() {
           />
         ) : currentRoute === ROUTES.delivery ? (
           <DeliveryScreen
+            bottomInset={insets.bottom}
             address={
               selectedAddress
                 ? [selectedAddress.street, selectedAddress.number].filter(Boolean).join(', ')
@@ -550,6 +487,7 @@ function AppContent() {
           />
         ) : currentRoute === ROUTES.payment ? (
           <PayScreen
+            bottomInset={insets.bottom}
             itemCount={cartItemCount}
             onBack={goBack}
             onChoosePix={() => navigate(ROUTES.pix)}
@@ -562,7 +500,9 @@ function AppContent() {
           />
         ) : currentRoute === ROUTES.pix ? (
           <PixScreen
+            bottomInset={insets.bottom}
             onBack={goBack}
+            onContinue={() => navigate(ROUTES.delivery)}
             onSelectTab={(tab) => resetNavigation(TAB_ROUTES[tab])}
           />
         ) : currentRoute === ROUTES.notifications ? (
@@ -602,6 +542,7 @@ function AppContent() {
                 : ''
             }
             firstName={firstName}
+            onAddToCart={addProductToCart}
             onNotifications={() => navigate(ROUTES.notifications)}
             onSelectTab={(tab) => resetNavigation(TAB_ROUTES[tab])}
             onChickenInfoScreenChange={setHideBottomNavigation}
@@ -908,181 +849,6 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.8,
-  },
-  bottomNav: {
-    backgroundColor: COLORS.blue,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    minHeight: 68,
-    paddingTop: 6,
-  },
-  compactBottomNav: {
-    backgroundColor: '#0D4889',
-    minHeight: 0,
-    paddingTop: 1,
-  },
-  tab: {
-    alignItems: 'center',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  compactTab: {
-    paddingVertical: 0,
-  },
-  compactKoalaBadge: {
-    height: 14,
-    width: 26,
-  },
-  compactKoalaIcon: {
-    height: 14,
-    width: 26,
-  },
-  compactSearchIcon: {
-    height: 14,
-    width: 14,
-  },
-  compactTabIconShape: {
-    borderRadius: 6,
-    borderWidth: 1,
-    height: 9,
-    width: 9,
-  },
-  compactSearchHandle: {
-    height: 1,
-    left: 9,
-    top: 9,
-    width: 5,
-  },
-  compactReceiptIcon: {
-    borderRadius: 2,
-    borderWidth: 1,
-    height: 14,
-    paddingHorizontal: 1,
-    width: 11,
-  },
-  compactReceiptLine: {
-    height: 1,
-    width: 5,
-  },
-  compactProfileIcon: {
-    height: 14,
-    width: 14,
-  },
-  compactProfileHead: {
-    borderRadius: 3,
-    borderWidth: 1,
-    height: 5,
-    marginBottom: 1,
-    width: 5,
-  },
-  compactProfileBody: {
-    borderWidth: 1,
-    height: 6,
-    width: 11,
-  },
-  compactTabLabel: {
-    fontSize: 6,
-    lineHeight: 7,
-    marginTop: 1,
-  },
-  compactActiveTabIndicator: {
-    backgroundColor: COLORS.amber,
-    borderRadius: 1,
-    height: 1.5,
-    marginTop: 1,
-    width: 10,
-  },
-  koalaBadge: {
-    alignItems: 'center',
-    height: 30,
-    justifyContent: 'center',
-    width: 46,
-  },
-  koalaIcon: {
-    height: 30,
-    width: 46,
-  },
-  searchIcon: {
-    height: 25,
-    justifyContent: 'flex-start',
-    position: 'relative',
-    width: 25,
-  },
-  tabIconShape: {
-    borderColor: COLORS.white,
-    borderRadius: 12,
-    borderWidth: 2,
-    height: 17,
-    width: 17,
-  },
-  activeTabIconShape: {
-    borderColor: COLORS.amber,
-  },
-  searchHandle: {
-    backgroundColor: COLORS.white,
-    height: 2,
-    left: 16,
-    position: 'absolute',
-    top: 17,
-    transform: [{ rotate: '45deg' }],
-    width: 8,
-  },
-  activeSearchHandle: {
-    backgroundColor: COLORS.amber,
-  },
-  receiptIcon: {
-    alignItems: 'center',
-    borderColor: COLORS.white,
-    borderRadius: 2,
-    borderWidth: 2,
-    height: 21,
-    justifyContent: 'space-evenly',
-    paddingHorizontal: 3,
-    width: 17,
-  },
-  activeReceiptIcon: {
-    borderColor: COLORS.amber,
-  },
-  receiptLine: {
-    backgroundColor: COLORS.white,
-    height: 1.5,
-    width: 8,
-  },
-  activeReceiptLine: {
-    backgroundColor: COLORS.amber,
-  },
-  profileIcon: {
-    alignItems: 'center',
-    height: 24,
-    justifyContent: 'flex-end',
-    width: 24,
-  },
-  profileHead: {
-    borderColor: COLORS.white,
-    borderRadius: 6,
-    borderWidth: 2,
-    height: 10,
-    marginBottom: 2,
-    width: 10,
-  },
-  profileBody: {
-    borderColor: COLORS.white,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-    borderWidth: 2,
-    height: 9,
-    width: 17,
-  },
-  activeProfileIcon: {
-    borderColor: COLORS.amber,
-  },
-  tabLabel: {
-    color: COLORS.white,
-    fontSize: 11,
-    marginTop: 3,
-  },
-  activeTabText: {
-    color: COLORS.amber,
   },
   placeholder: {
     alignItems: 'center',

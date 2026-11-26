@@ -9,6 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import BottomNavigation from './BottomNavigation';
 
 const ORANGE = '#FF8500';
 const BLUE = '#124F8C';
@@ -31,28 +32,11 @@ function MapIllustration() {
   );
 }
 
-function BottomNavigation({ onSelectTab }) {
-  return (
-    <View style={styles.bottomNav}>
-      {[
-        ['🐨', 'Início'],
-        ['⌕', 'Buscar'],
-        ['▤', 'Pedidos'],
-        ['♙', 'Perfil'],
-      ].map(([icon, label]) => (
-        <Pressable accessibilityRole="button" key={label} onPress={() => onSelectTab?.(label)} style={styles.tab}>
-          <Text style={[styles.tabIcon, label === 'Pedidos' && styles.activeTab]}>{icon}</Text>
-          <Text style={[styles.tabLabel, label === 'Pedidos' && styles.activeTab]}>{label}</Text>
-        </Pressable>
-      ))}
-    </View>
-  );
-}
-
 export default function DeliveryScreen({
   onBack,
   onSelectTab,
   onViewOrders,
+  bottomInset = 0,
   address = 'Endereço não informado',
   addressDetails = '',
   itemCount = 0,
@@ -151,7 +135,7 @@ export default function DeliveryScreen({
           </View>
         </View>
       </View>
-      <BottomNavigation onSelectTab={onSelectTab} />
+      <BottomNavigation activeTab="Pedidos" bottomInset={bottomInset} onSelectTab={onSelectTab} />
     </SafeAreaView>
   );
 }
@@ -209,9 +193,4 @@ const styles = StyleSheet.create({
   detailCopy: { flex: 1 },
   detailTitle: { color: '#222222', fontSize: 8, fontWeight: '700', marginBottom: 3 },
   detailSubtitle: { color: '#777777', fontSize: 8 },
-  bottomNav: { height: 46, backgroundColor: BLUE, flexDirection: 'row', justifyContent: 'space-around' },
-  tab: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  tabIcon: { color: '#FFFFFF', fontSize: 16, lineHeight: 19 },
-  tabLabel: { color: '#FFFFFF', fontSize: 7, marginTop: 1 },
-  activeTab: { color: '#FFB400' },
 });

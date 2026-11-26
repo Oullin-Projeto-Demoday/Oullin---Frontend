@@ -8,6 +8,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import BottomNavigation from './BottomNavigation';
 
 const ORANGE = '#FF8500';
 const BLUE = '#124F8C';
@@ -35,34 +36,14 @@ function QRCodePlaceholder() {
   return <View accessibilityLabel="Ilustração de código QR Pix" style={styles.qrCode}>{modules}</View>;
 }
 
-function BottomNavigation({ onSelectTab }) {
-  return (
-    <View style={styles.bottomNav}>
-      {[
-        ['🐨', 'Início'],
-        ['⌕', 'Buscar'],
-        ['▤', 'Pedidos'],
-        ['♙', 'Perfil'],
-      ].map(([icon, label]) => (
-        <Pressable accessibilityRole="button" key={label} onPress={() => onSelectTab?.(label)} style={styles.tab}>
-          {label === 'Buscar' ? <SearchTabIcon /> : <Text style={[styles.tabIcon, label === 'Pedidos' && styles.activeTab]}>{icon}</Text>}
-          <Text style={[styles.tabLabel, label === 'Pedidos' && styles.activeTab]}>{label}</Text>
-        </Pressable>
-      ))}
-    </View>
-  );
-}
-
-function SearchTabIcon() {
-  return (
-    <View style={styles.staticSearch}>
-      <View style={styles.searchLens} />
-      <View style={styles.searchHandle} />
-    </View>
-  );
-}
-
-export default function PixScreen({ onBack, onSelectTab, onCopyPix, onSharePix }) {
+export default function PixScreen({
+  onBack,
+  onContinue,
+  onSelectTab,
+  onCopyPix,
+  onSharePix,
+  bottomInset = 0,
+}) {
   const progress = useRef(new Animated.Value(1)).current;
   const hourglassRotation = useRef(new Animated.Value(0)).current;
   const [expired, setExpired] = useState(false);
@@ -157,7 +138,17 @@ export default function PixScreen({ onBack, onSelectTab, onCopyPix, onSharePix }
         )}
         <Text style={styles.confirmationNote}>A tela Pix está em modo demonstrativo.</Text>
       </View>
-      <BottomNavigation onSelectTab={onSelectTab} />
+      <View style={styles.continueFooter}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onContinue}
+          style={({ pressed }) => [styles.continueButton, pressed && styles.continueButtonPressed]}
+        >
+          <Text style={styles.continueButtonText}>Continuar</Text>
+          <Text style={styles.continueArrow}>›</Text>
+        </Pressable>
+      </View>
+      <BottomNavigation activeTab="Pedidos" bottomInset={bottomInset} onSelectTab={onSelectTab} />
     </SafeAreaView>
   );
 }
@@ -187,12 +178,9 @@ const styles = StyleSheet.create({
   shareIcon: { color: '#FFFFFF', fontSize: 14, marginRight: 4 },
   feedbackMessage: { color: '#A64B00', fontSize: 8, lineHeight: 11, marginTop: 8, textAlign: 'center' },
   confirmationNote: { color: '#111111', fontSize: 7, textAlign: 'center', marginTop: 10 },
-  bottomNav: { height: 46, backgroundColor: BLUE, flexDirection: 'row', justifyContent: 'space-around' },
-  tab: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  tabIcon: { color: '#FFFFFF', fontSize: 16, lineHeight: 19 },
-  staticSearch: { width: 21, height: 21, position: 'relative' },
-  searchLens: { position: 'absolute', left: 1, top: 0, width: 14, height: 14, borderRadius: 8, borderWidth: 2, borderColor: '#FFFFFF' },
-  searchHandle: { position: 'absolute', left: 14, top: 13, width: 2, height: 8, backgroundColor: '#FFFFFF', transform: [{ rotate: '-45deg' }] },
-  tabLabel: { color: '#FFFFFF', fontSize: 7, marginTop: 1 },
-  activeTab: { color: '#FFB400' },
+  continueFooter: { paddingHorizontal: 25, paddingTop: 8, paddingBottom: 10, backgroundColor: '#FFFFFF' },
+  continueButton: { height: 46, paddingHorizontal: 16, borderRadius: 9, backgroundColor: ORANGE, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  continueButtonPressed: { opacity: 0.86 },
+  continueButtonText: { color: '#FFFFFF', fontSize: 14, fontWeight: '700' },
+  continueArrow: { color: '#FFFFFF', fontSize: 24, lineHeight: 26, marginLeft: 8 },
 });

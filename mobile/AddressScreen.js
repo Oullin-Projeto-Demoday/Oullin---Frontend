@@ -774,7 +774,11 @@ export default function AddressScreen({
       const suggestions = await searchNominatimAddresses(query);
       if (requestId !== searchRequestId.current) return;
       setSearchSuggestions(suggestions);
-      if (!suggestions.length) setSearchError('Nenhum endereço encontrado. Tente incluir a cidade e o estado.');
+      if (!suggestions.length) {
+        setSearchError(
+          'Nenhum endereço encontrado no Brasil pelo OpenStreetMap. A cobertura varia; tente informar cidade e estado ou cadastre manualmente.',
+        );
+      }
     } catch (error) {
       if (requestId !== searchRequestId.current) return;
       setSearchSuggestions([]);
@@ -1220,7 +1224,8 @@ export default function AddressScreen({
             <View style={styles.emptyState}>
               <Text style={styles.emptyTitle}>Nenhuma rua encontrada</Text>
               <Text style={styles.emptyText}>
-                {searchError || 'Tente informar também a cidade e o estado.'}
+                {searchError ||
+                  'Busca disponível no Brasil via OpenStreetMap, com cobertura variável. Tente incluir cidade e estado ou cadastre o endereço manualmente.'}
               </Text>
               <Pressable onPress={() => openEditor()} style={styles.emptyAddButton}>
                 <Text style={styles.emptyAddText}>Adicionar endereço manualmente</Text>

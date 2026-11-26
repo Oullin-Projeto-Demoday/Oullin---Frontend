@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  Image,
   Pressable,
   SafeAreaView,
   StatusBar,
@@ -8,36 +7,10 @@ import {
   Text,
   View,
 } from 'react-native';
+import BottomNavigation from './BottomNavigation';
 
 const ORANGE = '#FF8500';
 const AMBER = '#FFB400';
-const BLUE = '#124F8C';
-
-function BottomNavigation({ onSelectTab }) {
-  return (
-    <View style={styles.bottomNav}>
-      {[
-        ['Início', 'Início'],
-        ['Buscar', 'Buscar'],
-        ['Pedidos', 'Pedidos'],
-        ['Perfil', 'Perfil'],
-      ].map(([icon, label]) => (
-        <Pressable accessibilityRole="button" key={label} onPress={() => onSelectTab?.(label)} style={styles.tab}>
-          {label === 'Início' ? (
-            <Image source={require('./assets/nav-koala.png')} resizeMode="contain" style={styles.koalaIcon} />
-          ) : label === 'Buscar' ? (
-            <View style={styles.searchIcon}><View style={styles.searchLens} /><View style={styles.searchHandle} /></View>
-          ) : label === 'Pedidos' ? (
-            <View style={styles.receiptIcon}><View style={styles.receiptLine} /><View style={styles.receiptLine} /><View style={styles.receiptLine} /></View>
-          ) : (
-            <View style={styles.profileIcon}><View style={styles.profileHead} /><View style={styles.profileBody} /></View>
-          )}
-          <Text style={[styles.tabLabel, label === 'Pedidos' && styles.activeTab]}>{label}</Text>
-        </Pressable>
-      ))}
-    </View>
-  );
-}
 
 function OrderItem({ item, last }) {
   const price = `R$ ${(item.priceCents / 100).toFixed(2).replace('.', ',')}`;
@@ -61,6 +34,7 @@ export default function OrderSummaryScreen({
   onBack,
   onFinishPayment,
   onSelectTab,
+  bottomInset = 0,
 }) {
   const totalCents = items.reduce(
     (total, item) => total + item.priceCents * item.quantity,
@@ -103,7 +77,7 @@ export default function OrderSummaryScreen({
           </Pressable>
         </View>
       </View>
-      <BottomNavigation onSelectTab={onSelectTab} />
+      <BottomNavigation activeTab="Pedidos" bottomInset={bottomInset} onSelectTab={onSelectTab} />
     </SafeAreaView>
   );
 }
@@ -133,17 +107,4 @@ const styles = StyleSheet.create({
   check: { color: '#09A847', fontSize: 16, marginRight: 17, fontWeight: '700' },
   payButtonText: { color: '#FFFFFF', fontSize: 11, fontWeight: '700' },
   pressed: { opacity: 0.78 },
-  bottomNav: { height: 46, backgroundColor: BLUE, flexDirection: 'row', justifyContent: 'space-around' },
-  tab: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  koalaIcon: { width: 28, height: 21, marginBottom: 1 },
-  searchIcon: { width: 21, height: 21, position: 'relative' },
-  searchLens: { position: 'absolute', left: 1, top: 0, width: 14, height: 14, borderRadius: 8, borderWidth: 2, borderColor: '#FFFFFF' },
-  searchHandle: { position: 'absolute', left: 14, top: 13, width: 2, height: 8, backgroundColor: '#FFFFFF', transform: [{ rotate: '-45deg' }] },
-  receiptIcon: { alignItems: 'center', borderColor: AMBER, borderRadius: 2, borderWidth: 2, height: 19, justifyContent: 'space-evenly', paddingHorizontal: 3, width: 15 },
-  receiptLine: { backgroundColor: AMBER, height: 1.5, width: 7 },
-  profileIcon: { alignItems: 'center', height: 21, justifyContent: 'flex-end', width: 21 },
-  profileHead: { borderColor: '#FFFFFF', borderRadius: 6, borderWidth: 2, height: 9, marginBottom: 2, width: 9 },
-  profileBody: { borderColor: '#FFFFFF', borderTopLeftRadius: 8, borderTopRightRadius: 8, borderWidth: 2, height: 8, width: 16 },
-  tabLabel: { color: '#FFFFFF', fontSize: 7, marginTop: 1 },
-  activeTab: { color: AMBER },
 });

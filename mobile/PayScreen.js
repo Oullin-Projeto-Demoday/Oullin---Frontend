@@ -8,9 +8,9 @@ import {
   Text,
   View,
 } from 'react-native';
+import BottomNavigation from './BottomNavigation';
 
 const ORANGE = '#FF8500';
-const BLUE = '#124F8C';
 
 const METHODS = [
   { id: 'apple', name: 'Apple Pay', detail: 'Pague com Apple', badge: 'Parcele seu pedido', mark: 'Pay' },
@@ -43,33 +43,6 @@ function PaymentMethod({ method, selected, onPress }) {
   );
 }
 
-function BottomNavigation({ onSelectTab }) {
-  return (
-    <View style={styles.bottomNav}>
-      {[
-        ['🐨', 'Início'],
-        ['⌕', 'Buscar'],
-        ['▤', 'Pedidos'],
-        ['♙', 'Perfil'],
-      ].map(([icon, label]) => (
-        <Pressable accessibilityRole="button" key={label} onPress={() => onSelectTab?.(label)} style={styles.tab}>
-          {label === 'Buscar' ? <SearchTabIcon /> : <Text style={[styles.tabIcon, label === 'Pedidos' && styles.activeTab]}>{icon}</Text>}
-          <Text style={[styles.tabLabel, label === 'Pedidos' && styles.activeTab]}>{label}</Text>
-        </Pressable>
-      ))}
-    </View>
-  );
-}
-
-function SearchTabIcon() {
-  return (
-    <View style={styles.staticSearch}>
-      <View style={styles.searchLens} />
-      <View style={styles.searchHandle} />
-    </View>
-  );
-}
-
 function UtensilsIcon() {
   return (
     <View accessibilityLabel="Garfo e faca" style={styles.utensilsIcon}>
@@ -93,6 +66,7 @@ export default function PayScreen({
   onChoosePix,
   onOpenSummary,
   onSelectPaymentMethod,
+  bottomInset = 0,
   selectedPaymentMethod = 'apple',
   itemCount = 2,
   total = 'R$69,97',
@@ -159,7 +133,7 @@ export default function PayScreen({
           <Text style={styles.payButtonText}>Finalizar pagamento</Text>
         </Pressable>
       </View>
-      <BottomNavigation onSelectTab={onSelectTab} />
+      <BottomNavigation activeTab="Pedidos" bottomInset={bottomInset} onSelectTab={onSelectTab} />
     </SafeAreaView>
   );
 }
@@ -209,12 +183,4 @@ const styles = StyleSheet.create({
   check: { color: '#09A847', fontSize: 16, marginRight: 17, fontWeight: '700' },
   payButtonText: { color: '#FFFFFF', fontSize: 11, fontWeight: '700' },
   pressed: { opacity: 0.78 },
-  bottomNav: { height: 46, backgroundColor: BLUE, flexDirection: 'row', justifyContent: 'space-around' },
-  tab: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  tabIcon: { color: '#FFFFFF', fontSize: 16, lineHeight: 19 },
-  staticSearch: { width: 21, height: 21, position: 'relative' },
-  searchLens: { position: 'absolute', left: 1, top: 0, width: 14, height: 14, borderRadius: 8, borderWidth: 2, borderColor: '#FFFFFF' },
-  searchHandle: { position: 'absolute', left: 14, top: 13, width: 2, height: 8, backgroundColor: '#FFFFFF', transform: [{ rotate: '-45deg' }] },
-  tabLabel: { color: '#FFFFFF', fontSize: 7, marginTop: 1 },
-  activeTab: { color: '#FFB400' },
 });

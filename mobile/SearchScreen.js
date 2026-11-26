@@ -229,63 +229,90 @@ const SEARCH_RESULT_PRODUCTS = [
   {
     id: 'lanche-natural',
     name: 'Lanche Natural - Subway',
+    detailName: 'Lanche Natural',
     restaurantName: 'Subway',
+    price: 'R$ 24,90',
+    description: 'Pão integral com frango, cenoura, alface e molho leve.',
     restaurantLabel: 'Restaurante',
     image: require('./assets/subway-logo.png'),
   },
   {
     id: 'marmita-200g',
     name: 'Marmita 200g - Marmitas da jô',
+    detailName: 'Marmita 200g',
     restaurantName: 'Marmitas da jô',
+    price: 'R$ 15,99',
+    description: 'Arroz, feijão, frango grelhado e legumes da estação.',
     restaurantLabel: 'restaurante',
     image: require('./assets/search-result-store-marmitas-ju.png'),
   },
   {
     id: 'batata-cozida',
     name: 'Batata Cozida - Potato House',
+    detailName: 'Batata Cozida',
     restaurantName: 'Potato House',
+    price: 'R$ 12,00',
+    description: 'Batata cozida com ervas, sal e azeite.',
     restaurantLabel: 'restaurante',
     image: require('./assets/search-result-store-potato-house.png'),
   },
   {
     id: 'sanduiche-frango',
     name: 'Sanduíche de Frango - KFC',
+    detailName: 'Sanduíche de Frango',
     restaurantName: 'KFC',
+    price: 'R$ 19,90',
+    description: 'Pão, frango, alface, tomate e molho da casa.',
     restaurantLabel: 'restaurante',
     image: require('./assets/search-result-store-kfc.png'),
   },
   {
     id: 'suco-natural',
     name: 'Suco Natural - Saudavel Life',
+    detailName: 'Suco Natural',
     restaurantName: 'Saudavel Life',
+    price: 'R$ 10,00',
+    description: 'Suco de fruta preparado com água e gelo.',
     restaurantLabel: 'restaurante',
     image: require('./assets/search-result-store-saudavel-life.png'),
   },
   {
     id: 'brigadeiro',
     name: 'Brigadeiro - Doce Abraço',
+    detailName: 'Brigadeiro',
     restaurantName: 'Doce Abraço',
+    price: 'R$ 8,99',
+    description: 'Brigadeiro de chocolate com cobertura granulada.',
     restaurantLabel: 'restaurante',
     image: require('./assets/search-result-store-doce-abraco.png'),
   },
   {
     id: 'bife-acebolado',
     name: 'Bife Acebolado - Outback',
+    detailName: 'Bife Acebolado',
     restaurantName: 'Outback',
+    price: 'R$ 34,90',
+    description: 'Bife grelhado com cebola dourada e temperos.',
     restaurantLabel: 'restaurante',
     image: require('./assets/search-result-store-outback.png'),
   },
   {
     id: 'cafe-da-manha',
     name: 'Cafés Da Manhã - Manhã Leve',
+    detailName: 'Café da Manhã',
     restaurantName: 'Manhã Leve',
+    price: 'R$ 22,90',
+    description: 'Combo demonstrativo com café, pão e fruta.',
     restaurantLabel: 'restaurante',
     image: require('./assets/search-result-store-manha-leve.png'),
   },
   {
     id: 'bolo-de-milho',
     name: 'Bolo De Milho - Quintal Do Milho',
+    detailName: 'Bolo de Milho',
     restaurantName: 'Quintal Do Milho',
+    price: 'R$ 12,00',
+    description: 'Fatia de bolo de milho preparada pela casa.',
     restaurantLabel: 'restaurante',
     image: require('./assets/search-result-store-quintal-milho.png'),
   },
@@ -358,23 +385,20 @@ const RECENT_STORES = [
 const INITIAL_RECENT_SEARCHES = ['Pizza', 'Pastel', 'torta', 'filé a parmegiana'];
 const SEARCH_HISTORY_STORAGE_KEY = '@oullin/search-history';
 
-const MEAL_FEATURES = [
-  { type: 'utensils', label: 'Utensílios dedicados' },
-  { type: 'ingredientCard', label: 'Ingredientes utilizados' },
+const PRODUCT_INFORMATION_FEATURES = [
+  { type: 'utensils', label: 'Utensílios utilizados' },
+  { type: 'ingredients', label: 'Ingredientes atualizados' },
   { type: 'nutrition', label: 'Ficha nutricional' },
-  { type: 'certificate', label: 'Certificações' },
 ];
+
+const MEAL_FEATURES = PRODUCT_INFORMATION_FEATURES;
 
 const DEFAULT_RESTAURANT_FEATURES = [
   { type: 'utensils', label: 'Utensílios do preparo' },
   { type: 'ingredientCard', label: 'Dados de ingredientes' },
 ];
 
-const DEFAULT_FOOD_FEATURES = [
-  { type: 'utensils', label: 'Utensílios do preparo' },
-  { type: 'ingredientCard', label: 'Ingredientes do prato' },
-  { type: 'nutrition', label: 'Dados nutricionais a confirmar' },
-];
+const DEFAULT_FOOD_FEATURES = PRODUCT_INFORMATION_FEATURES;
 
 const MEAL_SEARCH_ITEMS = [
   {
@@ -515,6 +539,9 @@ const SAUDAVEL_LIFE_CHICKEN_RECOMMENDATIONS = [
     name: 'Marmita Simples',
     detailName: 'Marmita de frango',
     price: 'R$ 15,99',
+    description: 'Frango grelhado, arroz e feijão.',
+    ingredients: 'Frango, arroz, feijão e temperos. Confirme ingredientes e alergênicos com a loja.',
+    utensils: 'Grelha ou frigideira, panela, pegadores e utensílios de montagem.',
     image: require('./assets/restaurant-search-marmitas-ju-1.png'),
   },
   {
@@ -522,6 +549,9 @@ const SAUDAVEL_LIFE_CHICKEN_RECOMMENDATIONS = [
     name: 'Marmita Simples',
     detailName: 'Marmita de legumes',
     price: 'R$ 15,99',
+    description: 'Legumes, arroz integral e grão-de-bico.',
+    ingredients: 'Legumes, arroz integral e grão-de-bico. Confirme preparo e contaminação cruzada com a loja.',
+    utensils: 'Panelas, escumadeira e utensílios de montagem.',
     image: require('./assets/restaurant-search-marmitas-ju-3.png'),
   },
   {
@@ -529,6 +559,9 @@ const SAUDAVEL_LIFE_CHICKEN_RECOMMENDATIONS = [
     name: 'Marmita Simples',
     detailName: 'Marmita caseira',
     price: 'R$ 15,99',
+    description: 'Refeição completa preparada no dia; a composição varia conforme o cardápio.',
+    ingredients: 'A composição varia conforme o prato do dia. Consulte a loja para confirmar ingredientes e alergênicos.',
+    utensils: 'Panelas, pegadores e utensílios de montagem.',
     image: require('./assets/restaurant-search-marmitas-ju-2.png'),
   },
 ];
@@ -540,6 +573,8 @@ const RESTAURANT_MEALS = [
     detailName: 'Marmita de frango',
     price: 'R$ 15,99',
     description: 'Arroz, frango e legumes preparados no dia.',
+    ingredients: 'Arroz, frango, legumes e temperos. Confirme a composição e os alergênicos com a loja.',
+    utensils: 'Panelas, pegadores e utensílios de montagem.',
     image: require('./assets/marmita-detail-frango.png'),
     filters: SAUDAVEL_LIFE_CHICKEN_FILTERS,
     features: SAUDAVEL_LIFE_CHICKEN_FEATURES,
@@ -548,13 +583,17 @@ const RESTAURANT_MEALS = [
   {
     name: 'Marmita de legumes',
     price: 'R$ 15,99',
-    description: 'Legumes frescos com acompanhamento da casa.',
+    description: 'Legumes frescos, arroz integral e grão-de-bico.',
+    ingredients: 'Legumes, arroz integral e grão-de-bico. Confirme preparo e risco de contaminação cruzada com a loja.',
+    utensils: 'Panelas, escumadeira e utensílios de montagem.',
     image: require('./assets/marmita-card-salada.png'),
   },
   {
     name: 'Marmita caseira',
     price: 'R$ 18,99',
     description: 'Uma refeição completa feita com ingredientes selecionados.',
+    ingredients: 'A composição varia conforme o prato do dia. Consulte a loja para confirmar ingredientes e alergênicos.',
+    utensils: 'Panelas, pegadores e utensílios de montagem.',
     image: require('./assets/marmita-card-caseira.png'),
   },
 ];
@@ -618,7 +657,6 @@ export const RESTAURANT_DIRECTORY = [
     verified: true,
     image: require('./assets/search-result-store-marmitas-ju.png'),
     heroImage: require('./assets/restaurant-search-marmitas-ju-1.png'),
-    searchCardImage: require('./assets/restaurant-result-marmitas-ju.png'),
     rating: '4,8 (452)',
     deliveryTime: '40-50 min',
     deliveryFee: 'R$ 5,99',
@@ -632,15 +670,36 @@ export const RESTAURANT_DIRECTORY = [
       items: [
         {
           id: 'marmitas-da-jo-simples-1',
-          ...makeMenuItem('Marmita Simples', 'R$ 15,99', '', require('./assets/restaurant-search-marmitas-ju-1.png')),
+          ...makeMenuItem(
+            'Frango ao molho com arroz',
+            'R$ 15,99',
+            'Frango ao molho acompanhado de arroz e legumes.',
+            require('./assets/restaurant-search-marmitas-ju-1.png'),
+          ),
+          ingredients: 'Frango, arroz, legumes e molho da casa. Consulte a loja para confirmar temperos e alergênicos.',
+          utensils: 'Panela ou frigideira, pegadores e utensílios de montagem.',
         },
         {
           id: 'marmitas-da-jo-simples-2',
-          ...makeMenuItem('Marmita Simples', 'R$ 15,99', '', require('./assets/restaurant-search-marmitas-ju-2.png')),
+          ...makeMenuItem(
+            'Carne com purê',
+            'R$ 15,99',
+            'Carne moída com purê de batata e arroz.',
+            require('./assets/restaurant-search-marmitas-ju-2.png'),
+          ),
+          ingredients: 'Carne moída, batata, arroz e temperos. Confirme com a loja os ingredientes do purê.',
+          utensils: 'Panelas, colher ou espátula e utensílios de montagem.',
         },
         {
           id: 'marmitas-da-jo-simples-3',
-          ...makeMenuItem('Marmita Simples', 'R$ 15,99', '', require('./assets/restaurant-search-marmitas-ju-3.png')),
+          ...makeMenuItem(
+            'Frango com legumes',
+            'R$ 15,99',
+            'Frango acompanhado de arroz e legumes variados.',
+            require('./assets/restaurant-search-marmitas-ju-3.png'),
+          ),
+          ingredients: 'Frango, arroz, legumes e temperos. Consulte a loja sobre ingredientes e alergênicos.',
+          utensils: 'Frigideira, panela, pegadores e utensílios de montagem.',
         },
       ],
     }],
@@ -651,7 +710,6 @@ export const RESTAURANT_DIRECTORY = [
     verified: true,
     image: require('./assets/search-result-store-doce-abraco.png'),
     heroImage: require('./assets/restaurant-search-doce-abraco-1.png'),
-    searchCardImage: require('./assets/restaurant-result-doce-abraco.png'),
     rating: '4,8 (452)',
     deliveryTime: '40-50 min',
     deliveryFee: 'R$ 5,99',
@@ -665,15 +723,36 @@ export const RESTAURANT_DIRECTORY = [
       items: [
         {
           id: 'doce-abraco-brigadeiros-fit',
-          ...makeMenuItem('Brigadeiros Fit', 'R$ 24,99', '', require('./assets/restaurant-search-doce-abraco-1.png')),
+          ...makeMenuItem(
+            'Brigadeiros Fit',
+            'R$ 24,99',
+            'Brigadeiros de chocolate com cobertura granulada; receita demonstrativa.',
+            require('./assets/restaurant-search-doce-abraco-1.png'),
+          ),
+          ingredients: 'Cacau ou chocolate, leite ou leite condensado e cobertura. Confirme adoçantes, ingredientes e alergênicos com a loja.',
+          utensils: 'Panela, espátula, tigela e utensílios para porcionar e servir.',
         },
         {
           id: 'doce-abraco-fatia-bolo',
-          ...makeMenuItem('Fatia de bolo', 'R$ 15,99', '', require('./assets/restaurant-search-doce-abraco-2.png')),
+          ...makeMenuItem(
+            'Fatia de bolo de chocolate',
+            'R$ 15,99',
+            'Bolo de chocolate coberto com frutas vermelhas; composição demonstrativa.',
+            require('./assets/restaurant-search-doce-abraco-2.png'),
+          ),
+          ingredients: 'Massa de bolo, chocolate e frutas vermelhas. Confirme com a loja a receita, coberturas e alergênicos.',
+          utensils: 'Tigelas de preparo, forma, espátula e utensílios para cortar e servir.',
         },
         {
           id: 'doce-abraco-donuts',
-          ...makeMenuItem('Donuts', 'R$ 15,99', '', require('./assets/restaurant-search-doce-abraco-3.png')),
+          ...makeMenuItem(
+            'Donuts de chocolate',
+            'R$ 15,99',
+            'Donuts com cobertura de chocolate e confeitos; composição demonstrativa.',
+            require('./assets/restaurant-search-doce-abraco-3.png'),
+          ),
+          ingredients: 'Massa, chocolate e confeitos. Confirme com a loja a receita, ingredientes e alergênicos.',
+          utensils: 'Tigelas, espátula, assadeira ou fritadeira e utensílios para decorar e servir.',
         },
       ],
     }],
@@ -919,6 +998,16 @@ function normalizeSearchTerm(value) {
     .trim();
 }
 
+function getSearchPriceValue(price) {
+  const normalizedPrice = String(price || '')
+    .replace(/[^\d,]/g, '')
+    .replace(/\./g, '')
+    .replace(',', '.');
+  if (!normalizedPrice) return Number.POSITIVE_INFINITY;
+  const value = Number(normalizedPrice);
+  return Number.isFinite(value) ? value : Number.POSITIVE_INFINITY;
+}
+
 function isSaudavelLifeChicken(item, restaurantName = item.restaurantName) {
   const isChickenMeal =
     normalizeSearchTerm(item.detailName || item.name || '') === 'marmita de frango';
@@ -1062,6 +1151,284 @@ function FoodFeatureCard({ label, type, size, useReferenceIcons = false }) {
         </View>
       )}
       <Text numberOfLines={2} style={styles.foodFeatureLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function formatFoodInformation(value) {
+  if (typeof value === 'string') return value.trim();
+  if (Array.isArray(value)) return value.map((entry) => String(entry)).join('\n');
+  if (value && typeof value === 'object') {
+    return Object.entries(value)
+      .map(([label, amount]) => `${label}: ${amount}`)
+      .join('\n');
+  }
+  return '';
+}
+
+function getDemonstrationIngredients(item, searchableText, description) {
+  if (item.ingredients) return item.ingredients;
+  const productNameText = normalizeSearchTerm(item.detailName || item.name || '');
+  if (/cafe.*manha/.test(searchableText)) {
+    return 'Café, pão e fruta conforme a descrição; confirme acompanhamentos e alergênicos com a loja.';
+  }
+  if (/marmita.*legumes|legumes.*marmita|bowl.*legumes/.test(productNameText)) {
+    return `Legumes, grãos e acompanhamentos conforme a descrição: ${description.replace(/[.!?]+$/, '')}. Confirme a composição com a loja.`;
+  }
+  if (/marmita caseira|prato do dia|composicao varia/.test(searchableText)) {
+    return 'A composição pode variar conforme o prato do dia. Consulte a loja para confirmar ingredientes e alergênicos.';
+  }
+  if (/marmita|refeicao/.test(searchableText)) {
+    return `Ingredientes principais indicados: ${description.replace(/[.!?]+$/, '')}. Confirme a composição completa e os alergênicos com a loja.`;
+  }
+  if (/vegan|vegano|vegana/.test(searchableText)) {
+    return 'Base vegetal, proteína de origem vegetal, vegetais e molho da casa.';
+  }
+  if (/vegetari/.test(searchableText)) {
+    return 'Hambúrguer vegetal, pão, vegetais e molho. Confirme se há queijo, ovos ou outros ingredientes de origem animal.';
+  }
+  if (/hamburg|burger/.test(searchableText)) {
+    return 'Pão, hambúrguer, queijo, alface, tomate e molho da casa.';
+  }
+  if (/sanduiche|lanche/.test(searchableText)) {
+    return `Pão e recheio conforme a descrição: ${description.replace(/[.!?]+$/, '')}. Confirme molhos e alergênicos com a loja.`;
+  }
+  if (/bife|carne/.test(searchableText)) {
+    return 'Carne, cebola, óleo vegetal, sal e temperos.';
+  }
+  if (/pizza|marguerita/.test(searchableText)) {
+    return `Massa, molho e coberturas conforme a descrição: ${description.replace(/[.!?]+$/, '')}. Confirme a composição com a loja.`;
+  }
+  if (/sushi/.test(searchableText)) {
+    return 'Arroz temperado, alga nori, peixe ou vegetais e acompanhamentos.';
+  }
+  if (/salada/.test(searchableText)) {
+    return 'Folhas, tomate, cenoura, grãos e molho servido à parte.';
+  }
+  if (/batata|fritas|porcao/.test(searchableText)) {
+    return /cozida/.test(searchableText)
+      ? 'Batata cozida, ervas, sal e azeite conforme a descrição; confirme temperos com a loja.'
+      : 'Batata, óleo de preparo, sal e temperos. Confirme ingredientes e preparo com a loja.';
+  }
+  if (/pastel/.test(searchableText)) {
+    return /doce|chocolate/.test(searchableText)
+      ? 'Massa e recheio doce conforme a descrição. Confirme ingredientes e alergênicos com a loja.'
+      : 'Massa, recheio conforme a opção escolhida e óleo de preparo. Confirme ingredientes e alergênicos com a loja.';
+  }
+  if (/milho/.test(searchableText)) {
+    return 'Milho, farinha, ovos, leite, açúcar e óleo vegetal.';
+  }
+  if (/brigadeiro/.test(searchableText)) {
+    return 'Cacau ou chocolate, leite ou leite condensado e cobertura. Confirme adoçantes e alergênicos com a loja.';
+  }
+  if (/donut|rosquinha/.test(searchableText)) {
+    return 'Massa e cobertura conforme a descrição. Confirme ingredientes, fritura e alergênicos com a loja.';
+  }
+  if (/bolo/.test(searchableText)) {
+    return `Massa e cobertura conforme a descrição: ${description.replace(/[.!?]+$/, '')}. Confirme ingredientes e alergênicos com a loja.`;
+  }
+  if (/doce|sobremesa/.test(searchableText)) {
+    return `A composição varia conforme a sobremesa: ${description.replace(/[.!?]+$/, '')}. Consulte a loja para confirmar os ingredientes.`;
+  }
+  if (/lasanha/.test(searchableText)) {
+    return 'Massa em camadas, molho e recheio conforme a receita. Confirme ingredientes e alergênicos com a loja.';
+  }
+  if (/massa|penne/.test(searchableText)) {
+    return 'Massa e molho conforme a descrição. Confirme ingredientes e alergênicos com a loja.';
+  }
+  if (/suco/.test(searchableText)) return 'Fruta, água e gelo; açúcar opcional.';
+  if (/\b(bebida|bebidas|refrigerante|refrigerantes|suco|sucos|cola|agua)\b/.test(searchableText)) {
+    return 'Bebida pronta e ingredientes descritos no rótulo original.';
+  }
+  if (/cafe/.test(searchableText)) return 'Café e, conforme a opção, leite e açúcar. Confirme os ingredientes com a loja.';
+  return `Composição ilustrativa baseada na descrição: ${description.replace(/[.!?]+$/, '')}.`;
+}
+
+function getDemonstrationUtensils(item, searchableText) {
+  if (item.utensils) return item.utensils;
+  if (/cafe.*manha/.test(searchableText)) {
+    return 'Cafeteira, xícaras, pratos e utensílios para montar e servir o pão e a fruta.';
+  }
+  if (/cafe/.test(searchableText)) {
+    return 'Cafeteira, xícara e colher para preparar e servir.';
+  }
+  if (/\b(bebida|bebidas|refrigerante|refrigerantes|suco|sucos|cola|agua)\b/.test(searchableText)) {
+    return 'Embalagem original, abridor e copo para servir.';
+  }
+  if (/pizza/.test(searchableText)) {
+    return 'Forno, pá de pizza, cortador e utensílios de montagem.';
+  }
+  if (/pastel/.test(searchableText)) {
+    return 'Fritadeira, escumadeira ou pegador e recipiente para servir.';
+  }
+  if (/bife|carne/.test(searchableText)) {
+    return 'Grelha ou frigideira, pinça e utensílios para dourar a cebola e servir.';
+  }
+  if (/lasanha/.test(searchableText)) {
+    return 'Forno, refratário, espátula e utensílios para servir.';
+  }
+  if (/massa|penne/.test(searchableText)) {
+    return 'Panela para massa, escorredor, concha e utensílios para servir.';
+  }
+  if (/sushi|peixe/.test(searchableText)) {
+    return 'Faca afiada, tábua de preparo, utensílio para arroz e hashi para servir.';
+  }
+  if (/marmita|refeicao/.test(searchableText)) {
+    return 'Panelas, colher de preparo, pegadores e utensílios de montagem.';
+  }
+  if (/batata|fritas|porcao/.test(searchableText)) {
+    return /cozida/.test(searchableText)
+      ? 'Panela, escumadeira e recipiente para servir.'
+      : 'Fritadeira, cesto ou escumadeira e recipiente para servir.';
+  }
+  if (/salada|legumes|frutas|vegetais/.test(searchableText)) {
+    return 'Faca, tábua de corte, tigela e utensílios para servir.';
+  }
+  if (/hamburg|burger/.test(searchableText)) {
+    return 'Chapa, espátula e utensílios de montagem.';
+  }
+  if (/sanduiche|lanche/.test(searchableText)) {
+    return 'Faca, tábua de corte e utensílios para montar e servir.';
+  }
+  if (/bolo/.test(searchableText)) {
+    return 'Tigelas de preparo, forma, espátula e utensílios para cortar e servir.';
+  }
+  if (/brigadeiro|doce|sobremesa/.test(searchableText)) {
+    return 'Tigela, espátula e utensílios para porcionar, decorar e servir.';
+  }
+  return 'Utensílios de preparo e serviço a confirmar com o estabelecimento.';
+}
+
+function getDemonstrationFoodInformation(item) {
+  const productName = item.detailName || item.name || 'Produto';
+  const productNameText = normalizeSearchTerm(productName);
+  const searchableText = normalizeSearchTerm([
+    productName,
+    item.category,
+    item.description,
+    item.detail,
+  ].filter(Boolean).join(' '));
+  const seed = Array.from(normalizeSearchTerm(`${item.id || ''} ${productName}`)).reduce(
+    (total, character) => total + character.charCodeAt(0),
+    0,
+  );
+  const isDrink = /\b(bebida|bebidas|refrigerante|refrigerantes|suco|sucos|cola|agua)\b/.test(searchableText) ||
+    (/cafe/.test(productNameText) && !/manha/.test(productNameText));
+  const isZeroSugarDrink = isDrink && /zero|sem acucar|diet/.test(searchableText);
+  const isFreshProduce = /salada|legumes|frutas|vegetais/.test(searchableText);
+  const isProteinMeal = /marmita|frango|bife|hamburg|burger|sushi|sanduiche|lanche|carne/.test(searchableText);
+  let carbohydrates;
+  let protein;
+  let fat;
+  let fiber;
+
+  if (isDrink) {
+    carbohydrates = isZeroSugarDrink ? 0 : 8 + seed % 16;
+    protein = 0;
+    fat = 0;
+    fiber = 0;
+  } else if (isProteinMeal) {
+    carbohydrates = 20 + seed % 17;
+    protein = 14 + seed % 17;
+    fat = 6 + seed % 12;
+    fiber = 3 + seed % 5;
+  } else if (isFreshProduce) {
+    carbohydrates = 12 + seed % 18;
+    protein = 2 + seed % 8;
+    fat = 2 + seed % 8;
+    fiber = 3 + seed % 5;
+  } else {
+    carbohydrates = 28 + seed % 19;
+    protein = 3 + seed % 9;
+    fat = 8 + seed % 13;
+    fiber = 1 + seed % 5;
+  }
+
+  const energy = carbohydrates * 4 + protein * 4 + fat * 9;
+  const description = item.description || item.detail || productName;
+
+  return {
+    ...item,
+    ingredients: getDemonstrationIngredients(item, searchableText, description),
+    utensils: getDemonstrationUtensils(item, searchableText),
+    nutritionInfo: item.nutritionInfo || item.nutritionalInfo || item.nutrients || [
+      'Porção de referência fictícia: 100 g/ml',
+      `Valor energético: ${energy} kcal`,
+      `Carboidratos: ${carbohydrates} g`,
+      `Proteínas: ${protein} g`,
+      `Gorduras totais: ${fat} g`,
+      `Fibra alimentar: ${fiber} g`,
+      `Sódio: ${100 + seed % 500} mg`,
+    ],
+    demonstrationInformation: true,
+  };
+}
+
+function getHomeFoodInfoType(featureType) {
+  if (featureType === 'utensils') return 'utensils';
+  if (['ingredients', 'ingredientCard'].includes(featureType)) return 'ingredients';
+  if (featureType === 'nutrition') return 'nutrition';
+  return null;
+}
+
+function HomeFoodInfoScreen({ item, infoType, onBack, screenWidth }) {
+  const screenDetails = {
+    utensils: {
+      title: 'Utensílios utilizados',
+      value: item.utensils,
+      unavailable: 'A loja ainda não informou quais utensílios são usados no preparo.',
+    },
+    ingredients: {
+      title: 'Ingredientes atualizados',
+      value: item.ingredients,
+      unavailable: 'Os ingredientes ainda não foram atualizados para este produto.',
+    },
+    nutrition: {
+      title: 'Ficha nutricional',
+      value: item.nutritionInfo || item.nutritionalInfo || item.nutrients,
+      unavailable: 'A ficha nutricional ainda não foi cadastrada para este produto.',
+    },
+  }[infoType];
+  const content = formatFoodInformation(screenDetails.value) || screenDetails.unavailable;
+
+  return (
+    <View style={styles.homeFoodInfoScreen}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.homeFoodInfoContent,
+          {
+            paddingHorizontal: Math.min(screenWidth * 0.06, 24),
+            paddingTop: Math.max(24, screenWidth * 0.07),
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Pressable
+          accessibilityLabel="Voltar aos detalhes do produto"
+          accessibilityRole="button"
+          onPress={onBack}
+          style={styles.homeFoodInfoBack}
+        >
+          <Text style={styles.homeFoodInfoBackText}>‹ Voltar</Text>
+        </Pressable>
+        <Text style={styles.homeFoodInfoTitle}>{screenDetails.title}</Text>
+        <Text style={styles.homeFoodInfoProduct}>
+          {item.detailName || item.name}
+        </Text>
+        <View style={styles.homeFoodInfoCard}>
+          <Text style={styles.homeFoodInfoText}>{content}</Text>
+        </View>
+        <Text style={styles.homeFoodInfoNote}>
+          Dados fictícios para demonstração; não são informações oficiais nem garantem ausência de alergênicos. Confirme com {item.restaurantName || 'a loja'} antes de pedir.
+        </Text>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onBack}
+          style={styles.homeFoodInfoButton}
+        >
+          <Text style={styles.homeFoodInfoButtonText}>Entendi</Text>
+        </Pressable>
+      </ScrollView>
     </View>
   );
 }
@@ -2092,6 +2459,7 @@ export function FoodDetailsScreen({
   item,
   onBack,
   onSelectItem,
+  onAddToCart,
   onChickenInfoScreenChange,
   profileSelections = {},
   screenWidth,
@@ -2101,8 +2469,10 @@ export function FoodDetailsScreen({
   const [showChickenUtensils, setShowChickenUtensils] = useState(false);
   const [showChickenIngredients, setShowChickenIngredients] = useState(false);
   const [showChickenNutrition, setShowChickenNutrition] = useState(false);
+  const [homeInfoScreen, setHomeInfoScreen] = useState(null);
+  const [cartFeedback, setCartFeedback] = useState('');
   const isSaudavelChicken = isSaudavelLifeChicken(item);
-  const productFeatures = item.features || [];
+  const productFeatures = item.features?.length ? item.features : DEFAULT_FOOD_FEATURES;
   const featureSize = productFeatures.length >= 4
     ? Math.min(56, (screenWidth - 72) / 4)
     : Math.min(56, screenWidth * 116 / 608);
@@ -2121,12 +2491,17 @@ export function FoodDetailsScreen({
     ),
   );
   useEffect(() => {
-    const showChickenInfoScreen =
-      showChickenUtensils || showChickenIngredients || showChickenNutrition;
-    if (!showChickenInfoScreen) return undefined;
+    setCartFeedback('');
+  }, [item.detailName, item.name]);
+
+  useEffect(() => {
+    const showProductInfoScreen =
+      homeInfoScreen || showChickenUtensils || showChickenIngredients || showChickenNutrition;
+    if (!showProductInfoScreen) return undefined;
     onChickenInfoScreenChange?.(true);
     return () => onChickenInfoScreenChange?.(false);
   }, [
+    homeInfoScreen,
     onChickenInfoScreenChange,
     showChickenIngredients,
     showChickenNutrition,
@@ -2153,6 +2528,16 @@ export function FoodDetailsScreen({
     return (
       <ChickenNutritionInfoScreen
         onBack={() => setShowChickenNutrition(false)}
+        screenWidth={screenWidth}
+      />
+    );
+  }
+  if (homeInfoScreen) {
+    return (
+      <HomeFoodInfoScreen
+        infoType={homeInfoScreen}
+        item={getDemonstrationFoodInformation(item)}
+        onBack={() => setHomeInfoScreen(null)}
         screenWidth={screenWidth}
       />
     );
@@ -2204,6 +2589,15 @@ export function FoodDetailsScreen({
       )}
     </View>
   );
+
+  function addCurrentItemToCart() {
+    const added = onAddToCart?.(item);
+    setCartFeedback(
+      added
+        ? 'Adicionado ao carrinho.'
+        : 'Não foi possível adicionar; confira o preço cadastrado.',
+    );
+  }
 
   return (
     <View style={styles.foodDetailsScreen}>
@@ -2274,7 +2668,7 @@ export function FoodDetailsScreen({
               {item.price}
             </Text>
           )}
-          {!homeReferenceLayout && !!item.description && !isSaudavelChicken && (
+          {!!item.description && (
             <Text
               style={[
                 styles.foodProductDescription,
@@ -2377,63 +2771,63 @@ export function FoodDetailsScreen({
               },
             ]}
           >
-            {productFeatures.map((feature, index) => (
-              <View
-                key={`${feature.label}-${index}`}
-                style={productFeatures.length >= 4 ? undefined : [
-                  styles.foodReferenceFeatureSpacing,
-                  { marginRight: featureGap },
-                ]}
-              >
-                {isSaudavelChicken && feature.type === 'utensils' ? (
-                  <Pressable
-                    accessibilityLabel="Abrir utensílios do frango"
-                    accessibilityRole="button"
-                    onPress={() => setShowChickenUtensils(true)}
-                  >
-                    <FoodFeatureCard
-                      label={feature.label}
-                      size={featureSize}
-                      type={feature.type}
-                      useReferenceIcons
-                    />
-                  </Pressable>
-                ) : isSaudavelChicken && ['ingredients', 'ingredientCard'].includes(feature.type) ? (
-                  <Pressable
-                    accessibilityLabel="Abrir ingredientes e alergênicos"
-                    accessibilityRole="button"
-                    onPress={() => setShowChickenIngredients(true)}
-                  >
-                    <FoodFeatureCard
-                      label={feature.label}
-                      size={featureSize}
-                      type={feature.type}
-                      useReferenceIcons
-                    />
-                  </Pressable>
-                ) : isSaudavelChicken && feature.type === 'nutrition' ? (
-                  <Pressable
-                    accessibilityLabel="Abrir ficha nutricional"
-                    accessibilityRole="button"
-                    onPress={() => setShowChickenNutrition(true)}
-                  >
-                    <FoodFeatureCard
-                      label={feature.label}
-                      size={featureSize}
-                      type={feature.type}
-                      useReferenceIcons
-                    />
-                  </Pressable>
-                ) : (
-                  <FoodFeatureCard
-                    label={feature.label}
-                    size={featureSize}
-                    type={feature.type}
-                    useReferenceIcons
-                  />
-                )}
-              </View>
-            ))}
+            {productFeatures.map((feature, index) => {
+              const homeInfoType = getHomeFoodInfoType(feature.type);
+              const featureCard = (
+                <FoodFeatureCard
+                  label={feature.label}
+                  size={featureSize}
+                  type={feature.type}
+                  useReferenceIcons
+                />
+              );
+
+              return (
+                <View
+                  key={`${feature.label}-${index}`}
+                  style={productFeatures.length >= 4 ? undefined : [
+                    styles.foodReferenceFeatureSpacing,
+                    { marginRight: featureGap },
+                  ]}
+                >
+                  {isSaudavelChicken && feature.type === 'utensils' ? (
+                    <Pressable
+                      accessibilityLabel="Abrir utensílios do frango"
+                      accessibilityRole="button"
+                      onPress={() => setShowChickenUtensils(true)}
+                    >
+                      {featureCard}
+                    </Pressable>
+                  ) : isSaudavelChicken && ['ingredients', 'ingredientCard'].includes(feature.type) ? (
+                    <Pressable
+                      accessibilityLabel="Abrir ingredientes e alergênicos"
+                      accessibilityRole="button"
+                      onPress={() => setShowChickenIngredients(true)}
+                    >
+                      {featureCard}
+                    </Pressable>
+                  ) : isSaudavelChicken && feature.type === 'nutrition' ? (
+                    <Pressable
+                      accessibilityLabel="Abrir ficha nutricional"
+                      accessibilityRole="button"
+                      onPress={() => setShowChickenNutrition(true)}
+                    >
+                      {featureCard}
+                    </Pressable>
+                  ) : homeInfoType ? (
+                    <Pressable
+                      accessibilityLabel={`Abrir ${feature.label}`}
+                      accessibilityRole="button"
+                      onPress={() => setHomeInfoScreen(homeInfoType)}
+                    >
+                      {featureCard}
+                    </Pressable>
+                  ) : (
+                    featureCard
+                  )}
+                </View>
+              );
+            })}
           </View>
         )}
 
@@ -2580,6 +2974,24 @@ export function FoodDetailsScreen({
           </View>
         )}
       </ScrollView>
+      {homeReferenceLayout && onAddToCart && (
+        <View style={styles.homeAddToCartBar}>
+          <Pressable
+            accessibilityLabel={`Adicionar ${item.detailName || item.name} ao carrinho`}
+            accessibilityRole="button"
+            onPress={addCurrentItemToCart}
+            style={styles.homeAddToCartButton}
+          >
+            <Text style={styles.homeAddToCartButtonText}>Adicionar ao carrinho</Text>
+            {!!item.price && (
+              <Text style={styles.homeAddToCartPrice}>{item.price}</Text>
+            )}
+          </Pressable>
+          {!!cartFeedback && (
+            <Text style={styles.homeAddToCartFeedback}>{cartFeedback}</Text>
+          )}
+        </View>
+      )}
     </View>
   );
 }
@@ -2690,14 +3102,14 @@ export function RestaurantDetailScreen({
         candidate.name === item.name,
       ),
     );
-    const productFeatures = item.features?.length
-      ? item.features
-      : restaurant.features?.length
-        ? restaurant.features.slice(0, 2)
-        : DEFAULT_FOOD_FEATURES;
+    const isChickenMeal = isSaudavelLifeChicken(item, restaurant.name);
+    const productFeatures = isChickenMeal
+      ? SAUDAVEL_LIFE_CHICKEN_FEATURES
+      : PRODUCT_INFORMATION_FEATURES;
 
     setSelectedItem({
       ...item,
+      category: item.category || sectionTitle || itemSection?.title,
       features: productFeatures,
       filters: item.filters?.length
         ? item.filters
@@ -2984,54 +3396,6 @@ function RestaurantSearchResultCard({ restaurant, onSelectFood, onSelectRestaura
   const scale = screenWidth / 401;
   const restaurantItems = restaurant.sections.flatMap((section) => section.items).slice(0, 3);
 
-  if (restaurant.searchCardImage) {
-    return (
-      <View
-        style={[
-          styles.restaurantSpriteResult,
-          {
-            height: 238 * scale,
-            marginBottom: 60 * scale,
-            width: screenWidth,
-          },
-        ]}
-      >
-        <Image
-          accessibilityLabel={`Restaurante ${restaurant.name}, nota ${restaurant.rating}, entrega ${restaurant.deliveryTime}, taxa ${restaurant.deliveryFee || restaurant.minimumOrder}. Produtos: ${restaurantItems.map((item) => `${item.name}, ${item.price}`).join('; ')}`}
-          resizeMode="stretch"
-          source={restaurant.searchCardImage}
-          style={StyleSheet.absoluteFillObject}
-        />
-        <Pressable
-          accessibilityLabel={`Ver restaurante ${restaurant.name}`}
-          accessibilityRole="button"
-          onPress={() => onSelectRestaurant(restaurant.id)}
-          style={[
-            styles.restaurantSpriteHeaderButton,
-            { height: 58 * scale, width: screenWidth * 0.84 },
-          ]}
-        />
-        {restaurantItems.map((item, index) => (
-          <Pressable
-            accessibilityLabel={`Ver informações de ${item.name}`}
-            accessibilityRole="button"
-            key={item.id || item.name}
-            onPress={() => onSelectFood(restaurant, item)}
-            style={[
-              styles.restaurantSpriteProductButton,
-              {
-                height: 20 * scale,
-                left: (22 + index * 128) * scale,
-                top: 218 * scale,
-                width: 77 * scale,
-              },
-            ]}
-          />
-        ))}
-      </View>
-    );
-  }
-
   const cardWidth = Math.min(110, (screenWidth - 44) / 3);
 
   return (
@@ -3078,13 +3442,6 @@ function RestaurantSearchResultCard({ restaurant, onSelectFood, onSelectRestaura
                 {item.name}
               </Text>
             </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => onSelectFood(restaurant, item)}
-              style={styles.mealInfoButton}
-            >
-              <Text style={styles.mealInfoButtonText}>Ver informações</Text>
-            </Pressable>
           </View>
         ))}
       </ScrollView>
@@ -3092,7 +3449,14 @@ function RestaurantSearchResultCard({ restaurant, onSelectFood, onSelectRestaura
   );
 }
 
-function RestaurantSearchResults({ restaurants, onSelectRestaurant, onSelectFood, screenWidth }) {
+function RestaurantSearchResults({
+  restaurants,
+  onSelectRestaurant,
+  onSelectFood,
+  screenWidth,
+  heading = 'Opções encontradas',
+  notice,
+}) {
   const scale = screenWidth / 393;
 
   return (
@@ -3118,8 +3482,13 @@ function RestaurantSearchResults({ restaurants, onSelectRestaurant, onSelectFood
           },
         ]}
       >
-        Opções encontradas
+        {heading}
       </Text>
+      {!!notice && (
+        <Text style={[styles.productSearchEmpty, { fontSize: 11 * scale, paddingHorizontal: 24 * scale }]}>
+          {notice}
+        </Text>
+      )}
       {restaurants.length ? restaurants.map((restaurant) => (
         <RestaurantSearchResultCard
           key={restaurant.id}
@@ -3137,7 +3506,12 @@ function RestaurantSearchResults({ restaurants, onSelectRestaurant, onSelectFood
   );
 }
 
-function ProductSearchResults({ items, screenWidth }) {
+function ProductSearchResults({
+  items,
+  onSelectProduct,
+  screenWidth,
+  heading = 'Opções encontradas',
+}) {
   const scale = screenWidth / 393;
   const isWeb = Platform.OS === 'web';
 
@@ -3165,12 +3539,15 @@ function ProductSearchResults({ items, screenWidth }) {
           },
         ]}
       >
-        Opções encontradas
+        {heading}
       </Text>
       {items.length ? (
         items.map((item) => (
-          <View
+          <Pressable
+            accessibilityLabel={`Ver informações de ${item.detailName || item.name}`}
+            accessibilityRole="button"
             key={item.id}
+            onPress={() => onSelectProduct(item)}
             style={[
               styles.productSearchRow,
               {
@@ -3186,6 +3563,11 @@ function ProductSearchResults({ items, screenWidth }) {
               >
                 {item.name}
               </Text>
+              {!!item.price && (
+                <Text style={[styles.productSearchPrice, { fontSize: 10 * scale }]}>
+                  {item.price}
+                </Text>
+              )}
               <Text
                 numberOfLines={1}
                 ellipsizeMode="clip"
@@ -3215,7 +3597,7 @@ function ProductSearchResults({ items, screenWidth }) {
                 },
               ]}
             />
-          </View>
+          </Pressable>
         ))
       ) : (
         <Text style={[styles.productSearchEmpty, { fontSize: 13 * scale }]}>
@@ -3268,6 +3650,7 @@ export default function SearchScreen({
   const [query, setQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const [selectedSearchFilter, setSelectedSearchFilter] = useState('Todo Oullin');
+  const [filterApplied, setFilterApplied] = useState(false);
   const [recentSearches, setRecentSearches] = useState(INITIAL_RECENT_SEARCHES);
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('Todos');
@@ -3290,14 +3673,47 @@ export default function SearchScreen({
     item.toLocaleLowerCase('pt-BR').includes(query.trim().toLocaleLowerCase('pt-BR')),
   );
   const showSearchFilters =
-    searchOpen || query.trim().length > 0 || selectedSearchFilter !== 'Todo Oullin';
+    searchOpen || query.trim().length > 0 || selectedSearchFilter !== 'Todo Oullin' || filterApplied;
   const normalizedQuery = normalizeSearchTerm(query);
+  const normalizedSelectedFilter = normalizeSearchTerm(selectedSearchFilter);
   const visibleSearchResults = useMemo(
     () => SEARCH_RESULT_PRODUCTS.filter((item) =>
       normalizeSearchTerm(`${item.name} ${item.restaurantName}`).includes(normalizedQuery),
     ),
     [normalizedQuery],
   );
+  const catalogSearchProducts = useMemo(
+    () => RESTAURANT_DIRECTORY.flatMap((restaurant) => (
+      (restaurant.sections || []).flatMap((section, sectionIndex) => (
+        section.items.map((item, itemIndex) => ({
+          ...item,
+          id: `${restaurant.id}-${item.id || `${sectionIndex}-${itemIndex}`}`,
+          detailName: item.detailName || item.name,
+          restaurantName: restaurant.name,
+          restaurantLabel: restaurant.name,
+          category: section.title,
+          image: item.image || restaurant.image,
+        }))
+      ))
+    )),
+    [],
+  );
+  const filteredCatalogProducts = useMemo(() => {
+    let products = catalogSearchProducts;
+    if (normalizedSelectedFilter === 'bebidas') {
+      products = products.filter((item) =>
+        /\b(bebida|bebidas|suco|sucos|refri|refrigerante|refrigerantes|agua|cha|cafe)\b/.test(
+          normalizeSearchTerm(`${item.name} ${item.description || ''} ${item.category || ''}`),
+        ),
+      );
+    }
+    if (normalizedSelectedFilter === 'menor preco') {
+      return [...products].sort(
+        (first, second) => getSearchPriceValue(first.price) - getSearchPriceValue(second.price),
+      );
+    }
+    return products;
+  }, [catalogSearchProducts, normalizedSelectedFilter]);
   const productSearchResults = visibleSearchResults.length
     ? visibleSearchResults
     : SEARCH_RESULT_PRODUCTS;
@@ -3360,6 +3776,8 @@ export default function SearchScreen({
     ].slice(0, 8));
     setQuery(searchTerm);
     setSelectedCategory('Todos');
+    setSelectedSearchFilter('Todo Oullin');
+    setFilterApplied(false);
     setShowRestaurantFilter(false);
     setSearchOpen(false);
     Keyboard.dismiss();
@@ -3368,6 +3786,8 @@ export default function SearchScreen({
   function openCategory(category) {
     setSelectedCategory(category);
     setQuery('');
+    setSelectedSearchFilter('Todo Oullin');
+    setFilterApplied(false);
     setShowRestaurantFilter(false);
     setSearchOpen(false);
     Keyboard.dismiss();
@@ -3377,9 +3797,10 @@ export default function SearchScreen({
     const isSaudavelChicken = isSaudavelLifeChicken(item, saudavelLifeRestaurant.name);
     setSelectedProduct({
       ...item,
+      category: 'Marmitas',
       features: isSaudavelChicken
         ? SAUDAVEL_LIFE_CHICKEN_FEATURES
-        : item.features || saudavelLifeRestaurant.features,
+        : PRODUCT_INFORMATION_FEATURES,
       filters: isSaudavelChicken
         ? SAUDAVEL_LIFE_CHICKEN_FILTERS
         : item.filters || [],
@@ -3398,13 +3819,10 @@ export default function SearchScreen({
     const isSaudavelChicken = isSaudavelLifeChicken(item, restaurant.name);
     setSelectedProduct({
       ...item,
+      category: item.category || itemSection?.title,
       features: isSaudavelChicken
         ? SAUDAVEL_LIFE_CHICKEN_FEATURES
-        : item.features?.length
-          ? item.features
-          : restaurant.features?.length
-            ? restaurant.features.slice(0, 2)
-            : DEFAULT_FOOD_FEATURES,
+        : PRODUCT_INFORMATION_FEATURES,
       filters: isSaudavelChicken
         ? SAUDAVEL_LIFE_CHICKEN_FILTERS
         : item.filters?.length
@@ -3414,6 +3832,15 @@ export default function SearchScreen({
         ? item.recommendations || SAUDAVEL_LIFE_CHICKEN_RECOMMENDATIONS
         : restaurantItems.filter((recommendation) => recommendation !== item),
       restaurantName: restaurant.name,
+    });
+  }
+
+  function selectSearchResultProduct(item) {
+    setSelectedProduct({
+      ...item,
+      features: PRODUCT_INFORMATION_FEATURES,
+      filters: [],
+      recommendations: [],
     });
   }
 
@@ -3442,11 +3869,12 @@ export default function SearchScreen({
         onSelectItem={(item) =>
           setSelectedProduct({
             ...item,
-            features: item.features?.length
-              ? item.features
-              : selectedProduct.features?.length
-                ? selectedProduct.features
-                : DEFAULT_FOOD_FEATURES,
+            features: isSaudavelLifeChicken(
+              item,
+              item.restaurantName || selectedProduct.restaurantName,
+            )
+              ? SAUDAVEL_LIFE_CHICKEN_FEATURES
+              : PRODUCT_INFORMATION_FEATURES,
             filters: item.filters?.length
               ? item.filters
               : selectedProduct.filters || [],
@@ -3524,11 +3952,16 @@ export default function SearchScreen({
             onChangeText={(value) => {
               setQuery(value);
               setSearchOpen(value.trim().length === 0);
-              if (value.trim()) setSelectedCategory('Todos');
+              setSelectedCategory('Todos');
+              setSelectedSearchFilter('Todo Oullin');
+              setFilterApplied(false);
               setShowRestaurantFilter(false);
             }}
             onFocus={() => {
               setSearchOpen(query.trim().length === 0);
+              setSelectedSearchFilter('Todo Oullin');
+              setFilterApplied(false);
+              setSelectedCategory('Todos');
               setShowRestaurantFilter(false);
             }}
             onSubmitEditing={() => submitSearch()}
@@ -3552,6 +3985,9 @@ export default function SearchScreen({
               onPress={() => {
                 setQuery('');
                 setSearchOpen(true);
+                setSelectedSearchFilter('Todo Oullin');
+                setFilterApplied(false);
+                setSelectedCategory('Todos');
               }}
               style={styles.clearButton}
             >
@@ -3583,6 +4019,7 @@ export default function SearchScreen({
                   onPress={() => {
                     const normalizedFilter = normalizeSearchTerm(filter);
                     setSelectedSearchFilter(filter);
+                    setFilterApplied(true);
                     setQuery('');
                     setSearchOpen(false);
                     setShowRestaurantFilter(false);
@@ -3643,9 +4080,32 @@ export default function SearchScreen({
           onSelectFood={selectRestaurantFood}
           restaurants={RESTAURANT_DIRECTORY.filter((restaurant) => restaurant.verified)}
           screenWidth={screenWidth}
+          heading={normalizedSelectedFilter === 'regiao' ? 'Lojas da região' : 'Restaurantes'}
+          notice={
+            normalizedSelectedFilter === 'regiao'
+              ? 'Resultados demonstrativos; a localização exata ainda não está conectada.'
+              : undefined
+          }
+        />
+      ) : filterApplied && ['todo oullin', 'bebidas', 'menor preco'].includes(normalizedSelectedFilter) ? (
+        <ProductSearchResults
+          items={filteredCatalogProducts}
+          onSelectProduct={selectSearchResultProduct}
+          screenWidth={screenWidth}
+          heading={
+            normalizedSelectedFilter === 'menor preco'
+              ? 'Opções do menor para o maior preço'
+              : normalizedSelectedFilter === 'bebidas'
+                ? 'Bebidas encontradas'
+                : 'Opções encontradas'
+          }
         />
       ) : isWeb && normalizedQuery ? (
-        <ProductSearchResults items={productSearchResults} screenWidth={screenWidth} />
+        <ProductSearchResults
+          items={productSearchResults}
+          onSelectProduct={selectSearchResultProduct}
+          screenWidth={screenWidth}
+        />
       ) : searchOpen ? (
         <ScrollView
           contentContainerStyle={styles.searchLandingContent}
@@ -3709,7 +4169,11 @@ export default function SearchScreen({
           screenWidth={screenWidth}
         />
       ) : normalizedQuery && visibleSearchResults.length > 0 ? (
-        <ProductSearchResults items={visibleSearchResults} screenWidth={screenWidth} />
+        <ProductSearchResults
+          items={visibleSearchResults}
+          onSelectProduct={selectSearchResultProduct}
+          screenWidth={screenWidth}
+        />
       ) : showSaudavelLife ? (
         <MarmitaSearchResults
           items={compatibleMealItems}
@@ -3721,7 +4185,11 @@ export default function SearchScreen({
           onSelectFood={selectSaudavelFood}
         />
       ) : normalizedQuery ? (
-        <ProductSearchResults items={visibleSearchResults} screenWidth={screenWidth} />
+        <ProductSearchResults
+          items={visibleSearchResults}
+          onSelectProduct={selectSearchResultProduct}
+          screenWidth={screenWidth}
+        />
       ) : (
       <ScrollView
         key="search-landing"
@@ -4187,18 +4655,6 @@ const styles = StyleSheet.create({
   restaurantSearchHeading: {
     color: COLORS.text,
     fontWeight: '700',
-  },
-  restaurantSpriteResult: {
-    position: 'relative',
-  },
-  restaurantSpriteHeaderButton: {
-    left: 0,
-    position: 'absolute',
-    top: 0,
-  },
-  restaurantSpriteProductButton: {
-    backgroundColor: 'transparent',
-    position: 'absolute',
   },
   restaurantGenericResult: {
     backgroundColor: COLORS.white,
@@ -4712,6 +5168,102 @@ const styles = StyleSheet.create({
   foodReferenceTagText: {
     fontSize: 7,
     lineHeight: 9,
+  },
+  homeFoodInfoScreen: {
+    backgroundColor: COLORS.white,
+    flex: 1,
+  },
+  homeFoodInfoContent: {
+    flexGrow: 1,
+    paddingBottom: 28,
+  },
+  homeFoodInfoBack: {
+    alignSelf: 'flex-start',
+    justifyContent: 'center',
+    minHeight: 44,
+    marginBottom: 18,
+  },
+  homeFoodInfoBackText: {
+    color: COLORS.orange,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  homeFoodInfoTitle: {
+    color: COLORS.text,
+    fontSize: 24,
+    fontWeight: '700',
+    lineHeight: 30,
+  },
+  homeFoodInfoProduct: {
+    color: COLORS.muted,
+    fontSize: 16,
+    marginTop: 6,
+  },
+  homeFoodInfoCard: {
+    backgroundColor: '#FFF9F1',
+    borderColor: '#FFD18D',
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 24,
+    padding: 18,
+  },
+  homeFoodInfoText: {
+    color: COLORS.text,
+    fontSize: 16,
+    lineHeight: 24,
+  },
+  homeFoodInfoNote: {
+    color: COLORS.muted,
+    fontSize: 13,
+    lineHeight: 19,
+    marginTop: 16,
+  },
+  homeFoodInfoButton: {
+    alignItems: 'center',
+    backgroundColor: COLORS.orange,
+    borderRadius: 10,
+    justifyContent: 'center',
+    marginTop: 24,
+    minHeight: 48,
+  },
+  homeFoodInfoButtonText: {
+    color: COLORS.white,
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  homeAddToCartBar: {
+    backgroundColor: COLORS.white,
+    borderTopColor: '#E8E8E8',
+    borderTopWidth: 1,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 12,
+  },
+  homeAddToCartButton: {
+    alignItems: 'center',
+    backgroundColor: COLORS.orange,
+    borderRadius: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    minHeight: 50,
+    paddingHorizontal: 18,
+  },
+  homeAddToCartButtonText: {
+    color: COLORS.white,
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  homeAddToCartPrice: {
+    color: COLORS.white,
+    fontSize: 15,
+    fontWeight: '700',
+    marginLeft: 8,
+  },
+  homeAddToCartFeedback: {
+    color: COLORS.text,
+    fontSize: 12,
+    marginTop: 6,
+    textAlign: 'center',
   },
   chickenUtensilsScreen: {
     backgroundColor: COLORS.white,
@@ -5476,6 +6028,11 @@ const styles = StyleSheet.create({
   productSearchName: {
     color: COLORS.text,
     fontWeight: '400',
+  },
+  productSearchPrice: {
+    color: COLORS.text,
+    fontWeight: '700',
+    marginTop: 1,
   },
   productSearchRestaurant: {
     color: COLORS.muted,

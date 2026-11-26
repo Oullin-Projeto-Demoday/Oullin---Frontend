@@ -1433,7 +1433,105 @@ function HomeFoodInfoScreen({ item, infoType, onBack, screenWidth }) {
   );
 }
 
-function ChickenUtensilsScreen({ onBack, screenWidth }) {
+function getUtensilCards(item) {
+  const productName = normalizeSearchTerm(item.detailName || item.name || '');
+  if (/marmita.*frango|frango.*marmita/.test(productName)) {
+    return CHICKEN_UTENSILS;
+  }
+
+  const createCard = (title, description, image) => ({
+    title,
+    description,
+    image,
+  });
+
+  let template = null;
+  if (/batata|pastel|porcao/.test(productName)) {
+    template = [
+      createCard('Fritadeira', `Usada para preparar ${item.detailName || item.name}.`, require('./assets/chicken-frying-pan.png')),
+      createCard('Escumadeira', 'Usada para retirar o alimento da fritura.', require('./assets/chicken-tongs-spatula.png')),
+      createCard('Pegador', 'Usado para separar e porcionar o pedido.', require('./assets/chicken-tongs-spatula.png')),
+      createCard('Recipiente', 'Usado para servir o alimento com segurança.', null),
+    ];
+  } else if (/hamburg|burger/.test(productName)) {
+    template = [
+      createCard('Chapa', 'Usada para grelhar o hambúrguer.', require('./assets/chicken-frying-pan.png')),
+      createCard('Espátula', 'Usada para virar e retirar o hambúrguer.', require('./assets/chicken-tongs-spatula.png')),
+      createCard('Faca de cozinha', 'Usada para cortar e montar o lanche.', require('./assets/chicken-kitchen-knife.png')),
+      createCard('Utensílio de montagem', 'Usado para finalizar e servir o pedido.', null),
+    ];
+  } else if (/pizza/.test(productName)) {
+    template = [
+      createCard('Forno', 'Usado para assar a pizza.', require('./assets/chicken-frying-pan.png')),
+      createCard('Pá de pizza', 'Usada para colocar e retirar a pizza do forno.', require('./assets/chicken-tongs-spatula.png')),
+      createCard('Cortador', 'Usado para cortar a pizza em porções.', require('./assets/chicken-kitchen-knife.png')),
+      createCard('Tábua de apoio', 'Usada para apoiar e servir as fatias.', require('./assets/chicken-cutting-board.png')),
+    ];
+  } else if (/coca|cola|bebida|refrigerante|suco|agua/.test(productName)) {
+    template = [
+      createCard('Embalagem original', 'Mantém o produto protegido até a abertura.', null),
+      createCard('Abridor', 'Usado para abrir a embalagem quando necessário.', require('./assets/chicken-tongs-spatula.png')),
+      createCard('Copo', 'Usado para servir a bebida ao cliente.', null),
+      createCard('Bandeja', 'Usada para transportar o pedido com segurança.', null),
+    ];
+  } else if (/sushi/.test(productName)) {
+    template = [
+      createCard('Faca afiada', 'Usada para cortar e finalizar os sushis.', require('./assets/chicken-kitchen-knife.png')),
+      createCard('Tábua de corte', 'Usada para preparar as peças na bancada.', require('./assets/chicken-cutting-board.png')),
+      createCard('Utensílio de arroz', 'Usado para porcionar e montar as peças.', require('./assets/chicken-tongs-spatula.png')),
+      createCard('Hashi', 'Usado para servir o combinado.', null),
+    ];
+  } else if (/salada|legume|fruta|sobremesa|taca/.test(productName)) {
+    template = [
+      createCard('Faca de cozinha', 'Usada para cortar folhas e frutas.', require('./assets/chicken-kitchen-knife.png')),
+      createCard('Tábua de corte', 'Usada para preparar os ingredientes.', require('./assets/chicken-cutting-board.png')),
+      createCard('Tigela', 'Usada para misturar ou porcionar o alimento.', require('./assets/chicken-frying-pan.png')),
+      createCard('Recipiente de serviço', 'Usado para servir o pedido.', null),
+    ];
+  }
+  if (template) return template;
+
+  const utensilsText = formatFoodInformation(item.utensils);
+  if (!utensilsText) return [];
+
+  const entries = utensilsText
+    .split(/[;,]/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .slice(0, 4);
+
+  const cards = entries.map((entry) => {
+    const normalized = normalizeSearchTerm(entry);
+    let image = null;
+    if (/tabua|faca/.test(normalized)) {
+      image = normalized.includes('tabua')
+        ? require('./assets/chicken-cutting-board.png')
+        : require('./assets/chicken-kitchen-knife.png');
+    } else if (/frigideira|grelha|forno|chapa|panela|tigela/.test(normalized)) {
+      image = require('./assets/chicken-frying-pan.png');
+    } else if (/pegador|espatula|escumadeira|pa/.test(normalized)) {
+      image = require('./assets/chicken-tongs-spatula.png');
+    }
+
+    return {
+      title: entry.charAt(0).toUpperCase() + entry.slice(1),
+      description: `Usado para preparar ou servir ${item.detailName || item.name}.`,
+      image,
+    };
+  });
+
+  while (cards.length < 4) {
+    cards.push(
+      cards.length === 3
+        ? createCard('Recipiente de serviço', 'Usado para servir o pedido com segurança.', null)
+        : createCard('Utensílio de preparo', `Usado no preparo de ${item.detailName || item.name}.`, null),
+    );
+  }
+
+  return cards.slice(0, 4);
+}
+
+function ChickenUtensilsScreen({ item, onBack, screenWidth }) {
   const { height: screenHeight } = useWindowDimensions();
   const [showQuestionHelp, setShowQuestionHelp] = useState(false);
   const scale = Math.min(
@@ -1442,6 +1540,27 @@ function ChickenUtensilsScreen({ onBack, screenWidth }) {
     1,
   );
   const size = (value) => value * scale;
+  const productName = item?.detailName || item?.name || 'frango';
+  const isSpecificChicken = normalizeSearchTerm(productName).includes('frango');
+  const utensilCards = isSpecificChicken && !item
+    ? CHICKEN_UTENSILS
+    : getUtensilCards(item || {});
+  const visibleUtensilCards = utensilCards.length
+    ? utensilCards
+    : CHICKEN_UTENSILS;
+  const title = `Utensílios para ${normalizeSearchTerm(productName)}`;
+  const subtitle = `Veja os utensílios usados para preparar ${normalizeSearchTerm(productName)}.`;
+  const careTips = isSpecificChicken
+    ? [
+        'Separar o alimento cru dos outros ingredientes.',
+        'Higienizar os utensílios e superfícies após o uso.',
+        'Usar utensílios limpos para retirar e servir o alimento.',
+      ]
+    : [
+        'Higienizar os utensílios antes do preparo.',
+        'Evitar misturar utensílios usados em alimentos diferentes.',
+        'Usar utensílios limpos para retirar e servir o pedido.',
+      ];
 
   return (
     <View style={styles.chickenUtensilsScreen}>
@@ -1465,7 +1584,7 @@ function ChickenUtensilsScreen({ onBack, screenWidth }) {
             },
           ]}
         >
-          Utensílios do frango
+          {title.charAt(0).toUpperCase() + title.slice(1)}
         </Text>
         <Text
           style={[
@@ -1476,11 +1595,11 @@ function ChickenUtensilsScreen({ onBack, screenWidth }) {
             },
           ]}
         >
-          Veja os utensílios usados para preparar o frango grelhado desta marmita.
+          {subtitle.charAt(0).toUpperCase() + subtitle.slice(1)}
         </Text>
 
         <View style={[styles.chickenUtensilsList, { marginTop: size(30) }]}>
-          {CHICKEN_UTENSILS.map((utensil) => (
+          {visibleUtensilCards.map((utensil) => (
             <View
               key={utensil.title}
               style={[
@@ -1493,15 +1612,38 @@ function ChickenUtensilsScreen({ onBack, screenWidth }) {
                 },
               ]}
             >
-              <Image
-                accessibilityLabel={utensil.title}
-                resizeMode="contain"
-                source={utensil.image}
-                style={{
-                  height: size(46),
-                  width: size(59),
-                }}
-              />
+              {utensil.image ? (
+                <Image
+                  accessibilityLabel={utensil.title}
+                  resizeMode="contain"
+                  source={utensil.image}
+                  style={{
+                    height: size(46),
+                    width: size(59),
+                  }}
+                />
+              ) : (
+                <View
+                  accessibilityLabel={utensil.title}
+                  style={{
+                    alignItems: 'center',
+                    backgroundColor: '#FFF6DF',
+                    borderRadius: size(14),
+                    height: size(46),
+                    justifyContent: 'center',
+                    width: size(46),
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: COLORS.orange,
+                      fontSize: size(20),
+                    }}
+                  >
+                    ◦
+                  </Text>
+                </View>
+              )}
               <View style={{ flex: 1, marginLeft: size(6) }}>
                 <Text
                   style={[
@@ -1550,13 +1692,9 @@ function ChickenUtensilsScreen({ onBack, screenWidth }) {
               },
             ]}
           >
-            Cuidados durante o preparo do frango
+            Cuidados durante o preparo
           </Text>
-          {[
-            'Separar o frango cru dos outros ingredientes.',
-            'Higienizar tábua, faca e superfícies após o uso.',
-            'Usar utensílios limpos para retirar e servir o frango.',
-          ].map((tip, index) => (
+          {careTips.map((tip, index) => (
             <Text
               key={tip}
               style={[
@@ -2511,6 +2649,7 @@ export function FoodDetailsScreen({
   if (showChickenUtensils) {
     return (
       <ChickenUtensilsScreen
+        item={getDemonstrationFoodInformation(item)}
         onBack={() => setShowChickenUtensils(false)}
         screenWidth={screenWidth}
       />
@@ -2533,6 +2672,15 @@ export function FoodDetailsScreen({
     );
   }
   if (homeInfoScreen) {
+    if (homeInfoScreen === 'utensils') {
+      return (
+        <ChickenUtensilsScreen
+          item={getDemonstrationFoodInformation(item)}
+          onBack={() => setHomeInfoScreen(null)}
+          screenWidth={screenWidth}
+        />
+      );
+    }
     return (
       <HomeFoodInfoScreen
         infoType={homeInfoScreen}

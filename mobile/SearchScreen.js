@@ -3680,6 +3680,7 @@ function RestaurantSearchResults({
 function ProductSearchResults({
   items,
   onSelectProduct,
+  onBack,
   screenWidth,
   heading = 'Opções encontradas',
 }) {
@@ -3700,18 +3701,30 @@ function ProductSearchResults({
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
-      <Text
-        style={[
-          styles.productSearchHeading,
-          {
-            fontSize: 18 * scale,
-            lineHeight: 22 * scale,
-            marginBottom: 6 * scale,
-          },
-        ]}
-      >
-        {heading}
-      </Text>
+      <View style={[styles.productSearchHeadingRow, { marginBottom: 6 * scale }]}>
+        {onBack && (
+          <Pressable
+            accessibilityLabel="Voltar às categorias"
+            accessibilityRole="button"
+            onPress={onBack}
+            style={styles.mealResultsBack}
+          >
+            <Text style={styles.mealResultsBackText}>‹</Text>
+          </Pressable>
+        )}
+        <Text
+          style={[
+            styles.productSearchHeading,
+            onBack && styles.productSearchHeadingWithBack,
+            {
+              fontSize: 18 * scale,
+              lineHeight: 22 * scale,
+            },
+          ]}
+        >
+          {heading}
+        </Text>
+      </View>
       {items.length ? (
         items.map((item) => (
           <Pressable
@@ -4446,6 +4459,7 @@ export default function SearchScreen({
       ) : selectedCategory !== 'Todos' ? (
         <ProductSearchResults
           items={filteredCategoryProducts}
+          onBack={() => setSelectedCategory('Todos')}
           onSelectProduct={selectSearchResultProduct}
           screenWidth={screenWidth}
           heading={`Opções de ${selectedCategory}`}
@@ -6283,6 +6297,13 @@ const styles = StyleSheet.create({
   productSearchHeading: {
     color: COLORS.text,
     fontWeight: '700',
+  },
+  productSearchHeadingRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  productSearchHeadingWithBack: {
+    flex: 1,
   },
   productSearchRow: {
     alignItems: 'center',

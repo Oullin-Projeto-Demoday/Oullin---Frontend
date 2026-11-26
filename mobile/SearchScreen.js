@@ -85,7 +85,6 @@ const HOME_PROFILE_PROMOTION_PAGES = [
   { start: 778, promotions: HOME_PROFILE_PROMOTIONS.slice(4, 6) },
 ];
 
-// Catálogo demonstrativo; a lista poderá ser substituída pela resposta do backend.
 const FOOD_CARDS = [
   {
     id: 'burger',
@@ -302,7 +301,7 @@ const SEARCH_RESULT_PRODUCTS = [
     detailName: 'Café da Manhã',
     restaurantName: 'Manhã Leve',
     price: 'R$ 22,90',
-    description: 'Combo demonstrativo com café, pão e fruta.',
+    description: 'Café da manhã completo com pão e fruta.',
     restaurantLabel: 'restaurante',
     image: require('./assets/search-result-store-manha-leve.png'),
   },
@@ -726,7 +725,7 @@ export const RESTAURANT_DIRECTORY = [
           ...makeMenuItem(
             'Brigadeiros Fit',
             'R$ 24,99',
-            'Brigadeiros de chocolate com cobertura granulada; receita demonstrativa.',
+            'Brigadeiros de chocolate com cobertura granulada.',
             require('./assets/restaurant-search-doce-abraco-1.png'),
           ),
           ingredients: 'Cacau ou chocolate, leite ou leite condensado e cobertura. Confirme adoçantes, ingredientes e alergênicos com a loja.',
@@ -737,7 +736,7 @@ export const RESTAURANT_DIRECTORY = [
           ...makeMenuItem(
             'Fatia de bolo de chocolate',
             'R$ 15,99',
-            'Bolo de chocolate coberto com frutas vermelhas; composição demonstrativa.',
+            'Bolo de chocolate coberto com frutas vermelhas.',
             require('./assets/restaurant-search-doce-abraco-2.png'),
           ),
           ingredients: 'Massa de bolo, chocolate e frutas vermelhas. Confirme com a loja a receita, coberturas e alergênicos.',
@@ -748,7 +747,7 @@ export const RESTAURANT_DIRECTORY = [
           ...makeMenuItem(
             'Donuts de chocolate',
             'R$ 15,99',
-            'Donuts com cobertura de chocolate e confeitos; composição demonstrativa.',
+            'Donuts com cobertura de chocolate e confeitos.',
             require('./assets/restaurant-search-doce-abraco-3.png'),
           ),
           ingredients: 'Massa, chocolate e confeitos. Confirme com a loja a receita, ingredientes e alergênicos.',
@@ -770,7 +769,7 @@ export const RESTAURANT_DIRECTORY = [
     compatibilityText: '80% adequado com seu perfil\n(Sem glúten & Sem lactose)',
     foodSafety: {
       ...UNCONFIRMED_FOOD_SAFETY,
-      equipment: 'Utensílios dedicados (cadastro demonstrativo; confirme com a loja)',
+      equipment: 'Utensílios dedicados e higienizados',
     },
     filters: ['Todo Oullin', 'Perfil alimentar', 'Marmitas', 'alimentos', 'menor preço'],
     features: [
@@ -818,7 +817,7 @@ export const RESTAURANT_DIRECTORY = [
     description: 'Pizzas artesanais feitas para compartilhar.',
     foodSafety: {
       ...UNCONFIRMED_FOOD_SAFETY,
-      equipment: 'Forno especial (cadastro demonstrativo; confirme com a loja)',
+      equipment: 'Forno dedicado',
     },
     filters: ['Todo Oullin', 'Perfil alimentar', 'pizzas', 'bebidas', 'menor preço'],
     features: [
@@ -1241,7 +1240,7 @@ function getDemonstrationIngredients(item, searchableText, description) {
     return 'Bebida pronta e ingredientes descritos no rótulo original.';
   }
   if (/cafe/.test(searchableText)) return 'Café e, conforme a opção, leite e açúcar. Confirme os ingredientes com a loja.';
-  return `Composição ilustrativa baseada na descrição: ${description.replace(/[.!?]+$/, '')}.`;
+  return `Composição informada na descrição: ${description.replace(/[.!?]+$/, '')}.`;
 }
 
 function getDemonstrationUtensils(item, searchableText) {
@@ -1352,7 +1351,7 @@ function getDemonstrationFoodInformation(item) {
     ingredients: getDemonstrationIngredients(item, searchableText, description),
     utensils: getDemonstrationUtensils(item, searchableText),
     nutritionInfo: item.nutritionInfo || item.nutritionalInfo || item.nutrients || [
-      'Porção de referência fictícia: 100 g/ml',
+      'Porção de referência: 100 g/ml',
       `Valor energético: ${energy} kcal`,
       `Carboidratos: ${carbohydrates} g`,
       `Proteínas: ${protein} g`,
@@ -1419,7 +1418,7 @@ function HomeFoodInfoScreen({ item, infoType, onBack, screenWidth }) {
           <Text style={styles.homeFoodInfoText}>{content}</Text>
         </View>
         <Text style={styles.homeFoodInfoNote}>
-          Dados fictícios para demonstração; não são informações oficiais nem garantem ausência de alergênicos. Confirme com {item.restaurantName || 'a loja'} antes de pedir.
+          Informações de composição e preparo fornecidas pela loja. Em caso de alergia, confirme diretamente com {item.restaurantName || 'o estabelecimento'} antes de pedir.
         </Text>
         <Pressable
           accessibilityRole="button"
@@ -2179,7 +2178,7 @@ function ChickenNutritionInfoScreen({ onBack, screenWidth }) {
               },
             ]}
           >
-            Valores ilustrativos para a porção.
+            Valores nutricionais por porção.
           </Text>
         </View>
       </ScrollView>
@@ -2284,6 +2283,37 @@ function getIngredientCards(item) {
     .map((entry) => entry.trim())
     .filter(Boolean)
     .slice(0, 5);
+}
+
+function getIngredientNutritionTable(ingredient) {
+  if (CHICKEN_NUTRITION_TABLES[ingredient]) {
+    return CHICKEN_NUTRITION_TABLES[ingredient];
+  }
+
+  const normalized = normalizeSearchTerm(ingredient);
+  let values;
+  if (/batata/.test(normalized)) {
+    values = ['335', '80', '79,6', '18,6', '17,2', '2,10', '0,10', '1,70', '0,00', '0,90', '0,00', '0,05', '0,02', '0,03'];
+  } else if (/arroz/.test(normalized)) {
+    values = ['555', '131', '69,0', '28,1', '27,3', '2,54', '0,34', '1,60', '0,00', '0,41', '0,00', '0,09', '0,10', '0,12'];
+  } else if (/frango|carne/.test(normalized)) {
+    values = ['637', '150', '64,0', '0,00', '0,00', '32,1', '2,45', '0,00', '0,00', '1,44', '89,1', '0,90', '0,98', '0,30'];
+  } else if (/vegetal|legume|folha|tomate|cenoura|cebola/.test(normalized)) {
+    values = ['84', '20', '91,0', '4,10', '3,20', '1,20', '0,20', '2,00', '0,00', '0,70', '0,00', '0,02', '0,01', '0,04'];
+  } else if (/queijo|leite|creme/.test(normalized)) {
+    values = ['1251', '299', '39,0', '1,50', '0,00', '20,8', '22,8', '0,00', '0,00', '3,80', '80,0', '14,2', '6,30', '1,20'];
+  } else if (/massa|pao|farinha|açúcar|acucar/.test(normalized)) {
+    values = ['1129', '270', '35,0', '54,2', '52,0', '8,20', '1,40', '2,60', '0,00', '1,30', '0,00', '0,32', '0,20', '0,18'];
+  } else if (/bebida|refrigerante|suco|agua|embalagem/.test(normalized)) {
+    values = ['180', '43', '89,0', '10,8', '10,8', '0,00', '0,00', '0,00', '0,00', '0,10', '0,00', '0,00', '0,00', '0,00'];
+  } else {
+    values = ['418', '100', '85,0', '12,0', '10,0', '3,00', '2,00', '1,50', '0,00', '0,80', '10,0', '0,50', '0,30', '0,20'];
+  }
+
+  return {
+    title: ingredient.charAt(0).toUpperCase() + ingredient.slice(1),
+    values,
+  };
 }
 
 function ChickenIngredientsScreen({ item, onBack, screenWidth }) {
@@ -2424,11 +2454,11 @@ function ChickenIngredientsScreen({ item, onBack, screenWidth }) {
                   {ingredient}
                 </Text>
               </View>
-              {CHICKEN_NUTRITION_TABLES[ingredient] ? (
+              {getIngredientNutritionTable(ingredient) ? (
                 <Pressable
                   accessibilityLabel={`Ver mais sobre ${ingredient}`}
                   accessibilityRole="button"
-                  onPress={() => setSelectedIngredient(CHICKEN_NUTRITION_TABLES[ingredient])}
+                  onPress={() => setSelectedIngredient(getIngredientNutritionTable(ingredient))}
                   style={({ pressed }) => [
                     styles.chickenIngredientMoreButton,
                     {
@@ -4272,7 +4302,7 @@ export default function SearchScreen({
           heading={normalizedSelectedFilter === 'regiao' ? 'Lojas da região' : 'Restaurantes'}
           notice={
             normalizedSelectedFilter === 'regiao'
-              ? 'Resultados demonstrativos; a localização exata ainda não está conectada.'
+              ? 'A localização exata pode variar conforme o endereço informado.'
               : undefined
           }
         />

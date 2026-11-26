@@ -1,13 +1,10 @@
 import React from 'react';
 import {
-  Image,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-
-const PROFILE_AVATAR = require('./assets/profile-avatar.png');
 
 function PreferenceGroup({ emptyLabel, title, values }) {
   return (
@@ -40,11 +37,15 @@ export default function ProfileScreen({ user = {}, selections = {} }) {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.profileHeader}>
-          <Image
-            accessibilityLabel={`Foto de perfil de ${fullName}`}
-            source={PROFILE_AVATAR}
+          <View
+            accessibilityLabel="Avatar neutro"
+            accessibilityRole="image"
+            accessible
             style={styles.avatar}
-          />
+          >
+            <View style={styles.avatarHead} />
+            <View style={styles.avatarBody} />
+          </View>
           <View style={styles.userInfo}>
             <Text numberOfLines={1} style={styles.userName}>{fullName}</Text>
             <Text numberOfLines={1} style={styles.userEmail}>{email}</Text>
@@ -88,9 +89,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   avatar: {
+    alignItems: 'center',
+    backgroundColor: '#FFE7B0',
     borderRadius: 30,
     height: 60,
+    justifyContent: 'flex-end',
+    overflow: 'hidden',
     width: 60,
+  },
+  avatarHead: {
+    backgroundColor: '#FFB703',
+    borderRadius: 10,
+    height: 18,
+    marginBottom: 4,
+    width: 18,
+  },
+  avatarBody: {
+    backgroundColor: '#FFB703',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    height: 17,
+    width: 36,
   },
   userInfo: {
     flex: 1,

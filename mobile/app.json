@@ -4,7 +4,7 @@
     "slug": "oullin",
     "version": "1.0.0",
     "experiments": {
-      "baseUrl": "/Oullin---Frontend"
+      "baseUrl": "/Oullin---Frontend/cliente"
     },
     "web": {
       "bundler": "metro",
@@ -16,8 +16,8 @@
       "backgroundColor": "#FFFDF9",
       "display": "standalone",
       "orientation": "portrait",
-      "startUrl": "/",
-      "scope": "/",
+      "startUrl": "/Oullin---Frontend/cliente/",
+      "scope": "/Oullin---Frontend/cliente/",
       "dir": "ltr",
       "lang": "pt-BR"
     },

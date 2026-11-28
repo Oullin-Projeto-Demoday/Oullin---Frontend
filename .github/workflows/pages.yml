@@ -27,15 +27,42 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: mobile/package-lock.json
+          cache-dependency-path: |
+            mobile/package-lock.json
+            empreendedor-web/package-lock.json
 
       - name: Install dependencies
         working-directory: mobile
         run: npm ci
 
+      - name: Install entrepreneur web dependencies
+        working-directory: empreendedor-web
+        run: npm ci
+
+      - name: Build entrepreneur web
+        working-directory: empreendedor-web
+        run: npm run build
+
       - name: Build Expo web
         working-directory: mobile
+        env:
+          EXPO_PUBLIC_GEOAPIFY_WEB_API_KEY: ${{ secrets.GEOAPIFY_API_KEY }}
         run: npm run export:web
+
+      - name: Assemble Pages site
+        run: |
+          mkdir -p site/cliente
+          cp -R mobile/dist/. site/cliente/
+          cp -R empreendedor-web/dist/. site/
+
+      - name: Configure Geoapify key
+        env:
+          GEOAPIFY_API_KEY: ${{ secrets.GEOAPIFY_API_KEY }}
+        run: |
+          if [ -z "$GEOAPIFY_API_KEY" ]; then
+            echo "::warning::GEOAPIFY_API_KEY secret is not configured. Address search will be unavailable."
+          fi
+          node -e "require('node:fs').writeFileSync('site/geoapify-config.js', 'window.OULLIN_GEOAPIFY_API_KEY = ' + JSON.stringify(process.env.GEOAPIFY_API_KEY || '') + ';\\n')"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -43,7 +70,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: mobile/dist
+          path: site
 
   deploy:
     environment:

@@ -3,6 +3,7 @@ import {
   Alert,
   Image,
   KeyboardAvoidingView,
+  Linking,
   Modal,
   Platform,
   Pressable,
@@ -15,6 +16,11 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import MapView from './AddressMap';
+import {
+  normalizeText,
+  reverseGeoapifyAddress,
+  searchGeoapifyAddresses,
+} from './addressGeocoding';
 
 const COLORS = {
   amber: '#FFB400',
@@ -49,183 +55,17 @@ const EMPTY_FORM = {
   reference: '',
 };
 
-const BRAZIL_STATE_CODES = {
-  acre: 'AC', alagoas: 'AL', amapa: 'AP', amazonas: 'AM', bahia: 'BA',
-  ceara: 'CE', 'distrito federal': 'DF', 'espirito santo': 'ES', goias: 'GO',
-  maranhao: 'MA', 'mato grosso': 'MT', 'mato grosso do sul': 'MS',
-  'minas gerais': 'MG', para: 'PA', paraiba: 'PB', parana: 'PR',
-  pernambuco: 'PE', piaui: 'PI', 'rio de janeiro': 'RJ', 'rio grande do norte': 'RN',
-  'rio grande do sul': 'RS', rondonia: 'RO', roraima: 'RR', 'santa catarina': 'SC',
-  'sao paulo': 'SP', sergipe: 'SE', tocantins: 'TO',
-};
-
-function normalizeText(value) {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLocaleLowerCase('pt-BR')
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
 function getAddressTitle(address) {
   return [address.street, address.number].filter(Boolean).join(', ');
 }
 
-function getHouseNumberFromQuery(query) {
-  const commaNumber = query.trim().match(/,\s*(\d+[a-z]?(?:[-/]\d+[a-z]?)?)(?=\s*(?:,|$))/i);
-  if (commaNumber) return commaNumber[1];
-  const trailingNumber = query.trim().match(/\s+(\d+[a-z]?(?:[-/]\d+[a-z]?)?)\s*$/i);
-  return trailingNumber?.[1] || '';
-}
-
-const NOMINATIM_CACHE = new Map();
-let lastNominatimRequestAt = 0;
-let nominatimRequestQueue = Promise.resolve();
-
-async function waitForNominatimSlot() {
-  const requestSlot = nominatimRequestQueue.then(async () => {
-    const wait = Math.max(0, 1100 - (Date.now() - lastNominatimRequestAt));
-    if (wait) await new Promise((resolve) => setTimeout(resolve, wait));
-    lastNominatimRequestAt = Date.now();
-  });
-  nominatimRequestQueue = requestSlot.catch(() => {});
-  await requestSlot;
-}
-
-function mapNominatimAddress(result, fallbackQuery = '') {
-  const address = result.address || {};
-  const stateName = address.state || '';
-  const street = address.road || address.street || address.pedestrian || address.path ||
-    address.residential || address.footway || address.cycleway || '';
-  const placeName = street && result.name && normalizeText(result.name) !== normalizeText(street)
-    ? result.name
-    : '';
-  return {
-    id: `nominatim-${result.osm_type || 'place'}-${result.osm_id || result.place_id}`,
-    placeName,
-    street: street || result.name || fallbackQuery,
-    number: address.house_number || '',
-    neighborhood: address.suburb || address.neighbourhood || address.quarter || address.city_district || '',
-    city: address.city || address.town || address.village || address.municipality || address.county || '',
-    state: BRAZIL_STATE_CODES[normalizeText(stateName)] || stateName,
-    postalCode: address.postcode || '',
-    reference: '',
-    coordinates: {
-      latitude: Number(result.lat),
-      longitude: Number(result.lon),
-    },
-  };
-}
-
-function deduplicateAddresses(addresses) {
-  const unique = [];
-  const addressKeys = new Set();
-  const resultIds = new Set();
-
-  addresses.forEach((address) => {
-    if (resultIds.has(address.id)) return;
-    resultIds.add(address.id);
-
-    const key = [
-      address.placeName,
-      address.street,
-      address.number,
-      address.neighborhood,
-      address.city,
-      address.state,
-    ].map((part) => normalizeText(part || '')).join('|');
-    if (addressKeys.has(key)) return;
-
-    const nearbyDuplicate = unique.some((existing) => {
-      if (
-        normalizeText(existing.placeName || '') !== normalizeText(address.placeName || '') ||
-        normalizeText(existing.street || '') !== normalizeText(address.street || '') ||
-        normalizeText(existing.number || '') !== normalizeText(address.number || '')
-      ) return false;
-
-      const latitudeDelta = (existing.coordinates.latitude - address.coordinates.latitude) * 111320;
-      const longitudeScale = Math.cos((address.coordinates.latitude * Math.PI) / 180);
-      const longitudeDelta =
-        (existing.coordinates.longitude - address.coordinates.longitude) * 111320 * longitudeScale;
-      return Math.hypot(latitudeDelta, longitudeDelta) < 30;
-    });
-    if (nearbyDuplicate) return;
-
-    addressKeys.add(key);
-    unique.push(address);
-  });
-
-  return unique;
-}
-
-async function searchNominatimAddresses(query) {
-  const cacheKey = query.trim().toLocaleLowerCase('pt-BR');
-  if (NOMINATIM_CACHE.has(cacheKey)) return NOMINATIM_CACHE.get(cacheKey);
-  await waitForNominatimSlot();
-  const params = new URLSearchParams({
-    q: query,
-    format: 'jsonv2',
-    addressdetails: '1',
-    limit: '40',
-    countrycodes: 'br',
-  });
-  const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`, {
-    headers: {
-      Accept: 'application/json',
-      'Accept-Language': 'pt-BR,pt;q=0.9',
-      'User-Agent': 'OullinMobile/1.0 (delivery address search)',
-    },
-  });
-  if (!response.ok) throw new Error(`A busca falhou (${response.status}).`);
-  const results = await response.json();
-  const queryNumber = getHouseNumberFromQuery(query);
-  const suggestions = results
-    .filter((result) => result.address?.country_code === 'br')
-    .map((result) => {
-      const address = mapNominatimAddress(result, query);
-      const requestedNumberMatches = Boolean(
-        queryNumber && address.number &&
-        normalizeText(address.number) === normalizeText(queryNumber),
-      );
-      return {
-        ...address,
-        numberNeedsConfirmation: Boolean(queryNumber && !requestedNumberMatches),
-        requestedNumber: requestedNumberMatches ? '' : queryNumber,
-        requestedNumberMatches,
-      };
-    })
-    .filter((result) =>
-      Number.isFinite(result.coordinates.latitude) &&
-      Number.isFinite(result.coordinates.longitude) &&
-      (!queryNumber || !result.number || result.requestedNumberMatches),
-    )
-    .sort((first, second) => Number(second.requestedNumberMatches) - Number(first.requestedNumberMatches));
-  const uniqueSuggestions = deduplicateAddresses(suggestions);
-  NOMINATIM_CACHE.set(cacheKey, uniqueSuggestions);
-  return uniqueSuggestions;
-}
-
-async function reverseNominatimAddress(coordinates) {
-  await waitForNominatimSlot();
-  const params = new URLSearchParams({
-    lat: String(coordinates.latitude),
-    lon: String(coordinates.longitude),
-    format: 'jsonv2',
-    addressdetails: '1',
-    zoom: '18',
-  });
-  const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params.toString()}`, {
-    headers: {
-      Accept: 'application/json',
-      'Accept-Language': 'pt-BR,pt;q=0.9',
-      'User-Agent': 'OullinMobile/1.0 (delivery address search)',
-    },
-  });
-  if (!response.ok) throw new Error(`A confirmação do endereço falhou (${response.status}).`);
-  const result = await response.json();
-  return result.address ? mapNominatimAddress(result) : null;
+async function openAttributionLink(url) {
+  try {
+    await Linking.openURL(url);
+  } catch (error) {
+    console.error('Não foi possível abrir o link de atribuição.', error);
+    Alert.alert('Link indisponível', 'Não foi possível abrir o site da atribuição.');
+  }
 }
 
 function AddressFormField({ label, value, onChangeText, ...props }) {
@@ -771,20 +611,23 @@ export default function AddressScreen({
 
     setSearchLoading(true);
     try {
-      const suggestions = await searchNominatimAddresses(query);
+      const suggestions = await searchGeoapifyAddresses(query, Platform.OS);
       if (requestId !== searchRequestId.current) return;
       setSearchSuggestions(suggestions);
       if (!suggestions.length) {
         setSearchError(
-          'Nenhum endereço encontrado no Brasil pelo OpenStreetMap. A cobertura varia; tente informar cidade e estado ou cadastre manualmente.',
+          'Nenhum endereço encontrado no Brasil pela Geoapify. Tente informar cidade e estado ou cadastre manualmente.',
         );
       }
     } catch (error) {
       if (requestId !== searchRequestId.current) return;
       setSearchSuggestions([]);
+      const message = error?.message || '';
       setSearchError(
-        error?.message?.includes('(429)')
-          ? 'A busca está temporariamente ocupada. Aguarde um instante e tente novamente.'
+        message.startsWith('Configure EXPO_PUBLIC_GEOAPIFY_') ||
+          message.startsWith('A chave da Geoapify') ||
+          message.startsWith('O limite de buscas da Geoapify')
+          ? message
           : 'Não foi possível conectar à busca de endereços. Verifique a conexão e tente novamente.',
       );
     } finally {
@@ -930,7 +773,10 @@ export default function AddressScreen({
   async function confirmAddressOnMap() {
     setConfirmingAddress(true);
     try {
-      const place = await reverseNominatimAddress(pendingAddress.coordinates);
+      const place = await reverseGeoapifyAddress(
+        pendingAddress.coordinates,
+        Platform.OS,
+      );
       const confirmedAddress = place
         ? {
             ...pendingAddress,
@@ -1012,7 +858,7 @@ export default function AddressScreen({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         };
-        const place = await reverseNominatimAddress(coordinates);
+        const place = await reverseGeoapifyAddress(coordinates, Platform.OS);
         if (!place) {
           throw new Error('Não foi possível encontrar um endereço para esta localização.');
         }
@@ -1046,7 +892,11 @@ export default function AddressScreen({
       const position = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
       });
-      const [place] = await Location.reverseGeocodeAsync(position.coords);
+      const coordinates = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
+      const place = await reverseGeoapifyAddress(coordinates, Platform.OS);
       if (!place) {
         throw new Error('Não foi possível encontrar um endereço para esta localização.');
       }
@@ -1057,12 +907,9 @@ export default function AddressScreen({
         number: place.streetNumber || '',
         neighborhood: place.district || place.subregion || '',
         city: place.city || place.subregion || '',
-        state: place.region || '',
+        state: place.state || '',
         reference: 'Adicionado pela localização atual',
-        coordinates: {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        },
+        coordinates,
       };
       setPendingAddress(newAddress);
     } catch (error) {
@@ -1225,7 +1072,7 @@ export default function AddressScreen({
               <Text style={styles.emptyTitle}>Nenhuma rua encontrada</Text>
               <Text style={styles.emptyText}>
                 {searchError ||
-                  'Busca disponível no Brasil via OpenStreetMap, com cobertura variável. Tente incluir cidade e estado ou cadastre o endereço manualmente.'}
+                  'Busca de endereços no Brasil pela Geoapify. Tente incluir cidade e estado ou cadastre o endereço manualmente.'}
               </Text>
               <Pressable onPress={() => openEditor()} style={styles.emptyAddButton}>
                 <Text style={styles.emptyAddText}>Adicionar endereço manualmente</Text>
@@ -1245,7 +1092,26 @@ export default function AddressScreen({
           ))
         ) : null}
         {showStreetSuggestions && searchSubmitted && (
-          <Text style={styles.searchAttribution}>Busca por © OpenStreetMap contributors</Text>
+          <Text style={styles.searchAttribution}>
+            Busca de endereços por{' '}
+            <Text
+              accessibilityRole="link"
+              onPress={() => openAttributionLink('https://www.geoapify.com/')}
+              style={styles.searchAttributionLink}
+            >
+              Geoapify
+            </Text>
+            {' · Dados © '}
+            <Text
+              accessibilityRole="link"
+              onPress={() =>
+                openAttributionLink('https://www.openstreetmap.org/copyright')
+              }
+              style={styles.searchAttributionLink}
+            >
+              OpenStreetMap contributors
+            </Text>
+          </Text>
         )}
       </ScrollView>
 
@@ -1822,6 +1688,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingTop: 2,
     textAlign: 'right',
+  },
+  searchAttributionLink: {
+    color: COLORS.blue,
+    textDecorationLine: 'underline',
   },
   emptyState: {
     alignItems: 'center',
